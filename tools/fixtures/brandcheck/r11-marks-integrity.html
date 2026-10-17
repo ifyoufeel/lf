@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- expect: R11 warning 3 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>lastfomo — research house</title>
+<style>
+:root{--bg:#f4f4f4;--fg:#111111;--fg2:#555555;--machina:#d4f70d;--hortus:#46ed08;--arca:#ff0a96;--wing:var(--fg);--disp:"Jacquard 24",monospace;--mono:"Geist Mono",monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#111111;--fg:#ffffff;--fg2:#8c8c8c}}
+:root[data-theme="dark"]{--bg:#111111;--fg:#ffffff;--fg2:#8c8c8c}
+[data-wing="machina"]{--wing:var(--machina)}
+[data-wing="hortus"]{--wing:var(--hortus)}
+[data-wing="arca"]{--wing:var(--arca)}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 system-ui,sans-serif}
+.word{font-family:var(--disp);font-size:clamp(64px,8vw,148px)}
+.code{font:500 12px/1.3 var(--mono);color:var(--wing)}
+.lead{font-size:15px;color:var(--fg2)}
+@media (prefers-reduced-motion: reduce){*{animation:none;transition:none}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="#/" aria-label="lastfomo, home"><svg viewBox="0 0 761 120" fill="currentColor" aria-hidden="true"><path d="M 0 0 L 10 10 L 0 10 Z"/></svg></a></header>
+<main>
+  <section data-wing="machina">
+    <p class="code">MCH — Machina · Autonomous AI</p>
+    <h2 class="word">machina</h2>
+    <p class="lead">What thinks. 8 GPUs and 176 GB of VRAM, inside the practice.</p>
+    <canvas class="plate" data-plate="machina" aria-hidden="true"></canvas>
+    <img src="media/machina-rig.jpg" alt="The wide view of the eight-GPU rig with its cooling fans lit">
+  </section>
+  <nav class="naves" aria-label="The wings">
+    <a href="#/hortus" data-wing="hortus">Hortus</a>
+    <a href="#/machina" data-wing="machina">Machina</a>
+    <a href="#/arca" data-wing="arca">Arca</a>
+  </nav>
+</main>
+<script>
+const note = document.querySelector('.lead');
+if (note) note.dataset.state = 'It’s local. Nothing leaves the room.';
+const HORSE = new Path2D("M 0 0 L 10 10 L 0 10 Z");
+</script>
+</body>
+</html>

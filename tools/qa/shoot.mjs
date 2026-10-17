@@ -12,7 +12,7 @@
 import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import {
-  REPO, QA_OUT, ROUTES, VIEWPORTS, SCHEMES,
+  REPO, QA_OUT, FONT_CACHE, ROUTES, VIEWPORTS, SCHEMES,
   loadPlaywright, parseArgs, splitList, normaliseRoute, routeSlug, resolveTarget,
   startServer, createFontRouter, attachCollectors, probeFonts, pool, pad2, VISIBLE_VIEWS_FN,
 } from './harness.mjs';
@@ -56,7 +56,10 @@ const settle = Number(args.settle ?? 1400);
 const rate = Number(args.rate ?? 2);
 const concurrency = Number(args.concurrency ?? 4);
 const dpr = Number(args.dpr ?? 1);
-const rel = (p) => relative(REPO, p) || '.';
+for (const [k, v, min] of [['settle', settle, 0], ['rate', rate, 0.01], ['concurrency', concurrency, 1], ['dpr', dpr, 0.5]]) {
+  if (!Number.isFinite(v) || v < min) { console.error(`--${k} must be a number of at least ${min}`); process.exit(1); }
+}
+const rel = (p) => { const r = relative(REPO, p); return !r ? '.' : r.startsWith('..') ? p : r; };
 
 // Wing colours for the contact-sheet captions, from the brand tokens when present.
 const WING = { machina: '#d4f70d', hortus: '#46ed08', arca: '#ff0a96' };
@@ -123,20 +126,20 @@ const MEASURE_FN = ({ i, vw }) => {
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) continue;
     if (r.right <= vw + TOL && r.left >= -TOL) continue;
+    // Skip it when a horizontal carousel holds it (items sit past the edge by
+    // design) or when a clipping box that itself fits the viewport cuts it off.
     let skip = false;
     for (let a = el.parentElement; a && a !== screen; a = a.parentElement) {
       if (reported.has(a)) { skip = true; break; }
       const ac = getComputedStyle(a);
       if (ac.overflowX === 'visible') continue;
       if (ac.overflowX === 'auto' || ac.overflowX === 'scroll') {
-        // A horizontal carousel: its items may sit past the edge by design.
         if (!scrollers.some((s) => s.el === sel(a))) scrollers.push({ el: sel(a), scrollWidth: a.scrollWidth, clientWidth: a.clientWidth });
         skip = true;
         break;
       }
       const ar = a.getBoundingClientRect();
-      if (ar.right <= vw + TOL && ar.left >= -TOL) { skip = true; break; } // clipped by a box that fits
-      break;
+      if (ar.right <= vw + TOL && ar.left >= -TOL) { skip = true; break; }
     }
     if (skip) continue;
     reported.add(el);
@@ -153,6 +156,41 @@ const MEASURE_FN = ({ i, vw }) => {
     scrollers,
   };
   overflow.found = overflow.view.overflows || overflow.document.overflows || elements.length > 0 || window.innerWidth > vw + TOL;
+
+  // Fixed chrome that sits over the screen: boxes with a background (the bar)
+  // and any visible text (the section dots' current label).
+  const opacityOf = (el) => {
+    let o = 1;
+    for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+      o *= parseFloat(getComputedStyle(e).opacity);
+      if (o < 0.05) return 0;
+    }
+    return o;
+  };
+  const vh = window.innerHeight;
+  const onScreen = (r) => r.width >= 1 && r.height >= 1 && r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw;
+  const covers = [];
+  const cr = document.createRange();
+  for (const el of document.querySelectorAll('body *')) {
+    if (screen.contains(el) || el.contains(screen) || el.closest('dialog')) continue;
+    const cs = getComputedStyle(el);
+    if (cs.position !== 'fixed' && cs.position !== 'sticky') continue;
+    if (hiddenish(cs) || cs.clipPath !== 'none') continue;
+    if (opacityOf(el) < 0.05) continue;
+    const r = el.getBoundingClientRect();
+    if (!onScreen(r)) continue;
+    const bg = cs.backgroundColor;
+    const solid = bg && bg !== 'transparent' && !/,\s*0\)$/.test(bg);
+    if (solid && r.width * r.height < 0.4 * vw * vh) covers.push({ by: sel(el), rect: r });
+    const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.nodeValue.trim() ? 1 : 2) });
+    for (let t = tw.nextNode(); t; t = tw.nextNode()) {
+      const pe = t.parentElement;
+      if (!pe || hiddenish(getComputedStyle(pe)) || opacityOf(pe) < 0.05) continue;
+      cr.selectNodeContents(t);
+      for (const tr of cr.getClientRects()) if (onScreen(tr)) covers.push({ by: sel(pe), rect: tr });
+    }
+  }
+  const covered = [];
 
   // 2. Text cut off by the screen or by any clipping box inside it.
   const clipped = [];
@@ -175,34 +213,52 @@ const MEASURE_FN = ({ i, vw }) => {
       left: Math.min(...rects.map((r) => r.left)), right: Math.max(...rects.map((r) => r.right)),
     };
     const fs = parseFloat(cs.fontSize) || 16;
+    // 3. Text under fixed chrome (overlap of at least 3px each way).
+    if (covers.length && covered.length < 25 && opacityOf(el) >= 0.05) {
+      let hit = null;
+      for (const r of rects) {
+        for (const c of covers) {
+          const w = Math.min(r.right, c.rect.right) - Math.max(r.left, c.rect.left);
+          const h = Math.min(r.bottom, c.rect.bottom) - Math.max(r.top, c.rect.top);
+          if (w >= 3 && h >= 3) { hit = c; break; }
+        }
+        if (hit) break;
+      }
+      if (hit) covered.push({ text: t.nodeValue.trim().replace(/\s+/g, ' ').slice(0, 70), el: sel(el), by: hit.by });
+    }
+    // Walk out to the screen. A scroll container keeps its text reachable on
+    // its scrolling axis, so boxes further out no longer clip on that axis.
+    let reachX = false, reachY = false;
     for (let a = el; a; a = a.parentElement) {
       const ac = getComputedStyle(a);
       const cx = ac.overflowX !== 'visible', cy = ac.overflowY !== 'visible';
       if (cx || cy) {
-        // Scrollable boxes keep their text reachable; only hidden/clip boxes cut it.
         const scrollX = ac.overflowX === 'auto' || ac.overflowX === 'scroll';
         const scrollY = ac.overflowY === 'auto' || ac.overflowY === 'scroll';
         const ar = a.getBoundingClientRect();
         const l = ar.left + a.clientLeft, tp = ar.top + a.clientTop;
         const clip = { left: l, top: tp, right: l + a.clientWidth, bottom: tp + a.clientHeight };
-        // Glyph boxes run a little past tight line boxes; allow 0.2em inside the screen.
+        // Glyph boxes run a little past tight line boxes; allow for it inside the screen.
         const tolY = a === screen ? TOL : Math.max(2, fs * 0.2);
         const tolX = a === screen ? TOL : Math.max(2, fs * 0.1);
+        const checkY = cy && !scrollY && !reachY, checkX = cx && !scrollX && !reachX;
         const sides = {};
-        if (cy && !scrollY && box.top < clip.top - tolY) sides.top = round(clip.top - box.top);
-        if (cy && !scrollY && box.bottom > clip.bottom + tolY) sides.bottom = round(box.bottom - clip.bottom);
-        if (cx && !scrollX && box.left < clip.left - tolX) sides.left = round(clip.left - box.left);
-        if (cx && !scrollX && box.right > clip.right + tolX) sides.right = round(box.right - clip.right);
+        if (checkY && box.top < clip.top - tolY) sides.top = round(clip.top - box.top);
+        if (checkY && box.bottom > clip.bottom + tolY) sides.bottom = round(box.bottom - clip.bottom);
+        if (checkX && box.left < clip.left - tolX) sides.left = round(clip.left - box.left);
+        if (checkX && box.right > clip.right + tolX) sides.right = round(box.right - clip.right);
         if (Object.keys(sides).length) {
           seen.add(el);
           if (clipped.length < 25) clipped.push({ text: t.nodeValue.trim().replace(/\s+/g, ' ').slice(0, 70), el: sel(el), by: sel(a), sides });
           break;
         }
+        if (scrollX) reachX = true;
+        if (scrollY) reachY = true;
       }
       if (a === screen) break;
     }
   }
-  return { overflow, clipped };
+  return { overflow, clipped, covered };
 };
 
 /* ------------------------------------------------------------------ run */
@@ -289,7 +345,7 @@ async function shoot({ route, viewport, scheme }) {
     delete run.closing;
   }
   try { run.sheet = await contactSheet(run); } catch (e) { run.errors.push('contact sheet: ' + String(e.message || e).split('\n')[0]); }
-  const flags = run.screens.filter((s) => s.overflow.found || s.clipped.length).length;
+  const flags = run.screens.filter((s) => s.overflow.found || s.clipped.length || s.covered.length).length;
   const errs = run.consoleErrors.length + run.pageErrors.length + run.failedRequests.length + run.errors.length;
   console.log(`  ${errs ? 'warn' : 'ok  '}  ${route.padEnd(10)} ${viewport.padEnd(7)} ${scheme.padEnd(5)} ${pad2(run.screens.length)} screens${flags ? `, ${flags} flagged` : ''}${errs ? `, ${errs} errors` : ''}`);
   return run;
@@ -312,9 +368,10 @@ async function contactSheet(run) {
     const flags = [];
     if (s.overflow.found) flags.push('overflow');
     if (s.clipped.length) flags.push(`clipped ${s.clipped.length}`);
+    if (s.covered.length) flags.push(`covered ${s.covered.length}`);
     const dot = s.wing && WING[s.wing] ? `<i style="background:${WING[s.wing]}"></i>` : '<i class="house"></i>';
     const src = `${server.url}/__qa/${run.slug}/${s.file.split('/').pop()}`;
-    return `<figure><img src="${esc(src)}" width="${tw}" height="${th}" alt=""><figcaption>${dot}<b>${pad2(s.n)}</b><span>${esc(s.title || s.id || '')}</span>${flags.length ? `<em>${esc(flags.join(' · '))}</em>` : ''}</figcaption></figure>`;
+    return `<figure${flags.length ? ' class="flag"' : ''}><img src="${esc(src)}" width="${tw}" height="${th}" alt=""><figcaption>${dot}<b>${pad2(s.n)}</b><span>${esc(s.title || s.id || '')}</span>${flags.length ? `<em>${esc(flags.join(' · '))}</em>` : ''}</figcaption></figure>`;
   }).join('');
   const html = `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500&family=Jacquard+24&display=block">
@@ -328,11 +385,13 @@ header span{color:#8c8c8c}
 .grid{display:grid;grid-template-columns:repeat(${cols},${tw}px);gap:${gap + 6}px ${gap}px}
 figure{margin:0}
 img{display:block;width:${tw}px;height:${th}px;outline:1px solid #2a2a2a;background:#111}
-figcaption{display:flex;align-items:center;gap:8px;margin-top:9px;white-space:nowrap;overflow:hidden}
+figcaption{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:9px;white-space:nowrap}
+figure.flag img{outline:2px solid #ff8a80}
 figcaption i{flex:none;width:8px;height:8px;border-radius:50%}
 figcaption i.house{border:1px solid #8c8c8c}
 figcaption b{color:#fff;font-weight:500}
-figcaption em{font-style:normal;color:#ff8a80;margin-left:auto}
+figcaption span{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+figcaption em{flex-basis:100%;font-style:normal;color:#ff8a80;padding-left:16px}
 </style></head><body>
 <header><span class="word">lastfomo</span><b>QA</b><span>${esc(run.route)} · ${esc(run.viewport)} ${vp.width}×${vp.height} · ${esc(run.scheme)} · ${n} screens</span></header>
 <div class="grid">${cells}</div>
@@ -387,8 +446,8 @@ const dedupe = (list, key) => {
   return [...map.values()];
 };
 const flagged = runs.flatMap((r) => r.screens
-  .filter((s) => s.overflow.found || s.clipped.length)
-  .map((s) => ({ route: r.route, viewport: r.viewport, scheme: r.scheme, n: s.n, title: s.title, file: s.file, overflow: s.overflow.found, clipped: s.clipped.length })));
+  .filter((s) => s.overflow.found || s.clipped.length || s.covered.length)
+  .map((s) => ({ route: r.route, viewport: r.viewport, scheme: r.scheme, n: s.n, title: s.title, file: s.file, overflow: s.overflow.found, clipped: s.clipped.length, covered: s.covered.length })));
 
 const expectedMissing = dedupe(all('expectedMissing'), (x) => x.url).map(({ url, how, runs }) => ({ url, how, runs }));
 const summary = {
@@ -402,6 +461,7 @@ const summary = {
   expectedMissingIgnored: expectedMissing.length,
   overflowScreens: flagged.filter((f) => f.overflow).length,
   clippedTextScreens: flagged.filter((f) => f.clipped).length,
+  coveredTextScreens: flagged.filter((f) => f.covered).length,
   runErrors: all('errors').length,
 };
 
@@ -413,7 +473,7 @@ const report = {
   options: { routes, viewports, schemes, settleMs: settle, playbackRate: rate, concurrency, deviceScaleFactor: dpr },
   summary,
   fonts: fontSummary,
-  fontCache: { dir: rel(join(REPO, 'out', '.fontcache')), ...fonts.stats },
+  fontCache: { dir: rel(FONT_CACHE), ...fonts.stats },
   consoleErrors: dedupe(all('consoleErrors'), (x) => x.text),
   pageErrors: dedupe(all('pageErrors'), (x) => x.message),
   failedRequests: dedupe(all('failedRequests'), (x) => x.url + (x.status || x.error)),
@@ -429,10 +489,11 @@ const fontLine = Object.entries(fontSummary).map(([f, s]) => `${f} ${s.ok ? 'ok'
 console.log('');
 console.log(`  shots   ${summary.screenshots} screenshots, ${summary.contactSheets} contact sheets in ${rel(outDir)}/`);
 console.log(`  fonts   ${fontLine}`);
+if (fonts.stats.failed.length) console.log(`          ${fonts.stats.failed.length} font downloads failed, see fontCache in the report`);
 console.log(`  errors  ${summary.consoleErrors} console, ${summary.pageErrors} page, ${summary.failedRequests} failed requests${expectedMissing.length ? ` (${expectedMissing.length} missing videos ignored)` : ''}`);
-console.log(`  layout  overflow on ${summary.overflowScreens} screens, clipped text on ${summary.clippedTextScreens} screens`);
+console.log(`  layout  overflow on ${summary.overflowScreens} screens, clipped text on ${summary.clippedTextScreens}, text under fixed chrome on ${summary.coveredTextScreens}`);
 for (const f of flagged.slice(0, 12)) {
-  const what = [f.overflow && 'overflow', f.clipped && `${f.clipped} clipped`].filter(Boolean).join(', ');
+  const what = [f.overflow && 'overflow', f.clipped && `${f.clipped} clipped`, f.covered && `${f.covered} covered`].filter(Boolean).join(', ');
   console.log(`          ${f.route} ${f.viewport} ${f.scheme} ${pad2(f.n)} ${f.title || ''}: ${what}`);
 }
 if (flagged.length > 12) console.log(`          and ${flagged.length - 12} more in the report`);

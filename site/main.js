@@ -4,12 +4,23 @@
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const root = document.documentElement;
 
-  /* ---------------- media manifest: loops and films, null until uploaded ---------------- */
+  /* ---------------- media manifest (site/media.json, filled in by the build) ---------------- */
   let MEDIA = {};
   try { MEDIA = JSON.parse(($('#lf-media') || {}).textContent || '{}'); } catch (_) { MEDIA = {}; }
   const LOOPS = MEDIA.loops || {};
-  const REELS = MEDIA.films || {};
-  const has = (map, k) => typeof map[k] === 'string' && map[k].length > 0;
+  const FILMS = MEDIA.films || {};
+  // The web build plays films in place; an Artifact cannot embed other sites, so there the links open YouTube.
+  const EMBED = MEDIA.embed !== false;
+  // A loop is { mp4, webm } (or one path); pick what this browser decodes. Some builds ship without H.264.
+  const probe = document.createElement('video');
+  const loopSrc = (k) => {
+    const l = LOOPS[k];
+    if (!l) return '';
+    if (typeof l === 'string') return l;
+    return (l.mp4 && probe.canPlayType('video/mp4; codecs="avc1.640028"')) ? l.mp4 : (l.webm && probe.canPlayType('video/webm; codecs="vp9"')) ? l.webm : (l.mp4 || '');
+  };
+  const filmId = (k) => (FILMS[k] && /^[\w-]{11}$/.test(FILMS[k].youtube || '') ? FILMS[k].youtube : '');
+  const NAMES = { machina: 'Machina', hortus: 'Hortus', arca: 'Arca' };
 
   // The exact Figma horse (Logo/Mark 9:3). brand/marks/horse.svg is the source; the brand check keeps them identical.
   const HORSE = new Path2D("M322.101 1.53716C320.348 2.91274 319.256 3.04607 312.945 2.65567C306.632 2.26447 305.449 2.40897 302.994 3.87317C301.461 4.7865 298.595 6.29781 296.625 7.23109C294.655 8.16358 292.505 9.19666 291.848 9.52479C291.074 9.91279 290.742 11.001 290.904 12.6153C291.159 15.1556 290.591 15.5205 286.943 15.1612C284.536 14.9249 284.411 16.8258 286.713 18.666C290.052 21.3366 280.896 33.3256 275.917 32.8019C273.957 32.5959 273.62 32.8657 273.397 34.8129C273.13 37.1482 272.314 37.3813 267.256 36.5693C264.172 36.0743 264.506 37.8116 267.86 39.7013C273.171 42.6952 282.031 40.4111 290.636 33.8286C293.788 31.4175 294.967 31.7648 298.904 36.262C302.231 40.0614 302.251 40.0198 295.63 43.1319C288.638 46.4187 278.291 46.7133 268.85 43.8959C265.955 43.0313 260.899 41.813 257.615 41.1871C254.331 40.5619 246.542 38.7489 240.305 37.1593C225.232 33.3168 216.24 33.201 199.61 36.6372C182.405 40.1923 180.226 40.3208 172.533 38.2395C156.02 33.7711 141.289 40.8885 116.24 65.4365C87.5356 93.5685 68.5251 101.841 56.5125 91.428C52.7374 88.1556 53.2039 86.7983 58.717 85.022C80.3809 78.0411 90.8641 63.0255 78.5458 56.6202C73.0988 53.7884 64.3853 55.8075 56.7132 61.681C54.7253 63.2027 50.6619 65.2457 47.6828 66.2205C34.6862 70.4742 21.2796 80.3204 12.5439 92.0276C9.49555 96.1128 5.29683 100.96 3.21419 102.798C-1.1318 106.634 -1.06413 107.74 3.37819 105.457C7.05386 103.567 11.6968 99.05 15.0047 94.1457C19.9446 86.8199 21.9651 85.3956 21.9651 89.2365C21.9651 92.0771 23.4721 96.5408 24.4315 96.5408C24.8263 96.5408 25.1496 96.1703 25.1496 95.7168C25.1496 92.6551 27.5952 89.1288 28.6835 90.6201C29.7495 92.0803 29.943 91.9949 32.9252 88.7567C36.4082 84.9757 36.2108 85.0244 43.1641 86.2387C47.8205 87.0514 48.4288 87.4123 51.7892 91.357C65.964 107.996 89.8013 99.9841 126.35 66.298C144.675 49.4078 150.883 46.2439 165.696 46.2439C177.439 46.2439 179.814 47.5213 176.76 52.1949C175.232 54.5341 175.133 58.6361 176.445 65.284C177.247 69.3445 177.247 70.475 176.448 70.9708C173.76 72.6362 159.196 73.3443 151.642 72.1763C147.518 71.5384 145.366 73.3132 145.36 77.3585C145.353 82.2221 128.895 99.7885 122.892 101.34C115.95 103.134 114.366 103.879 110.799 107.027C104.039 112.994 106.86 114.569 117.671 110.863C128.5 107.149 128.909 106.867 140.188 95.3265C153.829 81.3703 153.741 81.4118 163.559 84.3019C175.953 87.9496 190.66 86.487 201.83 80.4961C206.816 77.8216 207.396 77.7665 213.559 79.376C216.081 80.0346 219.725 80.5735 221.657 80.5735C225.947 80.5735 225.565 81.2337 218.093 86.7361C211.051 91.9214 211.307 92.822 220.409 94.9009C224.466 95.8278 229.699 97.4756 232.039 98.563C234.379 99.6504 239.024 101.242 242.363 102.099C251.276 104.389 252.174 106.287 247.664 113.306C241.691 122.603 248.317 121.646 260.386 111.47C267.603 105.385 262.642 98.6636 248.212 94.9784C231.949 90.8245 230.512 89.4593 238.845 86.075C245.772 83.2608 252.218 76.6942 254.693 69.9289C255.537 67.6208 256.984 68.7673 258.109 72.6378C261.071 82.8265 269.803 87.2215 287.868 87.6175C299.163 87.8642 301.227 88.1068 302.596 89.3483C303.472 90.1419 307.548 92.8244 311.656 95.3089C326.608 104.354 327.287 105.407 320.555 109.115C313.554 112.971 304.892 112.971 301.877 109.115C300.087 106.826 299.661 106.638 298.252 107.515C296.911 108.351 295.939 108.192 292.163 106.517C286.892 104.18 285.267 104.053 283.484 105.841C279.964 109.371 300.701 121.934 306.438 119.746C307.665 119.278 310.264 118.895 312.211 118.895C314.159 118.895 318.337 118.176 321.498 117.298C324.658 116.42 328.505 115.676 330.046 115.646C334.342 115.559 335.709 114.697 336.982 111.269C339.197 105.304 339.164 105.053 335.921 103.327C329.752 100.042 325.115 93.9221 323.406 86.8095C322.712 83.9202 324.007 83.3103 325.615 85.7701C327.394 88.4933 346.535 88.7376 356.334 86.162C359.618 85.299 363.737 84.5845 365.489 84.5741C367.24 84.5637 369.7 84.0184 370.953 83.363C372.208 82.7067 373.669 82.1702 374.2 82.1702C376.474 82.1702 399.232 93.5285 402.423 96.2557C405.397 98.7985 416.519 103.726 419.284 103.726C420.49 103.726 420.122 101.104 418.556 98.5367C417.437 96.702 413.841 94.5153 403.198 89.1958C395.554 85.3756 386.849 80.4362 383.854 78.2183C377.31 73.3746 372.212 72.7751 364.84 75.9829C359.614 78.2574 346.865 78.6055 344.796 76.5314C342.695 74.4237 342.461 57.5423 344.463 52.4496C349.497 39.643 361.461 34.8225 361.496 45.5868C361.512 50.4066 363.672 53.3557 368.324 54.9053C370.267 55.5528 373.291 56.9356 375.042 57.9782C376.794 59.0209 379.458 60.4324 380.962 61.115C382.468 61.7984 384.83 63.2227 386.213 64.2797C392.676 69.224 399.272 63.6115 393.913 57.7267C387.154 50.3068 385.115 46.3876 384.558 39.7548C384.366 37.4675 383.451 34.025 382.524 32.1041C381.179 29.3178 380.94 27.7714 381.34 24.4542C382.308 16.4155 374.85 9.54474 373.726 17.4406C373.414 19.6281 372.39 20.2093 370.718 19.149C369.766 18.5463 369.739 17.8884 370.55 15.1724C371.759 11.1271 370.633 6.22275 367.858 3.43966C364.402 -0.0260346 362.312 1.35194 364.693 5.52738C367.205 9.93435 365.952 10.5443 362.421 6.63392C358.956 2.79539 358.956 2.79538 352.271 2.62613C342.432 2.37704 334.807 1.68645 331.66 0.758755C327.501 -0.466732 324.323 -0.208058 322.101 1.53716ZM332.511 6.26428C334.573 8.33124 334.839 9.15195 334.839 13.4495C334.839 18.6988 333.952 19.569 332.135 16.1057C331.501 14.8986 329.164 12.1274 326.939 9.94871C321.859 4.96932 321.79 3.93066 326.541 3.93066C329.506 3.93066 330.617 4.36497 332.511 6.26428ZM302.886 24.7424C306.421 26.7582 308.426 29.3657 309.114 32.8402C309.633 35.466 309.633 35.466 306.112 32.5807C300.89 28.3007 297.288 26.2912 294.834 26.288C292.475 26.2848 292.082 25.5711 293.6 24.0494C295.075 22.57 299.679 22.9133 302.886 24.7424ZM76.9942 59.0696C80.931 61.1829 79.8522 66.8888 75.2101 68.5118C70.2272 70.2539 60.5918 69.0092 59.6309 66.5C57.9097 61.9996 71.5655 56.1564 76.9942 59.0696Z");
@@ -130,9 +141,31 @@
   let rz;
   addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => plates.forEach((p) => p.build()), 200); });
 
-  /* ---------------- films that are not uploaded yet show their poster, without dead controls ---------------- */
-  const posterFor = (k) => { const v = $('video.cv[data-reel="' + k + '"]'); return v ? v.getAttribute('poster') || '' : ''; };
-  $$('video.cv').forEach((v) => { if (!has(REELS, v.dataset.reel)) v.removeAttribute('controls'); });
+  /* ---------------- films: real links, played in place where the page may embed ---------------- */
+  const embedSrc = (k) => 'https://www.youtube-nocookie.com/embed/' + filmId(k) + '?autoplay=1&rel=0&playsinline=1';
+  const filmFrame = (k) => {
+    const f = document.createElement('iframe');
+    f.src = embedSrc(k);
+    f.title = (NAMES[k] || 'lastfomo') + ' film';
+    f.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+    f.allowFullscreen = true;
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    return f;
+  };
+  $$('a[data-play]').forEach((a) => {
+    // Three "Play the film" buttons share one visible label; the name says which film, and where it opens.
+    const label = a.getAttribute('aria-label') || a.textContent.trim() + ', ' + (NAMES[a.dataset.play] || '');
+    a.setAttribute('aria-label', EMBED ? label : label + ' (opens YouTube in a new tab)');
+    if (EMBED) return;
+    const ne = '<svg aria-hidden="true"><use href="#g-ne"/></svg>';
+    if (a.classList.contains('btn')) a.insertAdjacentHTML('beforeend', ne);
+    else a.querySelector('.pl')?.insertAdjacentHTML('beforeend', ne);
+  });
+  const resetFrames = (keep) => $$('a.frame.playing').forEach((fr) => {
+    if (keep && keep.contains(fr)) return;
+    fr.querySelector('iframe')?.remove();
+    fr.classList.remove('playing');
+  });
 
   /* ---------------- screens: reveal, wing colour, previews, counters ---------------- */
   const dotsNav = $('#dots'), prog = $('#prog');
@@ -158,15 +191,12 @@
     $$('button', dotsNav).forEach((b, j) => b.setAttribute('aria-current', j === i ? 'true' : 'false'));
     prog.style.width = (secs.length > 1 ? (i / (secs.length - 1)) * 100 : 100) + '%';
     $$('video.lp', view).forEach((v) => {
-      if (s.contains(v) && !RM && has(LOOPS, v.dataset.loop)) {
-        if (!v.src) v.src = LOOPS[v.dataset.loop];
+      if (s.contains(v) && !RM && loopSrc(v.dataset.loop)) {
+        if (!v.src) v.src = loopSrc(v.dataset.loop);
         v.play().catch(() => {});
       } else { v.pause(); }
     });
-    $$('video.cv', view).forEach((v) => {
-      if (s.contains(v)) { if (!v.src && has(REELS, v.dataset.reel)) v.src = REELS[v.dataset.reel]; }
-      else if (!v.paused) v.pause();
-    });
+    resetFrames(s);
     $$('[data-count]', s).forEach(count);
   }
   function setup(view) {
@@ -199,6 +229,7 @@
   function swap(k) {
     Object.entries(views).forEach(([n, v]) => { v.hidden = n !== k; });
     $$('video').forEach((v) => { if (!v.paused) v.pause(); });
+    resetFrames(null);
     cur = k;
     document.title = TITLES[k];
     const v = views[k];
@@ -233,23 +264,28 @@
     const sc = e.target.closest('[data-scroll]');
     if (sc) { e.preventDefault(); const t = document.getElementById(sc.dataset.scroll); if (t) t.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' }); return; }
     const pl = e.target.closest('[data-play]');
-    if (pl) { e.preventDefault(); openReel(pl.dataset.play); }
+    if (pl && EMBED && filmId(pl.dataset.play)) {
+      e.preventDefault();
+      if (pl.classList.contains('frame')) { if (!pl.classList.contains('playing')) { pl.classList.add('playing'); pl.append(filmFrame(pl.dataset.play)); } }
+      else openReel(pl.dataset.play);
+    }
   });
   addEventListener('hashchange', route);
 
   /* ---------------- film player ---------------- */
-  const dlg = $('#reel'), rv = $('#reel-v'), note = $('#reel-note');
+  const dlg = $('#reel'), slot = $('#reel-frame');
+  let opener = null;
   function openReel(k) {
-    note.textContent = '';
-    if (has(REELS, k)) { rv.src = REELS[k]; rv.removeAttribute('poster'); rv.controls = true; }
-    else { rv.removeAttribute('src'); rv.poster = posterFor(k); rv.controls = false; note.textContent = 'This film is still being uploaded.'; }
+    opener = document.activeElement;
+    slot.replaceChildren(filmFrame(k));
+    dlg.setAttribute('aria-label', (NAMES[k] || 'lastfomo') + ' film');
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
-    if (has(REELS, k)) rv.play().catch(() => {});
   }
-  function closeReel() { rv.pause(); rv.removeAttribute('src'); rv.load(); if (dlg.open) dlg.close(); else dlg.removeAttribute('open'); }
+  function closeReel() { if (dlg.open) dlg.close(); else { dlg.removeAttribute('open'); dlg.dispatchEvent(new Event('close')); } }
   $('#reel-x').addEventListener('click', closeReel);
   dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.classList.contains('reel-in')) closeReel(); });
-  dlg.addEventListener('close', () => { rv.pause(); });
+  // Closing removes the player, which stops the film; focus returns to the control that opened it.
+  dlg.addEventListener('close', () => { slot.replaceChildren(); if (opener && opener.focus) opener.focus({ preventScroll: true }); });
 
   /* ---------------- the plus cursor ---------------- */
   if (FINE && !RM) {

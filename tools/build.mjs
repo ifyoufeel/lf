@@ -53,22 +53,38 @@ if (!args.has('--no-check') && !(await brandcheck({}, 'source'))) fail('brand ch
 /* ---------- 3. assemble ---------- */
 let html = read('site/index.html');
 const media = JSON.parse(read('site/media.json'));
-const manifest = JSON.stringify({ loops: media.loops, films: media.films });
 const once = (s, re, fn) => { let n = 0; const out = s.replace(re, (...m) => { n++; return fn(...m); }); if (n !== 1) fail(`expected exactly one match for ${re}, found ${n}`); return out; };
-html = once(html, /(<script type="application\/json" id="lf-media">)[\s\S]*?(<\/script>)/, (_, a, b) => a + manifest + b);
+const withManifest = (doc, obj) => once(doc, /(<script type="application\/json" id="lf-media">)[\s\S]*?(<\/script>)/, (_, a, b) => a + JSON.stringify(obj).replace(/</g, '\\u003c') + b);
+
+// Films: every play control links to the film named in site/media.json, and nothing else.
+const watch = (id) => `https://www.youtube.com/watch?v=${id}`;
+for (const m of html.matchAll(/<a\b[^>]*\bdata-play="(\w+)"[^>]*>/g)) {
+  const k = m[1], id = media.films?.[k]?.youtube, href = (m[0].match(/href="([^"]*)"/) || [])[1];
+  if (!id) fail(`a play control for "${k}" has no film in site/media.json`);
+  if (href !== watch(id)) fail(`play control for "${k}" links to ${href}, but site/media.json says ${watch(id)}`);
+  if (!/target="_blank"/.test(m[0]) || !/rel="noopener"/.test(m[0])) fail(`play control for "${k}" must open a new tab (target="_blank" rel="noopener")`);
+}
+const local = (v) => typeof v === 'string' && !/^https?:/.test(v);
+const loopFiles = Object.values(media.loops).flatMap((v) => (v && typeof v === 'object' ? Object.values(v) : [v])).filter(local);
+for (const f of loopFiles) if (!existsSync(P('site', f))) fail(`missing loop ${f}`);
+const webHtml = withManifest(html, { loops: media.loops, films: media.films, embed: true });
 
 const refs = [...new Set([...html.matchAll(/(?:src|poster)="(media\/[^"]+)"/g)].map((m) => m[1]))];
 for (const r of refs) if (!existsSync(P('site', r))) fail(`missing ${r}`);
-const videoRefs = [...Object.values(media.loops), ...Object.values(media.films)].filter((v) => typeof v === 'string' && !/^https?:/.test(v));
 
 // dist/web: the source as files, tokens generated, manifest filled. CSP-friendly: no inline script.
 rmSync(P('dist'), { recursive: true, force: true });
 mkdirSync(P('dist/web/media'), { recursive: true });
-writeFileSync(P('dist/web/index.html'), html);
+writeFileSync(P('dist/web/index.html'), webHtml);
 for (const f of ['tokens.css', 'styles.css', 'boot.js', 'main.js']) copyFileSync(P('site', f), P('dist/web', f));
-for (const r of [...refs, ...videoRefs]) { mkdirSync(dirname(P('dist/web', r)), { recursive: true }); copyFileSync(P('site', r), P('dist/web', r)); }
+for (const r of [...refs, ...loopFiles]) { mkdirSync(dirname(P('dist/web', r)), { recursive: true }); copyFileSync(P('site', r), P('dist/web', r)); }
 
 // dist/artifact: a fragment (the Artifact skeleton supplies doctype, charset and viewport), everything inlined.
+// Loops are small (rule 12), so they travel inside the page as data URIs; films stay links, since an Artifact cannot embed YouTube.
+const loopUri = (rel) => `data:video/${rel.endsWith('.webm') ? 'webm' : 'mp4'};base64,` + readFileSync(P('site', rel)).toString('base64');
+const inline = (v) => (local(v) ? loopUri(v) : v);
+const artLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, inline(f)])) : inline(v)]));
+html = withManifest(html, { loops: artLoops, films: media.films, embed: false });
 const scriptSafe = (s) => s.replace(/<\/script/gi, '<\\/script');
 const dataUri = (rel) => 'data:image/jpeg;base64,' + readFileSync(P('site', rel)).toString('base64');
 let head = html.slice(html.indexOf('<head>') + 6, html.indexOf('</head>'));
@@ -79,7 +95,6 @@ head = once(head, /<link rel="stylesheet" href="tokens\.css">\s*<link rel="style
 head = once(head, /<script src="boot\.js"><\/script>/, () => `<script>${scriptSafe(read('site/boot.js'))}</script>`);
 body = once(body, /<script src="main\.js"><\/script>/, () => `<script>\n${scriptSafe(read('site/main.js'))}</script>`);
 body = body.replace(/(src|poster)="(media\/[^"]+\.jpg)"/g, (_, attr, rel) => `${attr}="${dataUri(rel)}"`);
-if (videoRefs.length) console.warn('build: local video files are not inlined into the Artifact; upload them to its asset store and put those URLs in site/media.json');
 const fragment = head.trim() + '\n' + body.trim() + '\n';
 mkdirSync(P('dist/artifact'), { recursive: true });
 writeFileSync(P('dist/artifact/lastfomo.html'), fragment);
@@ -92,8 +107,8 @@ if (!args.has('--no-check')) {
 const kb = (p) => (statSync(P(p)).size / 1024).toFixed(0) + ' KB';
 console.log(`build: dist/web/index.html ${kb('dist/web/index.html')} + ${refs.length} images`);
 console.log(`build: dist/artifact/lastfomo.html ${kb('dist/artifact/lastfomo.html')}`);
-const missing = ['loops', 'films'].flatMap((k) => Object.entries(media[k]).filter(([, v]) => !v).map(([w]) => `${w} ${k.slice(0, -1)}`));
-if (missing.length) console.log(`build: posters stand in for ${missing.length} videos not uploaded yet (${missing.join(', ')})`);
+const missing = Object.entries(media.loops).filter(([, v]) => !v).map(([w]) => w);
+if (missing.length) console.log(`build: posters stand in for the ${missing.join(' and ')} loop${missing.length > 1 ? 's' : ''} (not uploaded yet)`);
 const ledger = JSON.parse(read('brand/ledger.json'));
 const ph = ledger.placeholders.filter((p) => fragment.includes(p.token)).map((p) => p.token);
 if (ph.length) console.log(`build: placeholders still in the page: ${ph.join(', ')}`);

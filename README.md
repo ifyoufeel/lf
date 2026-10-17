@@ -1,0 +1,117 @@
+# lastfomo
+
+The landing page of lastfomo, a research house with three wings: Machina (private, on-premise AI), Hortus (plant science) and Arca (art and collections). *What grows. What thinks. What lasts.*
+
+This repo holds the page as source, the brand as data, and the tools that keep one true to the other. One build turns the source into two publishable pages and refuses anything off brand.
+
+## What this is
+
+- `site/` is the page: one HTML document with hash routes for home, the three case pages and Start a project.
+- `brand/` is the brand as data: tokens, a ledger of facts and approved copy, and the exact Figma marks.
+- `tools/` builds the page, checks it against the brand rules, and photographs every screen for review.
+- `dist/` is what ships: a claude.ai Artifact and a folder for any static host.
+
+The brand rules themselves live in the `lastfomo-brand` skill, `.claude/skills/lastfomo-brand/`. `CLAUDE.md` condenses them for Claude Code sessions. `docs/brand-rails.md` shows which check enforces each one.
+
+## Requirements
+
+- Node 22. Nothing to install: the build and the brand check have no npm dependencies.
+- For the QA tools only: a global Playwright with Chromium. Set `PLAYWRIGHT_MODULE` to its folder if it is not found.
+- Network access to Google Fonts for the QA tools. Fonts are cached in `out/.fontcache/` after the first run.
+
+## Folder layout
+
+The authoritative description is `docs/contract.md`. In outline:
+
+```
+brand/
+  tokens.json            colours, themes, wing modes, type, motion, layout; the single source of truth
+  ledger.json            facts, approved lines, banned copy, British spelling, placeholders, media rights
+  marks/*.svg            exact Figma vectors: horse, wordmark, lockup, glyphs; never edited by hand
+site/
+  index.html             the page: routes #/, #/machina, #/hortus, #/arca, #/start
+  tokens.css             generated from brand/tokens.json by tools/build.mjs; never edited by hand
+  styles.css             component styles; colours only through var(--token)
+  boot.js                runs in <head> before first paint: the js class, the saved theme
+  main.js                plates, reveals, routing, curtain, player, cursor, brief composer, theme switch
+  media.json             video manifest; null means not uploaded yet
+  media/*.jpg            posters and stills, each listed in brand/ledger.json under media
+tools/
+  build.mjs              tokens, brand check, both publish targets
+  brandcheck.mjs         the brand check, rules R0 to R17
+  brandcheck.test.mjs    fixture tests for the brand check
+  fixtures/brandcheck/   one fixture page per rule
+  hooks/                 the Claude Code hook that runs the check after each edit
+  qa/shoot.mjs           screenshots and contact sheets
+  qa/smoke.mjs           interaction smoke test
+  qa/harness.mjs         shared plumbing for the QA tools
+docs/
+  contract.md            file layout, markup conventions, commands
+  brand-rails.md         every rail, what enforces it, how to fix a failure
+.claude/                 the lastfomo-brand skill and the hook settings
+.githooks/pre-commit     the build before every commit
+.github/workflows/       the brand check on every push and pull request
+dist/                    generated, not committed
+  web/                   full document with CSS, JS and media/ beside it
+  artifact/lastfomo.html fragment with CSS, JS and images inlined
+out/                     generated, not committed
+  qa/                    screenshots, contact sheets, report.json, smoke.json
+```
+
+## Commands
+
+| Command | Does |
+|---|---|
+| `node tools/build.mjs` | Regenerates `site/tokens.css`, runs the brand check, writes `dist/web/` and `dist/artifact/lastfomo.html`. Fails on brand errors. |
+| `node tools/brandcheck.mjs` | Checks the source in `site/`. `--html <file>` checks one self-contained page. `--json` for machine output. Exits 1 on errors. |
+| `node tools/brandcheck.test.mjs` | Fixture tests for the brand check. |
+| `node tools/qa/shoot.mjs` | Screenshots every screen of every route, desktop 1440×900 and phone 390×844, dark and light, with contact sheets and a JSON report in `out/qa/`. |
+| `node tools/qa/smoke.mjs` | Clicks through routes, player, brief form and theme switch; reports console errors. |
+
+A normal round:
+
+1. Edit `site/`.
+2. `node tools/build.mjs`
+3. `node tools/qa/shoot.mjs`, then open the contact sheets in `out/qa/home/`, `out/qa/machina/` and so on: one per viewport and theme, such as `phone-dark-contact.jpg`.
+4. `node tools/qa/smoke.mjs` if behaviour changed.
+5. Publish one or both targets.
+
+`node tools/qa/shoot.mjs --help` lists options for shooting a single route, viewport or theme.
+
+## Publishing
+
+There are two targets, built from the same source in one run.
+
+**claude.ai Artifact: `dist/artifact/lastfomo.html`.** A fragment with no doctype, `html`, `head` or `body`, because the Artifact supplies its own skeleton. CSS, JS and images are inlined; nothing else is needed. Publish it with the Artifact tool in Claude Code, and republish to the same URL for every update. Keep it under 16 MB. Videos are not inlined: they belong in the Artifact’s asset store.
+
+**Static host: `dist/web/`.** A full HTML document with `tokens.css`, `styles.css`, `boot.js`, `main.js` and `media/` beside it. Any static host serves the folder as it is, Vercel included. `dist/` is not committed, so a host that builds from Git runs `node tools/build.mjs` itself and serves `dist/web/`.
+
+Publish only from `dist/`, after a build that passed.
+
+## The rails
+
+The brand check runs in four places: after every edit Claude Code makes under `site/` or `brand/`, inside every build, before every commit and on every push. Enable the commit hook once per clone:
+
+```
+git config core.hooksPath .githooks
+```
+
+`docs/brand-rails.md` lists every rule, what enforces it, how to fix a failure, and what still needs a person: taste, the horse inside photographs, rights and tone.
+
+## Changing things
+
+- **A number or a claim.** Every number on the page must exist in `brand/ledger.json` under `facts`. The owner confirms a new figure first; it goes into the ledger, then onto the page.
+- **A line of copy.** Approved lines live in `brand/ledger.json` under `approvedLines`. New lines are approved by the owner and recorded there first.
+- **An image.** Add the file to `site/media/` and an entry to the ledger’s `media` with alt text and rights, then reference it as `media/<name>.jpg`.
+- **A colour or a token.** Change `brand/tokens.json` and rebuild. `site/tokens.css` follows; it is never edited by hand.
+- **A video.** Record its path or URL in `site/media.json`. Until then the poster stands in.
+
+## Open items for the owner
+
+1. **The house address.** `[YOUR EMAIL]` stands in the footer and in the brief composer on Start a project. Replace it in `site/index.html` and `site/main.js`; the build stops reporting it once it is gone.
+2. **The loops and the films.** The three wing loops and three films lived in the asset store of the previous landing-page Artifact (`https://claude.ai/artifact/Ckgt4AxvQpeKTKaPFByNMx`), which this account cannot reach. Posters stand in until they are re-uploaded. Loops: MP4, 600×826, 25 fps, 5.12 s, muted, under 1.2 MB each. Films: 1080p web encodes, 13 to 15 MB each. Record each one in `site/media.json`.
+3. **Rights.** The Frazetta painting (in the Arca loop and film posters) and the museum photographs of the Necklace of San Gennaro and the Sutton Hoo helmet need confirmed rights before public use. The salon photograph is third-party too. The build warns until each entry in the ledger is cleared.
+4. **Unconfirmed wording.** The roadmap’s “Next” items (more private builds; pilot beds to full farms; a private catalogue by invitation) and the “What happens next” steps on Start a project (we read the brief; a short call; a written plan) were written as suggestions. Confirm or rewrite them.
+5. **Arca’s field label.** The site and `brand/tokens.json` say “Art & collections”; the Figma brandbook says “Art & Artifacts”. The site wording stands for now. If the Figma label wins, British spelling makes it “artefacts”, and the change goes into `brand/tokens.json` and the Arca `.code` labels together.
+
+Wing 04 stays sealed and unnamed in public unless the owner decides otherwise.

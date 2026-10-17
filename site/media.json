@@ -1,5 +1,25 @@
 {
-  "$note": "Paths or URLs for the wing loops (600x826 MP4, muted, 5.12 s) and films (1080p web encodes). null = not uploaded yet; the page then shows the poster.",
-  "loops": { "machina": null, "hortus": null, "arca": null },
-  "films": { "machina": null, "hortus": null, "arca": null }
+  "$note": "Loops play muted inside the wing arches (3:4, made with tools/media/gif_to_loop.py, an MP4 and a WebM twin); null keeps the poster. Films live on YouTube: links everywhere, played in place on the web build only (Artifacts cannot embed other sites).",
+  "loops": {
+    "machina": null,
+    "hortus": null,
+    "arca": {
+      "mp4": "media/arca-loop.mp4",
+      "webm": "media/arca-loop.webm"
+    }
+  },
+  "films": {
+    "machina": {
+      "youtube": "hWzvRWBzQFQ",
+      "duration": "0:40"
+    },
+    "hortus": {
+      "youtube": "61uIUCtCN6k",
+      "duration": "0:40"
+    },
+    "arca": {
+      "youtube": "3GHNW57yH4Y",
+      "duration": "0:36"
+    }
+  }
 }

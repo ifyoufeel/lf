@@ -2,33 +2,175 @@
   "$meta": {
     "name": "lastfomo facts and copy ledger",
     "rule": "Every number, claim and line on a public surface must trace to this file. Anything new is confirmed by the owner first, or shipped as a named placeholder.",
-    "sources": ["lastfomo-brand skill: references/copy.md", "Figma brandbook rgztGHmGiCjoPUCDxdq0Pz (wing modes, voice spread)"]
+    "sources": [
+      "lastfomo-brand skill: references/copy.md",
+      "Figma brandbook rgztGHmGiCjoPUCDxdq0Pz (wing modes, voice spread)"
+    ]
   },
-
-  "brandNames": ["lastfomo", "machina", "hortus", "arca"],
-
-  "facts": [
-    { "id": "machina.gpus",    "claim": "8 GPUs: 4× RTX 3090, 2× RTX 4090, 2× RTX 5060 Ti", "numbers": ["8", "4", "3090", "2", "4090", "5060"] },
-    { "id": "machina.vram",    "claim": "176 GB VRAM", "numbers": ["176"] },
-    { "id": "machina.cpu",     "claim": "AMD EPYC 7702, 64 cores", "numbers": ["7702", "64"] },
-    { "id": "machina.memory",  "claim": "256 GB DDR4 (16 × 16 GB)", "numbers": ["256", "16"] },
-    { "id": "machina.flash",   "claim": "about 7 TB, SSD and NVMe", "numbers": ["7"] },
-    { "id": "machina.network", "claim": "50 Gbit inside the building", "numbers": ["50"] },
-    { "id": "machina.power",   "claim": "3.1 kW budget, 1500 W + 1600 W supplies", "numbers": ["3.1", "1500", "1600"] },
-    { "id": "machina.psu",     "claim": "Corsair HX1500i power supply (photo caption)", "numbers": ["1500"] },
-    { "id": "machina.premise", "claim": "0 bytes leave the room: a design premise (local inference), never a measurement", "numbers": ["0"], "premise": true },
-    { "id": "machina.case",    "claim": "Case N° 0001, an anonymous medical practice", "numbers": ["0001"] },
-    { "id": "hortus.disciplines", "claim": "5 disciplines", "numbers": ["5"] },
-    { "id": "hortus.dosing",   "claim": "5 dosing channels (visible on the feeding rig)", "numbers": ["5"] },
-    { "id": "house.count",     "claim": "1 research house, one method", "numbers": ["1"] },
-    { "id": "arca.gennaro",    "claim": "Collana di San Gennaro, begun by Michele Dato in Naples in 1679, enriched by sovereigns over about 250 years", "numbers": ["1679", "250"], "fieldNote": true },
-    { "id": "arca.frazetta",   "claim": "Frank Frazetta, Man Ape (1966), sold in 2025 for $13.5M, consigned by the artist's family", "numbers": ["1966", "2025", "13.5"], "fieldNote": true },
-    { "id": "arca.suttonhoo",  "claim": "Sutton Hoo helmet, early 7th century, found in 1939 in a ship burial, British Museum", "numbers": ["7", "1939"], "fieldNote": true },
-    { "id": "films.durations", "claim": "Machina and Hortus films 0:40, Arca film 0:36", "numbers": ["0:40", "0:36", "40", "36"] },
-    { "id": "wing04",          "claim": "Wing 04, in the works, always sealed", "numbers": ["04"] },
-    { "id": "sequence",        "claim": "Real sequences only: scope steps 01 to 04, next steps 01 to 03", "numbers": ["01", "02", "03", "04"] }
+  "brandNames": [
+    "lastfomo",
+    "machina",
+    "hortus",
+    "arca"
   ],
-
+  "facts": [
+    {
+      "id": "machina.gpus",
+      "claim": "8 GPUs: 4× RTX 3090, 2× RTX 4090, 2× RTX 5060 Ti",
+      "numbers": [
+        "8",
+        "4",
+        "3090",
+        "2",
+        "4090",
+        "5060"
+      ]
+    },
+    {
+      "id": "machina.vram",
+      "claim": "176 GB VRAM",
+      "numbers": [
+        "176"
+      ]
+    },
+    {
+      "id": "machina.cpu",
+      "claim": "AMD EPYC 7702, 64 cores",
+      "numbers": [
+        "7702",
+        "64"
+      ]
+    },
+    {
+      "id": "machina.memory",
+      "claim": "256 GB DDR4 (16 × 16 GB)",
+      "numbers": [
+        "256",
+        "16"
+      ]
+    },
+    {
+      "id": "machina.flash",
+      "claim": "about 7 TB, SSD and NVMe",
+      "numbers": [
+        "7"
+      ]
+    },
+    {
+      "id": "machina.network",
+      "claim": "50 Gbit inside the building",
+      "numbers": [
+        "50"
+      ]
+    },
+    {
+      "id": "machina.power",
+      "claim": "3.1 kW budget, 1500 W + 1600 W supplies",
+      "numbers": [
+        "3.1",
+        "1500",
+        "1600"
+      ]
+    },
+    {
+      "id": "machina.psu",
+      "claim": "Corsair HX1500i power supply (photo caption)",
+      "numbers": [
+        "1500"
+      ]
+    },
+    {
+      "id": "machina.premise",
+      "claim": "0 bytes leave the room: a design premise (local inference), never a measurement",
+      "numbers": [
+        "0"
+      ],
+      "premise": true
+    },
+    {
+      "id": "machina.case",
+      "claim": "Case N° 0001, an anonymous medical practice",
+      "numbers": [
+        "0001"
+      ]
+    },
+    {
+      "id": "hortus.disciplines",
+      "claim": "5 disciplines",
+      "numbers": [
+        "5"
+      ]
+    },
+    {
+      "id": "hortus.dosing",
+      "claim": "5 dosing channels (visible on the feeding rig)",
+      "numbers": [
+        "5"
+      ]
+    },
+    {
+      "id": "house.count",
+      "claim": "1 research house, one method",
+      "numbers": [
+        "1"
+      ]
+    },
+    {
+      "id": "arca.gennaro",
+      "claim": "Collana di San Gennaro, begun by Michele Dato in Naples in 1679, enriched by sovereigns over about 250 years",
+      "numbers": [
+        "1679",
+        "250"
+      ],
+      "fieldNote": true
+    },
+    {
+      "id": "arca.frazetta",
+      "claim": "Frank Frazetta, Man Ape (1966), sold in 2025 for $13.5M, consigned by the artist's family",
+      "numbers": [
+        "1966",
+        "2025",
+        "13.5"
+      ],
+      "fieldNote": true
+    },
+    {
+      "id": "arca.suttonhoo",
+      "claim": "Sutton Hoo helmet, early 7th century, found in 1939 in a ship burial, British Museum",
+      "numbers": [
+        "7",
+        "1939"
+      ],
+      "fieldNote": true
+    },
+    {
+      "id": "films.durations",
+      "claim": "Machina and Hortus films 0:40, Arca film 0:36",
+      "numbers": [
+        "0:40",
+        "0:36",
+        "40",
+        "36"
+      ]
+    },
+    {
+      "id": "wing04",
+      "claim": "Wing 04, in the works, always sealed",
+      "numbers": [
+        "04"
+      ]
+    },
+    {
+      "id": "sequence",
+      "claim": "Real sequences only: scope steps 01 to 04, next steps 01 to 03",
+      "numbers": [
+        "01",
+        "02",
+        "03",
+        "04"
+      ]
+    }
+  ],
   "approvedLines": {
     "house": [
       "What grows. What thinks. What lasts.",
@@ -40,66 +182,250 @@
       "Then walk the house.",
       "Walk the house."
     ],
-    "machina": ["What thinks.", "Your models. Your machines. Nothing leaves the room.", "Local AI, built for a medical practice.", "Private by architecture, not by policy.", "Local by default."],
-    "hortus": ["What grows.", "Better crops. Stronger plants. Unlocked potential.", "Five disciplines. One house.", "Seed to sensor, under one roof.", "Light is a recipe. We are writing it down."],
-    "arca": ["What lasts.", "Private by invitation.", "Direct to the artist.", "Hunted, not listed.", "Made to be seen.", "Kept beyond a lifetime.", "Sealed until you look.", "Kept, not stored."],
-    "cta": ["See the work", "Watch the films", "Play the film", "Open the case", "Start a project", "Write the brief", "Send the brief", "Back to the house", "All work", "Next case"]
+    "machina": [
+      "What thinks.",
+      "Your models. Your machines. Nothing leaves the room.",
+      "Local AI, built for a medical practice.",
+      "Private by architecture, not by policy.",
+      "Local by default."
+    ],
+    "hortus": [
+      "What grows.",
+      "Better crops. Stronger plants. Unlocked potential.",
+      "Five disciplines. One house.",
+      "Seed to sensor, under one roof.",
+      "Light is a recipe. We are writing it down."
+    ],
+    "arca": [
+      "What lasts.",
+      "Private by invitation.",
+      "Direct to the artist.",
+      "Hunted, not listed.",
+      "Made to be seen.",
+      "Kept beyond a lifetime.",
+      "Sealed until you look.",
+      "Kept, not stored."
+    ],
+    "cta": [
+      "See the work",
+      "Watch the films",
+      "Play the film",
+      "Open the case",
+      "Start a project",
+      "Write the brief",
+      "Send the brief",
+      "Back to the house",
+      "All work",
+      "Next case"
+    ]
   },
-
   "banned": [
-    { "pattern": "EST\\.?\\s*2026", "flags": "i", "reason": "Removed on request: no founding-year label." },
-    { "pattern": "by appointment", "flags": "i", "reason": "Arca says 'By invitation', never 'By appointment'." },
-    { "pattern": "\\b\\d+(?:\\.\\d+)?\\s?M\\s+records\\b", "flags": "i", "reason": "Invented results were removed (e.g. 1.2M records)." },
-    { "pattern": "\\brecords (?:processed|analysed|analyzed)\\b", "flags": "i", "reason": "No throughput claims; use build facts." },
-    { "pattern": "\\b\\d+(?:\\.\\d+)?\\s?(?:ms|s)\\b", "flags": "", "reason": "No timing results (e.g. 1.8 s). Film durations are written m:ss." },
-    { "pattern": "\\b\\d+\\s+weeks?\\b", "flags": "i", "reason": "No delivery-time claims (e.g. 6 weeks)." },
-    { "pattern": "\\b\\d+(?:\\.\\d+)?\\s?%", "flags": "", "reason": "No percentage results; none are in the ledger." },
-    { "pattern": "field report", "flags": "i", "reason": "The invented field-report page was removed." },
-    { "pattern": "\\bGlimp\\b", "flags": "i", "reason": "Wing 04 stays unnamed in public ('Wing 04, in the works')." },
-    { "pattern": "!", "flags": "", "reason": "No exclamation marks, ever.", "visibleTextOnly": true }
+    {
+      "pattern": "EST\\.?\\s*2026",
+      "flags": "i",
+      "reason": "Removed on request: no founding-year label."
+    },
+    {
+      "pattern": "by appointment",
+      "flags": "i",
+      "reason": "Arca says 'By invitation', never 'By appointment'."
+    },
+    {
+      "pattern": "\\b\\d+(?:\\.\\d+)?\\s?M\\s+records\\b",
+      "flags": "i",
+      "reason": "Invented results were removed (e.g. 1.2M records)."
+    },
+    {
+      "pattern": "\\brecords (?:processed|analysed|analyzed)\\b",
+      "flags": "i",
+      "reason": "No throughput claims; use build facts."
+    },
+    {
+      "pattern": "\\b\\d+(?:\\.\\d+)?\\s?(?:ms|s)\\b",
+      "flags": "",
+      "reason": "No timing results (e.g. 1.8 s). Film durations are written m:ss."
+    },
+    {
+      "pattern": "\\b\\d+\\s+weeks?\\b",
+      "flags": "i",
+      "reason": "No delivery-time claims (e.g. 6 weeks)."
+    },
+    {
+      "pattern": "\\b\\d+(?:\\.\\d+)?\\s?%",
+      "flags": "",
+      "reason": "No percentage results; none are in the ledger."
+    },
+    {
+      "pattern": "field report",
+      "flags": "i",
+      "reason": "The invented field-report page was removed."
+    },
+    {
+      "pattern": "\\bGlimp\\b",
+      "flags": "i",
+      "reason": "Wing 04 stays unnamed in public ('Wing 04, in the works')."
+    },
+    {
+      "pattern": "!",
+      "flags": "",
+      "reason": "No exclamation marks, ever.",
+      "visibleTextOnly": true
+    }
   ],
-
   "britishSpelling": {
-    "optimization": "optimisation", "optimize": "optimise", "optimized": "optimised",
-    "analyze": "analyse", "analyzed": "analysed", "color": "colour", "colors": "colours",
-    "center": "centre", "organization": "organisation", "catalog": "catalogue",
-    "behavior": "behaviour", "favorite": "favourite", "defense": "defence", "jewelry": "jewellery"
+    "optimization": "optimisation",
+    "optimize": "optimise",
+    "optimized": "optimised",
+    "analyze": "analyse",
+    "analyzed": "analysed",
+    "color": "colour",
+    "colors": "colours",
+    "center": "centre",
+    "organization": "organisation",
+    "catalog": "catalogue",
+    "behavior": "behaviour",
+    "favorite": "favourite",
+    "defense": "defence",
+    "jewelry": "jewellery"
   },
-
   "placeholders": [
-    { "token": "[YOUR EMAIL]", "where": "Contact footer and the brief composer", "owner": "Replace with the house address." }
+    {
+      "token": "[YOUR EMAIL]",
+      "where": "Contact footer and the brief composer",
+      "owner": "Replace with the house address."
+    }
   ],
-
   "unconfirmed": [
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
-    "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording."
+    "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
+    "Film links and durations (0:40, 0:40, 0:36) could not be checked against YouTube from the build sandbox; confirm each link plays the right wing."
   ],
-
   "conflicts": [
-    { "topic": "Arca field label", "site": "Art & collections", "figma": "Art & Artifacts", "decision": "Site wording kept (approved landing copy); confirm with the owner." }
+    {
+      "topic": "Arca field label",
+      "site": "Art & collections",
+      "figma": "Art & Artifacts",
+      "decision": "Site wording kept (approved landing copy); confirm with the owner."
+    }
   ],
-
   "media": {
-    "machina-loop.jpg":   { "alt": "", "role": "loop poster", "rights": "own" },
-    "hortus-loop.jpg":    { "alt": "", "role": "loop poster", "rights": "own" },
-    "arca-loop.jpg":      { "alt": "", "role": "loop poster", "rights": "check", "note": "Shows the Frazetta painting (sealed grey)." },
-    "machina-film.jpg":   { "alt": "", "role": "film poster", "rights": "own" },
-    "hortus-film.jpg":    { "alt": "", "role": "film poster", "rights": "own" },
-    "arca-film.jpg":      { "alt": "", "role": "film poster", "rights": "check", "note": "Shows the Frazetta painting." },
-    "machina-rig.jpg":    { "alt": "The wide view of the eight-GPU rig with its cooling fans lit", "role": "still", "rights": "own" },
-    "machina-memory.jpg": { "alt": "Close-up of memory modules on the motherboard", "role": "still", "rights": "own" },
-    "machina-power.jpg":  { "alt": "The Corsair HX1500i power supply among cables", "role": "still", "rights": "own" },
-    "hortus-feeding.jpg": { "alt": "Five peristaltic dosing pumps on a white control panel", "role": "still", "rights": "own" },
-    "hortus-plants.jpg":  { "alt": "A medical plant photographed against black", "role": "still", "rights": "own" },
-    "hortus-cnc.jpg":     { "alt": "A CNC spindle milling a block, chips flying", "role": "still", "rights": "own" },
-    "arca-salon.jpg":     { "alt": "A private salon with old master paintings, sculpture and sofas", "role": "still", "rights": "check", "note": "Third-party photograph." },
-    "arca-necklace.jpg":  { "alt": "The jewelled Necklace of San Gennaro on black", "role": "still", "rights": "check", "note": "Museum photograph." },
-    "arca-helmet.jpg":    { "alt": "The Sutton Hoo helmet on display", "role": "still", "rights": "check", "note": "Museum photograph." }
+    "machina-loop.jpg": {
+      "alt": "",
+      "role": "loop poster",
+      "rights": "own"
+    },
+    "hortus-loop.jpg": {
+      "alt": "",
+      "role": "loop poster",
+      "rights": "own"
+    },
+    "arca-loop.jpg": {
+      "alt": "",
+      "role": "loop poster (first frame of the Arca loop, sealed)",
+      "rights": "check",
+      "note": "Shows the Frazetta painting."
+    },
+    "machina-film.jpg": {
+      "alt": "",
+      "role": "film poster",
+      "rights": "own"
+    },
+    "hortus-film.jpg": {
+      "alt": "",
+      "role": "film poster",
+      "rights": "own"
+    },
+    "arca-film.jpg": {
+      "alt": "",
+      "role": "film poster",
+      "rights": "check",
+      "note": "Shows the Frazetta painting."
+    },
+    "machina-rig.jpg": {
+      "alt": "The wide view of the eight-GPU rig with its cooling fans lit",
+      "role": "still",
+      "rights": "own"
+    },
+    "machina-memory.jpg": {
+      "alt": "Close-up of memory modules on the motherboard",
+      "role": "still",
+      "rights": "own"
+    },
+    "machina-power.jpg": {
+      "alt": "The Corsair HX1500i power supply among cables",
+      "role": "still",
+      "rights": "own"
+    },
+    "hortus-feeding.jpg": {
+      "alt": "Five peristaltic dosing pumps on a white control panel",
+      "role": "still",
+      "rights": "own"
+    },
+    "hortus-plants.jpg": {
+      "alt": "A medical plant photographed against black",
+      "role": "still",
+      "rights": "own"
+    },
+    "hortus-cnc.jpg": {
+      "alt": "A CNC spindle milling a block, chips flying",
+      "role": "still",
+      "rights": "own"
+    },
+    "arca-salon.jpg": {
+      "alt": "A private salon with old master paintings, sculpture and sofas",
+      "role": "still",
+      "rights": "check",
+      "note": "Third-party photograph."
+    },
+    "arca-necklace.jpg": {
+      "alt": "The jewelled Necklace of San Gennaro on black",
+      "role": "still",
+      "rights": "check",
+      "note": "Museum photograph."
+    },
+    "arca-helmet.jpg": {
+      "alt": "The Sutton Hoo helmet on display",
+      "role": "still",
+      "rights": "check",
+      "note": "Museum photograph."
+    },
+    "arca-loop.mp4": {
+      "alt": "",
+      "role": "loop: sealed, magenta sweep, open, resealed (5 s, from the owner's GIF preview)",
+      "rights": "check",
+      "note": "Shows the Frazetta painting."
+    },
+    "arca-loop.webm": {
+      "alt": "",
+      "role": "VP9 twin of arca-loop.mp4",
+      "rights": "check",
+      "note": "Shows the Frazetta painting."
+    }
   },
-
   "videos": {
-    "$note": "Loops (600 x 826, 25 fps, 5.12 s, under 1.2 MB) and films (1080p web encodes, 13 to 15 MB) lived in the old artifact's asset store, which this account cannot reach. Re-upload them and fill site/media.json.",
-    "loops": ["machina", "hortus", "arca"],
-    "films": ["machina", "hortus", "arca"]
+    "$note": "Wing names whose loop or film the site may reference (read by the brand check, R12). Sources are in videoSources.",
+    "loops": [
+      "machina",
+      "hortus",
+      "arca"
+    ],
+    "films": [
+      "machina",
+      "hortus",
+      "arca"
+    ]
+  },
+  "videoSources": {
+    "$note": "Loops come from the owner's GIF previews via tools/media/gif_to_loop.py. Films are on YouTube; durations are the ledger's, not yet checked against the uploads.",
+    "loops": {
+      "arca": "site/media/arca-loop.mp4 + .webm",
+      "machina": "waiting for the GIF (it arrived as a still)",
+      "hortus": "waiting for the GIF (it arrived as a still)"
+    },
+    "films": {
+      "machina": "https://www.youtube.com/watch?v=hWzvRWBzQFQ",
+      "hortus": "https://www.youtube.com/watch?v=61uIUCtCN6k",
+      "arca": "https://www.youtube.com/watch?v=3GHNW57yH4Y"
+    }
   }
 }
