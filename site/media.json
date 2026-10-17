@@ -1,11 +1,12 @@
 {
-  "$note": "Loops play muted inside the wing arches (3:4, made with tools/media/gif_to_loop.py, an MP4 and a WebM twin); null keeps the poster. Films live on YouTube: links everywhere, played in place on the web build only (Artifacts cannot embed other sites).",
+  "$note": "Loops play muted inside the wing arches (3:4, made with tools/media/gif_to_loop.py, an MP4 and a WebM twin); null keeps the poster. \"hold\" (seconds) is where a loop rests after playing once per visit (WCAG 2.2.2); without it the loop rests on its last frame. Films live on YouTube: links everywhere, played in place on the web build only (Artifacts cannot embed other sites).",
   "loops": {
     "machina": null,
     "hortus": null,
     "arca": {
       "mp4": "media/arca-loop.mp4",
-      "webm": "media/arca-loop.webm"
+      "webm": "media/arca-loop.webm",
+      "hold": 3.6
     }
   },
   "films": {

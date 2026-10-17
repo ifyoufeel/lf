@@ -51,6 +51,38 @@ def even(n):
     return n - (n % 2)
 
 
+def frames_luma(gif):
+    """Every frame as a luma array (numpy), for measuring rows and corners."""
+    import numpy as np
+    im = Image.open(gif)
+    out = []
+    for i in range(getattr(im, 'n_frames', 1)):
+        im.seek(i)
+        out.append(np.asarray(im.convert('L'), dtype=np.float32))
+    return np.stack(out)
+
+
+def is_rectangle(luma, box):
+    """An arch window leaves its top corners on the canvas; a rectangular one fills them."""
+    x0, y0, x1, y1 = box
+    k = max(3, (x1 - x0) // 12)
+    corners = luma[:, y0 + 2:y0 + k, x0 + 2:x0 + k].max(), luma[:, y0 + 2:y0 + k, x1 - k:x1 - 2].max()
+    return min(corners) > 30
+
+
+def trim_dark_rows(luma, box, floor=28):
+    """Drop letterbox bars: rows whose brightest frame stays near black across most of the width."""
+    import numpy as np
+    x0, y0, x1, y1 = box
+    rows = np.percentile(luma[:, y0:y1, x0:x1], 85, axis=2).max(axis=0)
+    top, bot = 0, len(rows)
+    while top < bot and rows[top] < floor:
+        top += 1
+    while bot > top and rows[bot - 1] < floor:
+        bot -= 1
+    return (x0, y0 + top, x1, y0 + bot)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('gif')
@@ -59,12 +91,20 @@ def main():
     ap.add_argument('--anchor', choices=['center', 'bottom'], default='center', help='which part to keep when trimming to 3:4')
     ap.add_argument('--aspect', type=float, default=0.75, help='width / height of the holder (.wing .arch is 3:4)')
     ap.add_argument('--scale', type=int, default=2)
+    ap.add_argument('--keep-bars', action='store_true', help='keep letterbox bars inside a rectangular window')
     a = ap.parse_args()
 
     (x0, y0, x1, y1), frames = window_box(a.gif)
     iw, ih = x1 - x0, y1 - y0
     dx, dy = round(iw * a.inset), round(ih * a.inset)
     cx, cy, cw, ch = x0 + dx, y0 + dy, even(iw - 2 * dx), even(ih - 2 * dy)
+    luma = frames_luma(a.gif)
+    if not a.keep_bars and is_rectangle(luma, (x0, y0, x1, y1)):
+        # A rectangular window (Arca's vitrine) may letterbox its picture; the arch should show picture to its base.
+        tx0, ty0, tx1, ty1 = trim_dark_rows(luma, (cx, cy, cx + cw, cy + ch))
+        if (ty0, ty1) != (cy, cy + ch):
+            print(f'trimmed letterbox rows: {ty0 - cy} at the top, {cy + ch - ty1} at the foot')
+        cy, ch = ty0, even(ty1 - ty0)
     if cw / ch < a.aspect:  # taller than the holder: trim height
         nh = even(round(cw / a.aspect))
         cy += (ch - nh) if a.anchor == 'bottom' else (ch - nh) // 2

@@ -43,6 +43,9 @@
   const COLORS = { machina: rgb('--machina'), hortus: rgb('--hortus'), arca: rgb('--arca'), paper: rgb('--paper') };
 
   /* ---------------- live stipple plates: the brand naves, alive ---------------- */
+  // They twinkle for 5 s after they appear or the pointer moves, then hold still (WCAG 2.2.2), and wake under the cursor.
+  let liveUntil = 0;
+  const twinkling = () => !RM && performance.now() < liveUntil;
   class Plate {
     constructor(cv) {
       this.cv = cv;
@@ -100,7 +103,7 @@
     draw() {
       if (!this.ready) return;
       const { gw, gh, lit, lum, mask, holes } = this, data = this.img.data, n = gw * gh;
-      if (!RM) for (let k = 0, m = (n * 0.05) | 0; k < m; k++) { const i = (Math.random() * n) | 0; lit[i] = Math.random(); lum[i] = Math.random(); }
+      if (twinkling()) for (let k = 0, m = (n * 0.05) | 0; k < m; k++) { const i = (Math.random() * n) | 0; lit[i] = Math.random(); lum[i] = Math.random(); }
       const [cr, cg, cb] = this.col, [br, bg, bb] = BASE, px = this.px, py = this.py, rad2 = Math.pow(gw * 0.24, 2);
       const dev = this.dev, hor = this.hor;
       for (let y = 0, i = 0; y < gh; y++) {
@@ -121,22 +124,32 @@
     const p = plates.find((x) => x.cv === e.target);
     if (!p) return;
     p.visible = e.isIntersecting;
-    if (e.isIntersecting) { if (!p.ready) p.build(); p.start(); }
+    if (e.isIntersecting) { if (!p.ready) p.build(); p.start(); wake(); }
   }), { threshold: 0.2 });
   plates.forEach((p) => pio.observe(p.cv));
-  let last = 0;
+  // The draw loop runs only while a plate is visible and awake, so an idle page does no work.
+  let last = 0, looping = false;
   const loop = (t) => {
-    if (t - last > 90) { last = t; plates.forEach((p) => { if (p.visible && !document.hidden) p.draw(); }); }
+    const vis = plates.filter((p) => p.visible && p.ready);
+    if (!vis.length || document.hidden || performance.now() > liveUntil + 200) { looping = false; return; }
+    if (t - last > 90) { last = t; vis.forEach((p) => p.draw()); }
     requestAnimationFrame(loop);
   };
-  if (!RM) requestAnimationFrame(loop);
+  function wake() {
+    if (RM) return;
+    liveUntil = performance.now() + 5000;
+    if (!looping) { looping = true; requestAnimationFrame(loop); }
+  }
   addEventListener('pointermove', (e) => {
+    let near = false;
     plates.forEach((p) => {
       if (!p.visible || !p.ready) return;
       const r = p.cv.getBoundingClientRect();
       p.px = (e.clientX - r.left) / r.width * p.gw;
       p.py = (e.clientY - r.top) / r.height * p.gh;
+      near = true;
     });
+    if (near) wake();
   }, { passive: true });
   let rz;
   addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => plates.forEach((p) => p.build()), 200); });
@@ -183,9 +196,20 @@
     };
     requestAnimationFrame(step);
   }
+  // A loop plays once each time its screen becomes active and holds on media.json's "hold" frame (or its last).
+  $$('video.lp').forEach((v) => {
+    v.loop = false;
+    const hold = Number((LOOPS[v.dataset.loop] || {}).hold) || 0;
+    if (!hold) return;
+    const check = () => { if (v.currentTime >= hold) v.pause(); else if (!v.paused && v.requestVideoFrameCallback) v.requestVideoFrameCallback(check); };
+    v.addEventListener('play', check);
+    v.addEventListener('timeupdate', check);
+  });
   function activate(view, secs, i) {
     const s = secs[i];
     if (!s) return;
+    const fresh = view._active !== s;
+    view._active = s;
     s.classList.add('in');
     document.body.dataset.wing = s.dataset.wing || view.dataset.wing || '';
     $$('button', dotsNav).forEach((b, j) => b.setAttribute('aria-current', j === i ? 'true' : 'false'));
@@ -193,7 +217,7 @@
     $$('video.lp', view).forEach((v) => {
       if (s.contains(v) && !RM && loopSrc(v.dataset.loop)) {
         if (!v.src) v.src = loopSrc(v.dataset.loop);
-        v.play().catch(() => {});
+        if (fresh) { v.currentTime = 0; v.play().catch(() => {}); }
       } else { v.pause(); }
     });
     resetFrames(s);
@@ -226,26 +250,33 @@
     const el = document.getElementById(id);
     if (el && views.home.contains(el)) el.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' });
   }
+  let want = null, swapT = 0, offT = 0;
   function swap(k) {
+    if (views[cur]) views[cur]._y = views[cur].scrollTop;
+    if (dlg.open) closeReel();
     Object.entries(views).forEach(([n, v]) => { v.hidden = n !== k; });
     $$('video').forEach((v) => { if (!v.paused) v.pause(); });
     resetFrames(null);
     cur = k;
     document.title = TITLES[k];
     const v = views[k];
-    if (!pendingAnchor) v.scrollTop = 0;
+    // Back to the house returns to the screen the visitor left; a case always opens at its cover.
+    if (!pendingAnchor) v.scrollTop = (k === 'home' && v._y) || 0;
     setup(v);
     plates.forEach((p) => { if (v.contains(p.cv) && !p.ready) p.build(); });
     v.focus({ preventScroll: true });
     if (pendingAnchor) { const a = pendingAnchor; pendingAnchor = null; requestAnimationFrame(() => scrollToId(a)); }
   }
   function show(k) {
-    if (k === cur) { if (pendingAnchor) { const a = pendingAnchor; pendingAnchor = null; scrollToId(a); } return; }
-    if (cur === null || RM) { swap(k); return; }
+    // One route can be pending under the curtain; a newer one replaces it, so the URL and the view never part.
+    if (k === (want ?? cur)) { if (want === null && pendingAnchor) { const a = pendingAnchor; pendingAnchor = null; scrollToId(a); } return; }
+    clearTimeout(swapT); clearTimeout(offT);
+    if (cur === null || RM) { want = null; swap(k); return; }
+    want = k;
     const c = $('.curtain');
     c.classList.remove('on'); void c.offsetWidth; c.classList.add('on');
-    setTimeout(() => swap(k), 380);
-    setTimeout(() => c.classList.remove('on'), 950);
+    swapT = setTimeout(() => { want = null; swap(k); }, 380);
+    offT = setTimeout(() => c.classList.remove('on'), 950);
   }
   function route() {
     // "#/machina" inside the page; plain "#machina" also works, because an Artifact link only passes plain anchors.
@@ -253,6 +284,7 @@
     show(m ? m[1] : 'home');
   }
   document.addEventListener('click', (e) => {
+    if (e.target.closest('.skip')) { e.preventDefault(); views[cur].focus({ preventScroll: true }); return; }
     const go = e.target.closest('[data-go]');
     if (go) {
       e.preventDefault();
@@ -280,6 +312,8 @@
     slot.replaceChildren(filmFrame(k));
     dlg.setAttribute('aria-label', (NAMES[k] || 'lastfomo') + ' film');
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    // Start on Close, not inside the cross-origin player, so Escape (handled by the page) closes the dialog.
+    $('#reel-x').focus();
   }
   function closeReel() { if (dlg.open) dlg.close(); else { dlg.removeAttribute('open'); dlg.dispatchEvent(new Event('close')); } }
   $('#reel-x').addEventListener('click', closeReel);
@@ -290,14 +324,19 @@
   /* ---------------- the plus cursor ---------------- */
   if (FINE && !RM) {
     const c = $('.cur');
-    let x = -100, y = -100, tx = -100, ty = -100;
+    let x = -100, y = -100, tx = -100, ty = -100, following = false;
+    // Eases toward the pointer and stops once it arrives, so a still pointer costs nothing.
+    const follow = () => {
+      x += (tx - x) * 0.22; y += (ty - y) * 0.22;
+      c.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+      if (Math.abs(tx - x) + Math.abs(ty - y) > 0.3) requestAnimationFrame(follow); else following = false;
+    };
     addEventListener('pointermove', (e) => {
       tx = e.clientX; ty = e.clientY; c.style.opacity = '1';
       c.classList.toggle('hot', !!e.target.closest('a,button,[data-play],[data-go]'));
+      if (!following) { following = true; requestAnimationFrame(follow); }
     }, { passive: true });
     document.addEventListener('pointerleave', () => { c.style.opacity = '0'; });
-    const follow = () => { x += (tx - x) * 0.22; y += (ty - y) * 0.22; c.style.transform = 'translate(' + x + 'px,' + y + 'px)'; requestAnimationFrame(follow); };
-    requestAnimationFrame(follow);
   }
 
   /* ---------------- theme: follow the viewer, or Night / Day by choice ---------------- */

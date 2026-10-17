@@ -65,6 +65,9 @@ for (const m of html.matchAll(/<a\b[^>]*\bdata-play="(\w+)"[^>]*>/g)) {
   if (!/target="_blank"/.test(m[0]) || !/rel="noopener"/.test(m[0])) fail(`play control for "${k}" must open a new tab (target="_blank" rel="noopener")`);
 }
 const local = (v) => typeof v === 'string' && !/^https?:/.test(v);
+// Every in-page jump lands somewhere: data-go and data-scroll name an id that exists.
+const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
+for (const m of html.matchAll(/\bdata-(go|scroll)="([^"]+)"/g)) if (!ids.has(m[2])) fail(`data-${m[1]}="${m[2]}" points at no element (no id="${m[2]}" in site/index.html)`);
 const loopFiles = Object.values(media.loops).flatMap((v) => (v && typeof v === 'object' ? Object.values(v) : [v])).filter(local);
 for (const f of loopFiles) if (!existsSync(P('site', f))) fail(`missing loop ${f}`);
 const webHtml = withManifest(html, { loops: media.loops, films: media.films, embed: true });

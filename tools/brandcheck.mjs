@@ -32,7 +32,7 @@ export const RULES = {
   R2: { id: 'colour-literals', title: 'Colours come from tokens' },
   R3: { id: 'token-values', title: 'Token colours match brand/tokens.json' },
   R4: { id: 'one-wing-per-composition', title: 'One wing colour per composition' },
-  R5: { id: 'house-trio-order', title: 'The house trio runs hortus, machina, arca' },
+  R5: { id: 'house-trio-order', title: 'The house trio runs hortus, machina, arca, in .naves and in any row of all three wings' },
   R6: { id: 'facts-ledger', title: 'Every number is in the facts ledger' },
   R7: { id: 'banned-copy', title: 'Banned copy' },
   R8: { id: 'typographic-punctuation', title: 'Typographic punctuation' },
@@ -1110,17 +1110,20 @@ export function check(options = {}) {
   }
 
   /* ---- R5 house-trio-order ---- */
-  for (const naves of html.all) {
-    if (!hasClass(naves, 'naves')) continue;
-    let kids = naves.children.filter((c) => c.type === 'el' && wingOf(c));
-    if (!kids.length) {
-      kids = [];
-      for (const d of descendants(naves)) if (wingOf(d) && !kids.some((k) => wingOf(k) && isAncestor(k, d))) kids.push(d);
+  // .naves always, and any other row whose direct children carry all three wings (film cards, wing pills).
+  // Stacked screens (.screen) and whole pages (main.view) are the page's narrative, not a left-to-right trio, so they are exempt.
+  for (const row of html.all) {
+    const isNaves = hasClass(row, 'naves');
+    let kids = (row.children || []).filter((c) => c.type === 'el' && wingOf(c) && !hasClass(c, 'screen') && !hasClass(c, 'view'));
+    if (isNaves && !kids.length) {
+      for (const d of descendants(row)) if (wingOf(d) && !kids.some((k) => wingOf(k) && isAncestor(k, d))) kids.push(d);
     }
     const seq = kids.map(wingOf);
+    if (!isNaves && !TRIO_ORDER.every((w) => seq.includes(w))) continue;
     const sorted = [...seq].sort((a, b) => TRIO_ORDER.indexOf(a) - TRIO_ORDER.indexOf(b));
     if (seq.join() !== sorted.join()) {
-      F.error('R5', `.naves runs ${seq.join(', ')}. The house trio runs hortus, machina, arca.`, hfile.display, hline(naves));
+      const label = isNaves ? '.naves' : `<${row.name}${row.attrs.class ? ` class="${row.attrs.class}"` : ''}>`;
+      F.error('R5', `${label} runs ${seq.join(', ')}. The house trio runs hortus, machina, arca.`, hfile.display, hline(row));
     }
   }
 

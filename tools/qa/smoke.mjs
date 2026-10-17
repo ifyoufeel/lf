@@ -227,6 +227,65 @@ await step('film: Close shuts dialog#reel', async () => {
   return 'closed, player removed';
 });
 
+await step('film: Escape closes dialog#reel', async () => {
+  if (!embeds) throw new Skip('Artifact build links out; there is no in-page player');
+  await go('#/', homeView);
+  const card = page.locator(`main.view[data-view="${homeView}"] a.film[data-play]`).first();
+  await bringIntoView(card);
+  await card.focus();
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => document.querySelector('dialog#reel').open, null, { timeout: 3000 })
+    .catch(() => { throw new Error('dialog#reel did not open from the keyboard'); });
+  const first = await page.evaluate(() => document.activeElement && (document.activeElement.id || document.activeElement.tagName));
+  check(first === 'reel-x', `focus opened on ${first}, not the Close button`);
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('dialog#reel').open, null, { timeout: 3000 })
+    .catch(() => { throw new Error('Escape did not close dialog#reel'); });
+  const back = await page.evaluate(() => document.activeElement && document.activeElement.matches('a.film[data-play]'));
+  check(back, 'focus did not return to the film card');
+  return 'focus on Close, Escape closes, focus returns';
+});
+
+await step('nav: See the work lands on a wing', async () => {
+  await go('#/', homeView);
+  await page.evaluate(() => { const v = document.querySelector('main.view:not([hidden])'); v.style.scrollBehavior = 'auto'; v.scrollTop = 0; });
+  await page.locator(`main.view[data-view="${homeView}"] a[data-go]`, { hasText: /see the work/i }).first().click();
+  await page.waitForTimeout(1600);
+  const at = await page.evaluate(() => { const v = document.querySelector('main.view:not([hidden])'); const s = [...v.querySelectorAll('section.screen')].find((x) => Math.abs(x.offsetTop - v.scrollTop) < 4); return s ? (s.dataset.wing || s.id || '') : 'between screens'; });
+  check(at === 'machina', `"See the work" stopped at ${at || 'no screen'}`);
+  return 'Machina';
+});
+
+await step('nav: Skip to content moves focus into the view', async () => {
+  await go('#/machina', 'machina');
+  await page.waitForTimeout(400);
+  await page.evaluate(() => document.querySelector('a.skip').focus());
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(300);
+  const r = await page.evaluate(() => ({ hash: location.hash, focus: document.activeElement && document.activeElement.id }));
+  check(r.hash === '#/machina', `the skip link changed the route to ${r.hash}`);
+  check(r.focus === 'view-machina', `focus went to ${r.focus || 'nothing'}`);
+  return 'focus on #view-machina, route kept';
+});
+
+await step('motion: plates and the Arca loop come to rest', async () => {
+  await go('#/', homeView);
+  await page.evaluate(() => { const v = document.querySelector('main.view:not([hidden])'); v.style.scrollBehavior = 'auto'; v.scrollTop = 0; });
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(6500);
+  const hash = () => page.evaluate(() => [...document.querySelectorAll('.hero canvas.plate')].map((c) => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let h = 0; for (let i = 0; i < d.length; i += 97) h = (h * 31 + d[i]) | 0; return h; }).join());
+  const a = await hash(); await page.waitForTimeout(600); const b = await hash();
+  check(a === b, 'the hero plates still change 6 s after the pointer stopped');
+  const loop = await page.evaluate(async () => {
+    const v = document.querySelector('#view-home'); v.scrollTop = document.getElementById('arca').offsetTop;
+    await new Promise((r) => setTimeout(r, 6500));
+    const el = document.querySelector('video[data-loop="arca"]');
+    return el ? { paused: el.paused, t: +el.currentTime.toFixed(2), src: !!el.currentSrc } : null;
+  });
+  if (loop && loop.src) check(loop.paused && loop.t > 3 && loop.t < 4.5, `the Arca loop did not rest on its open frame (paused ${loop.paused}, t ${loop.t})`);
+  return `plates still; Arca loop ${loop && loop.src ? 'rests at ' + loop.t + ' s' : 'not loaded'}`;
+});
+
 const brief = {
   name: 'Smoke Test',
   email: 'qa@example.com',

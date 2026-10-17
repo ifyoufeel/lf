@@ -298,7 +298,8 @@
   "unconfirmed": [
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
-    "Film links and durations (0:40, 0:40, 0:36) could not be checked against YouTube from the build sandbox; confirm each link plays the right wing."
+    "Film links and durations (0:40, 0:40, 0:36) could not be checked against YouTube from the build sandbox; confirm each link plays the right wing.",
+    "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording."
   ],
   "conflicts": [
     {
@@ -306,6 +307,24 @@
       "site": "Art & collections",
       "figma": "Art & Artifacts",
       "decision": "Site wording kept (approved landing copy); confirm with the owner."
+    },
+    {
+      "topic": "Label weight",
+      "site": "Geist Mono Medium 500, tracked .1em to .14em (tokens.json, brand.md, the shipped page)",
+      "figma": "Label/S and Label/M are Geist Mono Regular 400 at 8 to 10% tracking; only Label/L (14 px buttons) is Medium",
+      "decision": "Site kept, as the owner prefers the shipped look; confirm."
+    },
+    {
+      "topic": "Machina stills colour",
+      "site": "machina-rig, machina-memory and machina-power carry violet, magenta and green, no chartreuse",
+      "figma": "Rule 3: the wing colour is the only saturated colour; grade footage to about 0.45 saturation",
+      "decision": "Inherited from the shipped page; grade the three stills only with the owner's approval."
+    },
+    {
+      "topic": "Arca film poster shape",
+      "site": "arca-film.jpg (the YouTube thumbnail) frames the painting in a rectangle beside two arched posters",
+      "figma": "Rule 8: every wing uses the arch holder",
+      "decision": "Inherited; re-export the thumbnail with the arch window if the owner wants consistency."
     }
   ],
   "media": {
