@@ -12,7 +12,7 @@ Research date: 17 October 2026. Every price below is as seen on that date. `verc
 |---|---|---|
 | Where the site lives now | The claude.ai Artifact built from `dist/artifact/lastfomo.html`, videos in its asset store | included in the owner’s claude.ai plan |
 | Where it lives later | Vercel, plan **Pro** (the site is commercial), framework preset “Other”, `vercel.json` in this repo | $20 per seat (*reported*) |
-| Where the six videos live later | **Vercel Blob**, one public store, versioned file names | $0 at launch scale; within the Pro allowance |
+| Where the videos live | Loops: small MP4 and WebM files in `site/media/`, as the build already does. Films: YouTube now (links in the Artifact, a privacy-enhanced embed on click in the web build); **Vercel Blob** if the films should leave YouTube | $0 at launch scale; Blob within the Pro allowance |
 | How “Send the brief” works later | A zero-dependency Vercel Function that sends the brief by email through Resend; the copy and mailto fallback stays | $0 on Resend Free |
 | Analytics | None at launch, or Vercel Web Analytics (cookieless). Never a third-party tracker. | $0 on Hobby; about $0.03 per 1,000 events on Pro |
 | Fonts | Google Fonts at launch (the CSP allows only them); self-host them on the web build soon after | $0 |
@@ -24,22 +24,28 @@ Research date: 17 October 2026. Every price below is as seen on that date. `verc
 - A page at `claude.ai/artifact/<id>`, private by default, shared by link.
 - The page is a fragment. claude.ai wraps it in its own document skeleton, so our `<head>` tags do not become the document head.
 - Scripts load only from cdnjs, jsDelivr, unpkg, the Tailwind CDN and code.jquery.com. Stylesheets load only from Google Fonts. Everything else is inline.
-- 16 MB per page. Supporting files up to 15 MB each. An asset store for media, served at root-relative `/_blob/<id>` URLs, with a 20 MiB cap per video (the `assets` type definitions of the Artifact runtime, contract 0.2.84). The films (13 to 15 MB) fit the asset store; they sit at the edge of the 15 MB supporting-file limit, so the asset store is the right home.
-- What it cannot do: `mailto:` links are unreliable inside the frame, forms cannot submit anywhere, there is no custom domain, no response headers of our own, no analytics, and no control over link previews.
+- 16 MB per page. Supporting files up to 15 MB each. An asset store for media, served at root-relative `/_blob/<id>` URLs, with a 20 MiB cap per video (the `assets` type definitions of the Artifact runtime, contract 0.2.84).
+- What it cannot do: `mailto:` links are unreliable inside the frame, forms cannot submit anywhere, other sites cannot be embedded, there is no custom domain, no response headers of our own, no analytics, and no control over link previews.
 
-The page already handles this. Routing uses hash routes, and plain anchors (`#machina`) also work, because an Artifact link passes only plain anchors (`site/main.js`, `route()`). The brief composer shows the brief with a copy button whenever there is no address, and opens the mail app only when one is set.
+The page and the build already handle this:
+
+- Routing uses hash routes, and plain anchors (`#machina`) also work, because an Artifact link passes only plain anchors (`site/main.js`, `route()`).
+- The loops are small (the Arca loop is 151 KB as MP4, 45 KB as WebM), so the build inlines them into the Artifact as data URIs. No upload.
+- The films are on YouTube. In the Artifact every play control is a plain link that opens YouTube in a new tab; the web build plays the same film in place (`site/media.json` → `films`, `embed: false` for the Artifact).
+- The brief composer shows the brief with a copy button whenever there is no address, and opens the mail app only when one is set.
 
 ### Steps
 
-1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 1 MB today, the stills inlined as data URIs, far below 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
-2. Publish with the Artifact tool: `file_path` `dist/artifact/lastfomo.html`, `capabilities: {"assets": {}}` (the tool uploads media only to a page that declares `assets`), a one-word icon. Keep the returned URL.
-3. Upload the six MP4s in one call: the same `url`, `asset: true`, `file_paths` with the three loops and three films. Each result returns an `id` and a `url` of the form `/_blob/<id>`.
-4. Write those six URLs into the Artifact’s media manifest (see *Two manifests* below), rebuild, and republish to the same URL with the same `file_path`. Never publish to a new path: that creates a new link.
-5. Share the link. Name the open items in the message: `[YOUR EMAIL]`, the unconfirmed wording, and the rights checks for the Frazetta painting and the museum photographs.
+1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 1 MB with the stills inlined, plus a few hundred KB for each inlined loop; the limit is 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
+2. Publish with the Artifact tool: `file_path` `dist/artifact/lastfomo.html` and a one-word icon. Keep the returned URL.
+3. For every later change, rebuild and republish with the same `file_path`, which keeps the same URL. A new path creates a new link.
+4. Share the link. Name the open items in the message: `[YOUR EMAIL]`, any loop still missing (the build names them; their posters stand in), the unconfirmed wording, and the rights checks for the Frazetta painting and the museum photographs.
 
-### The old Artifact
+### If the films should play inside the Artifact
 
-The original page (`https://claude.ai/artifact/Ckgt4AxvQpeKTKaPFByNMx`) still references its videos in its own asset store:
+The Artifact cannot embed YouTube, but it can play its own files. Declare `capabilities: {"assets": {}}` on the publish (the tool uploads media only to a page that declares `assets`), upload the three film MP4s with `asset: true` and `file_paths`, and the results give `/_blob/<id>` URLs. Each film (13 to 15 MB) fits the 20 MiB asset cap; it sits at the edge of the 15 MB supporting-file limit, so the asset store is the right home. The build would then need an Artifact-only film URL beside the YouTube id, for example `"machina": { "youtube": "hWzvRWBzQFQ", "duration": "0:40", "artifact": "/_blob/<id>" }`. That is the orchestrator’s call: `tools/build.mjs` and the contract are theirs.
+
+The original page (`https://claude.ai/artifact/Ckgt4AxvQpeKTKaPFByNMx`) still references all six videos in its own asset store:
 
 | Video | Old asset URL |
 |---|---|
@@ -50,22 +56,7 @@ The original page (`https://claude.ai/artifact/Ckgt4AxvQpeKTKaPFByNMx`) still re
 | Hortus film | `/_blob/c4088dce44998cd1952520033d875a11` |
 | Arca film | `/_blob/bb9879d9b46963c1d8dd66c01287d6c5` |
 
-If the owner can open that Artifact as an editor, publishing the new build to it keeps the old link and the six videos without a re-upload: put these URLs in the Artifact manifest and publish with `url` set to the old Artifact. If not, step 2 above creates a new link and step 3 re-uploads the videos.
-
-### Two manifests
-
-`site/media.json` holds one URL per video today. The two targets need different ones: `/_blob/<id>` only resolves inside claude.ai, and a Vercel Blob URL is not guaranteed to load inside the Artifact frame. Proposal for the build (the orchestrator’s call, as `tools/build.mjs` and the contract are theirs): a value may be a string, used by both targets, or an object with one URL per target.
-
-```json
-{
-  "loops": {
-    "machina": {
-      "artifact": "/_blob/bf7188baf3ac4918affb6ad7ee6ed1fc",
-      "web": "https://<store>.public.blob.vercel-storage.com/video/machina-loop.v1.mp4"
-    }
-  }
-}
-```
+If the owner can open that Artifact as an editor, publishing the new build to it (`url` set to the old Artifact) keeps the old link, and those URLs keep working there without a re-upload. They resolve only inside that one Artifact.
 
 ## 2. Later: `dist/web` on Vercel
 
@@ -118,11 +109,11 @@ If neither holds, lower the media rule to `public, max-age=604800` (a week) befo
 
 | Header | Value | Note |
 |---|---|---|
-| `Content-Security-Policy` | see below | mirrors the Artifact allowlist: own files, Google Fonts, nothing else |
+| `Content-Security-Policy` | see below | mirrors the Artifact allowlist (own files, Google Fonts), plus the YouTube privacy-enhanced player for the films |
 | `Strict-Transport-Security` | `max-age=63072000` | two years; no `includeSubDomains` until every subdomain of `[DOMAIN]` is on HTTPS |
 | `X-Content-Type-Options` | `nosniff` | |
 | `X-Frame-Options` | `DENY` | for browsers that predate `frame-ancestors` |
-| `Referrer-Policy` | `same-origin` | no referrer leaves for other hosts, Google Fonts included |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | other hosts see the origin, never the path. Stricter values break the films: YouTube’s embedded player refuses to play without a referrer and shows “Error 153” ([Simon Willison, December 2025](https://simonwillison.net/2025/Dec/1/youtube-embed-153-error/)) |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()` | the page uses none of these; fullscreen and autoplay keep their defaults |
 | `Cross-Origin-Opener-Policy` | `same-origin` | |
 
@@ -136,7 +127,8 @@ style-src-elem 'self' https://fonts.googleapis.com;
 style-src-attr 'unsafe-inline';
 font-src https://fonts.gstatic.com;
 img-src 'self';
-media-src 'self' https://*.public.blob.vercel-storage.com;
+media-src 'self';
+frame-src https://www.youtube-nocookie.com;
 connect-src 'self';
 object-src 'none';
 base-uri 'none';
@@ -147,11 +139,12 @@ upgrade-insecure-requests
 
 - `script-src 'self'`: the web build keeps `boot.js` and `main.js` as files (“CSP-friendly: no inline script”, `tools/build.mjs`). The JSON manifest `<script type="application/json" id="lf-media">` is a data block, not a script, so the policy does not touch it. If the build ever inlines scripts into `dist/web` (as the contract’s wording suggests), add a `'sha256-…'` hash per inline script, computed by the build. Never add `'unsafe-inline'` to `script-src`.
 - Styles: stylesheet elements may come only from our files and Google Fonts (`style-src-elem`). The markup uses `style="--d:.35s"` attributes for reveal delays, and those need `style-src-attr 'unsafe-inline'` ([CSP Level 3](https://www.w3.org/TR/CSP3/#directive-style-src-attr)). `style-src` repeats both for browsers without the split directives.
-- `media-src` already allows Vercel Blob, so the videos can move there without a header change. Once the store exists, replace the wildcard with the store’s own host.
+- `media-src 'self'`: the loops are files in `media/`. If the films move to Vercel Blob (section 3), add the store’s own host here, for example `https://<store>.public.blob.vercel-storage.com`.
+- `frame-src https://www.youtube-nocookie.com`: the only frame the page may hold is the YouTube privacy-enhanced player, created when a visitor presses play (`site/main.js`, `filmFrame()`). `www.youtube.com` frames stay blocked. Links that open YouTube in a new tab are navigation and need nothing here. Drop the line if the films leave YouTube.
 - `connect-src 'self'` covers the brief endpoint (`/api/brief`). Vercel Web Analytics loads its script from a path on the site’s own origin ([quickstart](https://vercel.com/docs/analytics/quickstart)); confirm on the first preview that its reports go there too, as the browser console names any host the policy blocks.
 - The policy has to travel as a header: `frame-ancestors` is ignored in a `<meta>` policy ([CSP Level 3](https://www.w3.org/TR/CSP3/#meta-element)).
 
-**Tested.** A local server served `site/` and `dist/web/` with exactly these headers, and Chromium walked every route, sent the brief through the composer and loaded all four brand fonts from Google Fonts. Zero CSP violations. Probes confirmed the policy bites: a video from a Blob host loaded, while an inline script, a foreign script, a foreign video and a foreign `fetch` were all blocked.
+**Tested.** A local server served the page with exactly these headers, and Chromium walked every route, loaded all four brand fonts from Google Fonts, sent the brief through the composer, played the Arca loop from `media/`, and opened a film both in the player dialog and in place on a case page. Zero CSP violations, and each YouTube request carried a referrer. Probes confirmed the policy bites: an inline script, a foreign script, a foreign video, a foreign `fetch` and a `www.youtube.com` frame were all blocked.
 
 The Vercel Toolbar on preview deployments needs `vercel.live` in five directives ([toolbar and CSP](https://vercel.com/docs/vercel-toolbar/managing-toolbar)). This policy leaves it out, so the toolbar stays off on previews. Turn the toolbar off for the project rather than widen the policy.
 

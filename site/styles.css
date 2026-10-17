@@ -31,7 +31,9 @@ img,video,canvas{max-width:100%}
 .dots button{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;gap:10px;height:28px;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
 .dots button i{display:block;width:16px;height:1px;background:currentColor;transition:width var(--glide) var(--ease),background var(--glide)}
 .dots button span{opacity:0;transform:translateX(6px);transition:opacity .2s,transform var(--glide) var(--ease);white-space:nowrap}
-.dots button:hover span,.dots button[aria-current="true"] span{opacity:1;transform:none}
+.dots button:hover span,.dots button:focus-visible span{opacity:1;transform:none}
+/* The active label stays on only where it clears the 1320 px content column (1320 + 2 × 187 px of index). */
+@media (min-width:1720px){.dots button[aria-current="true"] span{opacity:1;transform:none}}
 .dots button[aria-current="true"]{color:var(--fg)}
 .dots button[aria-current="true"] i{width:34px;background:var(--wing)}
 .dots button:focus-visible{outline:2px solid var(--wing-t);outline-offset:2px}

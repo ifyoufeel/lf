@@ -190,28 +190,41 @@ await step('header: Start a project', async () => {
 }
 
 let reelOpened = false;
+let embeds = true;
 await step('film: Play opens dialog#reel', async () => {
   await go('#/', homeView);
   check(await page.locator('dialog#reel').count(), 'dialog#reel is missing');
-  const btn = page.locator(`main.view[data-view="${homeView}"] button`, { hasText: /play the film/i }).first();
-  check(await btn.count(), 'no "Play the film" button on #/');
+  // Play controls are links to the film (site/media.json → films). The web build plays them in place;
+  // an Artifact (manifest "embed": false) lets the link open YouTube in a new tab instead.
+  embeds = await page.evaluate(() => { try { return JSON.parse(document.querySelector('#lf-media').textContent).embed !== false; } catch { return true; } });
+  const btn = page.locator(`main.view[data-view="${homeView}"] [data-play]`, { hasText: /play the film/i }).first();
+  check(await btn.count(), 'no "Play the film" control on #/');
+  const href = await btn.getAttribute('href');
+  check(/^https:\/\/www\.youtube\.com\/watch\?v=[\w-]{11}$/.test(href || ''), `"Play the film" links to ${href}, not a YouTube film`);
+  check(await btn.getAttribute('target') === '_blank', '"Play the film" does not open a new tab');
+  if (!embeds) return `links out to ${href} (Artifact build, no embed)`;
   await bringIntoView(btn);
   await btn.click();
   await page.waitForFunction(() => document.querySelector('dialog#reel').open, null, { timeout: 3000 })
     .catch(() => { throw new Error('dialog#reel did not open'); });
   reelOpened = true;
-  const note = await page.evaluate(() => (document.querySelector('#reel-note') || {}).textContent || '');
-  return note ? `open, note "${note.trim()}"` : 'open';
+  const src = await page.evaluate(() => (document.querySelector('#reel-frame iframe') || {}).src || '');
+  const id = href.split('v=')[1];
+  check(src.startsWith('https://www.youtube-nocookie.com/embed/' + id), `the player loads ${src || 'nothing'}, not film ${id}`);
+  return `open, plays ${id} in place`;
 });
 
 await step('film: Close shuts dialog#reel', async () => {
+  if (!embeds) throw new Skip('Artifact build links out; there is no in-page player');
   check(reelOpened, 'dialog#reel was not open');
   const close = page.locator('dialog#reel button', { hasText: /close/i }).first();
   check(await close.count(), 'no Close button in dialog#reel');
   await close.click();
   await page.waitForFunction(() => !document.querySelector('dialog#reel').open, null, { timeout: 3000 })
     .catch(() => { throw new Error('dialog#reel stayed open'); });
-  return 'closed';
+  const left = await page.evaluate(() => document.querySelectorAll('#reel-frame iframe').length);
+  check(left === 0, 'the player was not removed, so the film keeps playing');
+  return 'closed, player removed';
 });
 
 const brief = {

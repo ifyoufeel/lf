@@ -67,7 +67,8 @@ Publish only from `dist/`, after a build that passed: the build checks the page 
 
 - `[YOUR EMAIL]` in the footer and the brief composer: waiting for the house address.
 - The roadmap “Next” items and the “What happens next” steps are unconfirmed wording (`ledger.json` → `unconfirmed`).
-- The three loops and three films are not uploaded. Posters stand in until they are re-uploaded and listed in `site/media.json`.
+- Loops: Arca plays (`site/media/arca-loop.*`). Machina and Hortus still show posters; make their loops from the owner’s GIF previews with `python3 tools/media/gif_to_loop.py <preview.gif> <wing>` and list them in `site/media.json`.
+- Films are the owner’s YouTube uploads (`site/media.json` → `films`). Play controls are links to them; the web build plays them in place, the Artifact opens YouTube. The build fails if a link disagrees with `media.json`. The links and durations are unconfirmed (`ledger.json` → `unconfirmed`).
 - Rights to confirm for the Frazetta painting and the museum photographs (the R12 warning lists them).
 
 ## Never
