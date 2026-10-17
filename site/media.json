@@ -1,0 +1,5 @@
+{
+  "$note": "Paths or URLs for the wing loops (600x826 MP4, muted, 5.12 s) and films (1080p web encodes). null = not uploaded yet; the page then shows the poster.",
+  "loops": { "machina": null, "hortus": null, "arca": null },
+  "films": { "machina": null, "hortus": null, "arca": null }
+}

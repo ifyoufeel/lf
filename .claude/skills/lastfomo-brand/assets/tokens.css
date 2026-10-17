@@ -1,0 +1,14 @@
+/* lastfomo tokens (Illuminated Protocol). Night is the default; light follows the viewer. */
+:root{
+  --void:#080808;--ink:#111111;--graphite:#1c1c1c;--iron:#2a2a2a;--ash:#8c8c8c;--paper:#ffffff;--mist:#f4f4f4;--sealed:#9a9a9a;
+  --machina:#d4f70d;--hortus:#46ed08;--arca:#ff0a96;
+  --bg:var(--ink);--fg:var(--paper);--fg2:var(--ash);--line:rgba(255,255,255,.16);
+  --machina-t:#d4f70d;--hortus-t:#46ed08;--arca-t:#ff4fae;--wing:var(--fg);--wing-t:var(--fg);
+  --snap:120ms;--glide:320ms;--drift:960ms;--ease:cubic-bezier(.2,0,0,1);--exit:cubic-bezier(.4,0,1,1);
+  --font-disp:"Jacquard 24","Geist Mono",monospace;--font-sans:"Geist",ui-sans-serif,system-ui,sans-serif;--font-mono:"Geist Mono",ui-monospace,monospace;
+  --m:clamp(20px,5vw,96px);
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f4f4;--fg:#111111;--fg2:#555555;--line:rgba(17,17,17,.16);--machina-t:#4f5c00;--hortus-t:#1c6a00;--arca-t:#b3006a}}
+[data-wing="machina"]{--wing:var(--machina);--wing-t:var(--machina-t)}
+[data-wing="hortus"]{--wing:var(--hortus);--wing-t:var(--hortus-t)}
+[data-wing="arca"]{--wing:var(--arca);--wing-t:var(--arca-t)}

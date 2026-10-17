@@ -1,0 +1,12 @@
+#!/bin/sh
+# Brand rails before every commit. Enable once per clone: git config core.hooksPath .githooks
+# The build regenerates site/tokens.css from brand/tokens.json and refuses off-brand source.
+if ! node tools/build.mjs > /tmp/lastfomo-build.log 2>&1; then
+  cat /tmp/lastfomo-build.log
+  echo "pre-commit: the brand check failed. Fix the errors above, then commit again."
+  exit 1
+fi
+if ! git diff --quiet -- site/tokens.css; then
+  echo "pre-commit: site/tokens.css was out of date with brand/tokens.json and has been regenerated. Stage it and commit again."
+  exit 1
+fi
