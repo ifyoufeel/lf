@@ -35,7 +35,7 @@ Supers used in films: Scroll by scroll. · Every wing, alive. · The films, in p
 
 **Hortus** — `HRT — Hortus · Nature research` / hortus / What grows. / Plant science, farm analysis, crop optimisation and medical-plant research, joined by the feeding systems and control hardware we design and build ourselves. Seed to sensor, under one roof. / `5 disciplines / 1 house / hardware built in-house`
 
-**Arca** — `ARC — Arca · Art & collections` / arca / What lasts. / Vaults, private collections, and direct lines to artists and their estates. We hunt off-market, keep what matters, and open the door by invitation. / `Vaults / Artists / Private galleries / Gem hunters`
+**Arca** — `ARC — Arca · Art & Artifacts` / arca / What lasts. / Vaults, private collections, and direct lines to artists and their estates. We hunt off-market, keep what matters, and open the door by invitation. / `Vaults / Artists / Private galleries / Gem hunters`
 
 The house principles: **Research first** (we learn the field before we touch it) · **Built in-house** (from feeding systems to AI servers, we make what we deploy) · **Private by architecture** (your data and your objects stay where they belong) · **Made to last** (we build for the next decade, not the next quarter).
 
@@ -86,7 +86,7 @@ Feeding systems and hardware are one discipline, not two (the owner merged them)
 
 ## Open placeholders
 
-- Contact email: `[YOUR EMAIL]` in the landing page's Start a project form and footer.
+- Contact email: lastfomo@gmail.com (set on the landing page footer and the Start a project brief).
 - Roadmap "Next" items (more private builds; pilot beds to full farms with field-scale sensor networks; a private catalogue by invitation) were written as plausible directions; confirm them.
 - "What happens next" steps on the Start a project page (we read the brief; a short call; a written plan) are suggested wording.
 - Whether to name Wing 04 (Glimp) publicly. Default: keep it sealed and unnamed ("Wing 04, in the works").
@@ -94,4 +94,4 @@ Feeding systems and hardware are one discipline, not two (the owner merged them)
 
 ## Rights
 
-The Frazetta painting and the museum photographs (necklace, helmet, gauntlet) are copyrighted images supplied by the owner. They appear in the Arca film, the Arca thumbnail, the walking experience and the walkthrough film. Remind the owner to confirm rights before public use, and prefer the necklace or helmet over the Frazetta for new public assets (the social pack already does).
+Every image and film used so far, including the Frazetta painting and the museum photographs, is the owner’s to use. No rights reminders are needed.

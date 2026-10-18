@@ -288,43 +288,36 @@
     "defense": "defence",
     "jewelry": "jewellery"
   },
-  "placeholders": [
-    {
-      "token": "[YOUR EMAIL]",
-      "where": "Contact footer and the brief composer",
-      "owner": "Replace with the house address."
-    }
-  ],
+  "placeholders": [],
   "unconfirmed": [
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
-    "Film links and durations (0:40, 0:40, 0:36) could not be checked against YouTube from the build sandbox; confirm each link plays the right wing.",
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording."
   ],
   "conflicts": [
     {
       "topic": "Arca field label",
-      "site": "Art & collections",
+      "site": "Art & Artifacts",
       "figma": "Art & Artifacts",
-      "decision": "Site wording kept (approved landing copy); confirm with the owner."
+      "decision": "Owner chose “Art & Artifacts” (18 October 2026)."
     },
     {
       "topic": "Label weight",
       "site": "Geist Mono Medium 500, tracked .1em to .14em (tokens.json, brand.md, the shipped page)",
       "figma": "Label/S and Label/M are Geist Mono Regular 400 at 8 to 10% tracking; only Label/L (14 px buttons) is Medium",
-      "decision": "Site kept, as the owner prefers the shipped look; confirm."
+      "decision": "Owner: keep the site as it is (Medium 500)."
     },
     {
       "topic": "Machina stills colour",
       "site": "machina-rig, machina-memory and machina-power carry violet, magenta and green, no chartreuse",
       "figma": "Rule 3: the wing colour is the only saturated colour; grade footage to about 0.45 saturation",
-      "decision": "Inherited from the shipped page; grade the three stills only with the owner's approval."
+      "decision": "Owner: keep the footage as it is."
     },
     {
       "topic": "Arca film poster shape",
       "site": "arca-film.jpg (the YouTube thumbnail) frames the painting in a rectangle beside two arched posters",
       "figma": "Rule 8: every wing uses the arch holder",
-      "decision": "Inherited; re-export the thumbnail with the arch window if the owner wants consistency."
+      "decision": "Owner: no change needed."
     }
   ],
   "media": {
@@ -341,8 +334,7 @@
     "arca-loop.jpg": {
       "alt": "",
       "role": "loop poster (first frame of the Arca loop, sealed)",
-      "rights": "check",
-      "note": "Shows the Frazetta painting."
+      "rights": "own"
     },
     "machina-film.jpg": {
       "alt": "",
@@ -357,8 +349,7 @@
     "arca-film.jpg": {
       "alt": "",
       "role": "film poster",
-      "rights": "check",
-      "note": "Shows the Frazetta painting."
+      "rights": "own"
     },
     "machina-rig.jpg": {
       "alt": "The wide view of the eight-GPU rig with its cooling fans lit",
@@ -393,32 +384,27 @@
     "arca-salon.jpg": {
       "alt": "A private salon with old master paintings, sculpture and sofas",
       "role": "still",
-      "rights": "check",
-      "note": "Third-party photograph."
+      "rights": "own"
     },
     "arca-necklace.jpg": {
       "alt": "The jewelled Necklace of San Gennaro on black",
       "role": "still",
-      "rights": "check",
-      "note": "Museum photograph."
+      "rights": "own"
     },
     "arca-helmet.jpg": {
       "alt": "The Sutton Hoo helmet on display",
       "role": "still",
-      "rights": "check",
-      "note": "Museum photograph."
+      "rights": "own"
     },
     "arca-loop.mp4": {
       "alt": "",
       "role": "loop: sealed, magenta sweep, open, resealed (5 s, from the owner's GIF preview)",
-      "rights": "check",
-      "note": "Shows the Frazetta painting."
+      "rights": "own"
     },
     "arca-loop.webm": {
       "alt": "",
       "role": "VP9 twin of arca-loop.mp4",
-      "rights": "check",
-      "note": "Shows the Frazetta painting."
+      "rights": "own"
     }
   },
   "videos": {
@@ -435,7 +421,7 @@
     ]
   },
   "videoSources": {
-    "$note": "Loops come from the owner's GIF previews via tools/media/gif_to_loop.py. Films are on YouTube; durations are the ledger's, not yet checked against the uploads.",
+    "$note": "Loops come from the owner's GIF previews via tools/media/gif_to_loop.py. Films are the owner's YouTube uploads (links confirmed by the owner); durations are the ledger's.",
     "loops": {
       "arca": "site/media/arca-loop.mp4 + .webm",
       "machina": "waiting for the GIF (it arrived as a still)",
@@ -446,5 +432,8 @@
       "hortus": "https://www.youtube.com/watch?v=61uIUCtCN6k",
       "arca": "https://www.youtube.com/watch?v=3GHNW57yH4Y"
     }
+  },
+  "contact": {
+    "email": "lastfomo@gmail.com"
   }
 }

@@ -4,7 +4,7 @@ One source, two targets. Now the site lives as a claude.ai Artifact. Later it mo
 
 Research date: 17 October 2026. Every price below is as seen on that date. `vercel.com` itself was not reachable from the research session, so Vercel figures come from Vercel’s documentation index (the Vercel MCP search), from search results quoting Vercel’s pages, and from Vercel’s own source code on GitHub. Prices marked *reported* come from third parties. Confirm every price on the vendor’s page before paying.
 
-`[DOMAIN]` stands for the house domain and `[YOUR EMAIL]` for the house address. Neither is decided yet.
+`[DOMAIN]` stands for the house domain, not decided yet. The house address is lastfomo@gmail.com.
 
 ## At a glance
 
@@ -39,7 +39,7 @@ The page and the build already handle this:
 1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 1 MB with the stills inlined, plus a few hundred KB for each inlined loop; the limit is 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
 2. Publish with the Artifact tool: `file_path` `dist/artifact/lastfomo.html` and a one-word icon. Keep the returned URL.
 3. For every later change, rebuild and republish with the same `file_path`, which keeps the same URL. A new path creates a new link.
-4. Share the link. Name the open items in the message: `[YOUR EMAIL]`, any loop still missing (the build names them; their posters stand in), the unconfirmed wording, and the rights checks for the Frazetta painting and the museum photographs.
+4. Share the link. Name the open items in the message: any loop still missing (the build names them; their posters stand in), the unconfirmed wording.
 
 ### If the films should play inside the Artifact
 
@@ -214,14 +214,14 @@ The Vercel Toolbar on preview deployments needs `vercel.live` in five directives
 - The web build marks the form with an endpoint (for example `data-endpoint="/api/brief"`); the Artifact build does not. `main.js` posts the brief as JSON when the attribute is there. On success it shows a sent state. On any failure, or when there is no endpoint, it shows today’s composed brief with the copy button and the mailto link. The sent-state wording is new copy and needs the owner’s approval in `ledger.json` → `approvedLines` first.
 - `api/brief.mjs` at the repo root is a Vercel Function. Plain files in `/api` need no configuration and may export a web-standard `fetch` handler ([Node.js runtime](https://vercel.com/docs/functions/runtimes/node-js), [functions API](https://vercel.com/docs/functions/functions-api-reference)). Verify on the first preview that it deploys beside `dist/web` with the “Other” preset.
 - It calls Resend’s REST API with `fetch`, so it has zero dependencies ([Resend OpenAPI](https://github.com/resend/resend-openapi): `POST https://api.resend.com/emails`, bearer key, `from`, `to`, `subject`, `text`, `reply_to`).
-- Environment variables: `RESEND_API_KEY`, `BRIEF_TO` (`[YOUR EMAIL]`), `BRIEF_FROM` (for example `lastfomo <brief@send.[DOMAIN]>`). Set them for Production only; previews then fall back to copy, which keeps test briefs out of the house inbox.
+- Environment variables: `RESEND_API_KEY`, `BRIEF_TO` (`lastfomo@gmail.com`), `BRIEF_FROM` (for example `lastfomo <brief@send.[DOMAIN]>`). Set them for Production only; previews then fall back to copy, which keeps test briefs out of the house inbox.
 - Request bodies are capped at 4.5 MB on Vercel Functions ([limitations](https://vercel.com/docs/functions/limitations)); a brief is a few kilobytes.
 
 A sketch, syntax-checked and unit-tested against a mocked email API (send, honeypot, timing, validation, origin and method):
 
 ```js
 // api/brief.mjs: a proposal, not shipped. Zero dependencies; Node 22 globals only.
-const WINGS = new Set(['Machina, private AI', 'Hortus, nature research', 'Arca, art and collections', 'Not sure yet']);
+const WINGS = new Set(['Machina, private AI', 'Hortus, nature research', 'Arca, art and artifacts', 'Not sure yet']);
 const TIMELINES = new Set(['As soon as possible', 'In the next three months', 'This year', 'Just exploring']);
 const clean = (v, max) => String(v ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim().slice(0, max);
 const EMAIL = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
@@ -276,8 +276,8 @@ In order, adding the next layer only when the last one is not enough:
 
 ### Content gates
 
-- [ ] `[YOUR EMAIL]` replaced everywhere; `ledger.json` → `placeholders` emptied.
-- [ ] Rights confirmed for the Frazetta painting and the museum photographs (the R12 warning lists them). A public domain is a wider audience than a shared link.
+- [x] Contact address set: lastfomo@gmail.com.
+- [x] Rights: every image and film is the owner’s.
 - [ ] Unconfirmed wording (`ledger.json` → `unconfirmed`) approved or replaced.
 - [ ] `node tools/build.mjs` passes; `node tools/qa/shoot.mjs` and `node tools/qa/smoke.mjs` are clean on the preview build.
 
@@ -372,12 +372,11 @@ The Artifact keeps Google Fonts, the one stylesheet host its sandbox allows.
 
 For the owner:
 
-- `[DOMAIN]` and `[YOUR EMAIL]`.
+- `[DOMAIN]`.
 - Vercel Pro (recommended) and who holds the seat.
 - Analytics at launch or not.
 - Resend (US data) or an EU-hosted email provider.
 - The sent-state line and the privacy note for the brief.
-- Rights for the Frazetta painting and the museum photographs before the public launch.
 
 For the orchestrator (they own `tools/build.mjs`, `site/` and the contract):
 

@@ -1,6 +1,6 @@
 # lastfomo
 
-The landing page of lastfomo, a research house with three wings: Machina (private, on-premise AI), Hortus (plant science) and Arca (art and collections). *What grows. What thinks. What lasts.*
+The landing page of lastfomo, a research house with three wings: Machina (private, on-premise AI), Hortus (plant science) and Arca (art and artifacts). *What grows. What thinks. What lasts.*
 
 This repo holds the page as source, the brand as data, and the tools that keep one true to the other. One build turns the source into two publishable pages and refuses anything off brand.
 
@@ -108,10 +108,10 @@ git config core.hooksPath .githooks
 
 ## Open items for the owner
 
-1. **The house address.** `[YOUR EMAIL]` stands in the footer and in the brief composer on Start a project. Replace it in `site/index.html` and `site/main.js`; the build stops reporting it once it is gone.
-2. **The loops and the films.** The films are the owner’s YouTube uploads; confirm each link plays the right wing and that the durations (0:40, 0:40, 0:36) match. The Arca loop plays, made from the owner’s GIF preview. The Machina and Hortus GIFs arrived as single frames, so their posters stand in: send the GIF files again (zipped, or committed to this repo) and run `python3 tools/media/gif_to_loop.py <preview.gif> <wing>`.
-3. **Rights.** The Frazetta painting (in the Arca loop and film posters) and the museum photographs of the Necklace of San Gennaro and the Sutton Hoo helmet need confirmed rights before public use. The salon photograph is third-party too. The build warns until each entry in the ledger is cleared.
-4. **Unconfirmed wording.** The roadmap’s “Next” items (more private builds; pilot beds to full farms; a private catalogue by invitation) and the “What happens next” steps on Start a project (we read the brief; a short call; a written plan) were written as suggestions. Confirm or rewrite them.
-5. **Arca’s field label.** The site and `brand/tokens.json` say “Art & collections”; the Figma brandbook says “Art & Artifacts”. The site wording stands for now. If the Figma label wins, British spelling makes it “artefacts”, and the change goes into `brand/tokens.json` and the Arca `.code` labels together.
+1. **The Machina and Hortus loops.** Their GIF previews arrived in chat as single frames, so the old posters stand in. Send the GIF files again (zipped, or committed to this repo) and run `python3 tools/media/gif_to_loop.py <preview.gif> <wing>`, then list them in `site/media.json`.
+2. **Films inside the Artifact.** The web build plays the YouTube films in a popup. An Artifact cannot embed YouTube, so there the popup needs the film files: upload the three MP4s and they go to the Artifact’s asset store (`site/media.json` → `films.<wing>.asset`). Until then the Artifact opens YouTube in a new tab.
+3. **Unconfirmed wording.** The roadmap’s “Next” items (more private builds; pilot beds to full farms; a private catalogue by invitation) and the “What happens next” steps on Start a project (we read the brief; a short call; a written plan) were written as suggestions. Confirm or rewrite them.
+
+The contact address is lastfomo@gmail.com (`brand/ledger.json` → `contact`). Every image and film is the owner’s.
 
 Wing 04 stays sealed and unnamed in public unless the owner decides otherwise.

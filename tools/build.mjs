@@ -87,7 +87,9 @@ for (const r of [...refs, ...loopFiles]) { mkdirSync(dirname(P('dist/web', r)), 
 const loopUri = (rel) => `data:video/${rel.endsWith('.webm') ? 'webm' : 'mp4'};base64,` + readFileSync(P('site', rel)).toString('base64');
 const inline = (v) => (local(v) ? loopUri(v) : v);
 const artLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, inline(f)])) : inline(v)]));
-html = withManifest(html, { loops: artLoops, films: media.films, embed: false });
+// A film with an "asset" URL (uploaded to the Artifact's asset store) plays in the Artifact's own popup.
+const artFilms = Object.fromEntries(Object.entries(media.films).map(([k, f]) => [k, f && f.asset ? { ...f, src: f.asset } : f]));
+html = withManifest(html, { loops: artLoops, films: artFilms, embed: false });
 const scriptSafe = (s) => s.replace(/<\/script/gi, '<\\/script');
 const dataUri = (rel) => 'data:image/jpeg;base64,' + readFileSync(P('site', rel)).toString('base64');
 let head = html.slice(html.indexOf('<head>') + 6, html.indexOf('</head>'));

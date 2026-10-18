@@ -40,8 +40,6 @@ Footage sources supplied by the owner: the GPU rig clip (60 fps), the plant rese
 
 ## Open items
 
-- Replace `[YOUR EMAIL]` on the landing page.
 - Confirm or rewrite the roadmap's "Next" items and the "What happens next" steps.
 - Decide whether Wing 04 (Glimp) is ever named in public.
-- Confirm rights for the Frazetta painting and the museum photographs.
 - Not yet made: a LinkedIn company-page cover (1128 x 191), and a vertical cut of the walkthrough film.

@@ -91,7 +91,7 @@ A passing build means the page is not wrong in the ways a machine can measure. T
 
 - **Taste.** Whether a screen feels airy, sharp and deliberate. Whether the wing colour leads. Whether the page looks made by the same hand as the films.
 - **The horse inside images.** R11 proves the vector is exact, not that a plate, poster, loop or still shows the horse whole with clear margins. Check each one at phone size.
-- **Rights.** R12 lists the files marked “check”. Only the owner can clear the Frazetta painting, the museum photographs and the salon photograph.
+- **Rights.** Every current image and film is the owner’s. A new third-party image enters the ledger with rights “check”, and R12 lists it until the owner clears it.
 - **Tone.** R7 catches known bans. It cannot hear hype, a superlative, a line that was never approved, or a paragraph that should be three words. Compare new copy with `ledger.json` → `approvedLines` and the voice in `references/copy.md`.
 - **Numbers in words and claims without numbers.** R6 reads digits only: “eight GPUs” or “the fastest” pass unseen. Each still needs a ledger fact or must go.
 - **Meaning.** “0 bytes leave the room” is a premise, never a measurement. The Arca field-note objects are research references, not Arca’s holdings: never imply ownership or sale.

@@ -51,7 +51,7 @@ Sizes at 1920 x 1080: wordmark 150 to 230 px, headline or super 46 to 76 px, bod
 
 Sources that work in a sandbox: Geist and Geist Mono from the npm package `geist` (`dist/fonts`, woff2 and ttf); Jacquard 24 from `https://raw.githubusercontent.com/google/fonts/main/ofl/jacquard24/Jacquard24-Regular.ttf`. Published web pages can load all three from Google Fonts.
 
-Label pattern: `CODE — Wing · Discipline`, for example `MCH — Machina · Autonomous AI`, `HRT — Hortus · Nature research`, `ARC — Arca · Art & collections`. Case codes: `CASE N° 0001`.
+Label pattern: `CODE — Wing · Discipline`, for example `MCH — Machina · Autonomous AI`, `HRT — Hortus · Nature research`, `ARC — Arca · Art & Artifacts`. Case codes: `CASE N° 0001`.
 
 ## Marks
 

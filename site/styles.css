@@ -165,6 +165,8 @@ canvas.plate{image-rendering:pixelated;image-rendering:crisp-edges}
 .foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0 16px;width:100%;max-width:var(--max);margin:0 auto;font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
 .themesw{all:unset;cursor:pointer;display:inline-flex;align-items:center;min-height:44px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--fg2);transition:color .2s}
 .themesw:hover{color:var(--fg)}
+.foot a.mail{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;color:inherit;transition:color .2s}
+.foot a.mail:hover{color:var(--fg)}
 .themesw:focus-visible{outline:2px solid var(--wing-t);outline-offset:2px}
 @media (max-width:560px){.foot .mail{order:3;flex-basis:100%}}
 /* The footer is in the flow but hangs into the screen's bottom padding, so the closing composition sits where it did:
@@ -177,9 +179,10 @@ canvas.plate{image-rendering:pixelated;image-rendering:crisp-edges}
 .case-cover .arch{height:min(62svh,600px);aspect-ratio:3/4.4;width:auto}
 .player{width:min(100%,calc(68svh * 16 / 9),1180px);margin:0 auto;display:grid;gap:14px}
 .frame{position:relative;display:block;aspect-ratio:16/9;max-width:100%;background:var(--void);border:1px solid var(--line);overflow:hidden;color:var(--paper);text-decoration:none}
-.frame img,.frame iframe{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;border:0;transition:transform .9s var(--ease)}
+.frame img,.frame iframe,.frame video{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;border:0;transition:transform .9s var(--ease)}
 .frame:hover img{transform:scale(1.02)}
-.frame iframe{z-index:2}
+.frame iframe,.frame video{z-index:2}
+.frame video{object-fit:contain;background:var(--void)}
 .frame.playing .pl{display:none}
 .frame:focus-visible{outline:2px solid var(--wing-t);outline-offset:4px}
 .cap{display:flex;justify-content:space-between;gap:12px;font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
@@ -216,7 +219,7 @@ dialog.reel{--wing-t:var(--paper);padding:0;border:0;margin:0;width:100%;height:
 dialog.reel::backdrop{background:transparent}
 .reel-in{position:absolute;inset:0;display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 72px) max(clamp(12px,4vw,64px),env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 32px) max(clamp(12px,4vw,64px),env(safe-area-inset-left,0px))}
 .reel-frame{width:min(100%,calc((100svh - 140px) * 16 / 9));aspect-ratio:16/9;max-width:100%;background:var(--void)}
-.reel-frame iframe{width:100%;height:100%;border:0;display:block}
+.reel-frame iframe,.reel-frame video{width:100%;height:100%;border:0;display:block;background:var(--void)}
 .reel .x:hover{border-color:var(--paper)}
 .reel .x{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:max(clamp(12px,3vw,40px),env(safe-area-inset-right,0px));color:var(--paper);border-color:var(--paper-line)}
 .curtain{position:fixed;inset:0;z-index:40;background:var(--void);color:var(--paper);display:grid;place-items:center;pointer-events:none;clip-path:inset(100% 0 0 0)}

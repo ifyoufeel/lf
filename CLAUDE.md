@@ -1,6 +1,6 @@
 # lastfomo
 
-lastfomo is a research house with three wings: Machina (private, on-premise AI), Hortus (plant science) and Arca (art and collections).
+lastfomo is a research house with three wings: Machina (private, on-premise AI), Hortus (plant science) and Arca (art and artifacts).
 This repo is its landing page, built from one source in `site/` with the brand on rails.
 
 ## Read before any work
@@ -44,7 +44,7 @@ The rest of `site/` is hand-written source. `dist/` and `out/` are generated and
 2. `node tools/build.mjs`: regenerates `site/tokens.css`, checks the source and the built Artifact, writes both targets. It fails on brand errors.
 3. `node tools/qa/shoot.mjs`: every screen of every route, desktop 1440×900 and phone 390×844, dark and light, into `out/qa/`.
 4. Look at the contact sheets, `out/qa/<route>/<viewport>-<scheme>-contact.jpg`, yourself. In `out/qa/report.json` → `summary`, expect `fontsLoaded: true` and zero `overflowScreens`, `clippedTextScreens`, `coveredTextScreens`, `consoleErrors` and `pageErrors`. After any behaviour change, also run `node tools/qa/smoke.mjs`.
-5. Publish, and name any placeholder or rights warning in your reply.
+5. Publish, and name any placeholder in your reply.
 
 Other commands: `node tools/brandcheck.mjs` checks `site/` on its own (`--html <file>` for one page, `--json` for machine output). After changing the checker, run `node tools/brandcheck.test.mjs`.
 
@@ -63,13 +63,13 @@ Publish only from `dist/`, after a build that passed: the build checks the page 
 - An image: the file in `site/media/`, then an entry in `ledger.json` → `media` with alt text and rights, then `<img src="media/<name>.jpg" alt="…">`.
 - Not confirmed yet: ship a named placeholder listed in `ledger.json` → `placeholders`, never a guess.
 
-## Open placeholders
+## Open items
 
-- `[YOUR EMAIL]` in the footer and the brief composer: waiting for the house address.
+- Contact: lastfomo@gmail.com (`ledger.json` → `contact`), in the footer and the brief composer.
 - The roadmap “Next” items and the “What happens next” steps are unconfirmed wording (`ledger.json` → `unconfirmed`).
 - Loops: Arca plays (`site/media/arca-loop.*`). Machina and Hortus still show posters; make their loops from the owner’s GIF previews with `python3 tools/media/gif_to_loop.py <preview.gif> <wing>` and list them in `site/media.json`.
-- Films are the owner’s YouTube uploads (`site/media.json` → `films`). Play controls are links to them; the web build plays them in place, the Artifact opens YouTube. The build fails if a link disagrees with `media.json`. The links and durations are unconfirmed (`ledger.json` → `unconfirmed`).
-- Rights to confirm for the Frazetta painting and the museum photographs (the R12 warning lists them).
+- Films are the owner’s YouTube uploads (`site/media.json` → `films`). Play controls are links to them; the web build plays them in place, the Artifact opens YouTube. The build fails if a link disagrees with `media.json`. Inside the Artifact the popup needs the film files in its asset store (`films.<wing>.asset`); until then it links out.
+- Every image and film is the owner’s; there is nothing to clear.
 
 ## Never
 

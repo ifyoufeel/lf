@@ -20,6 +20,9 @@
     return (l.mp4 && probe.canPlayType('video/mp4; codecs="avc1.640028"')) ? l.mp4 : (l.webm && probe.canPlayType('video/webm; codecs="vp9"')) ? l.webm : (l.mp4 || '');
   };
   const filmId = (k) => (FILMS[k] && /^[\w-]{11}$/.test(FILMS[k].youtube || '') ? FILMS[k].youtube : '');
+  // Inside an Artifact a film plays from the page's own asset store (set by the build); otherwise from YouTube.
+  const filmSrc = (k) => (FILMS[k] && typeof FILMS[k].src === 'string' ? FILMS[k].src : '');
+  const inPage = (k) => (EMBED && filmId(k)) || (!EMBED && filmSrc(k));
   const NAMES = { machina: 'Machina', hortus: 'Hortus', arca: 'Arca' };
 
   // The exact Figma horse (Logo/Mark 9:3). brand/marks/horse.svg is the source; the brand check keeps them identical.
@@ -27,7 +30,7 @@
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const FINE = matchMedia('(pointer: fine)').matches;
   const views = { home: $('#view-home'), machina: $('#view-machina'), hortus: $('#view-hortus'), arca: $('#view-arca'), start: $('#view-start') };
-  const TITLES = { home: 'lastfomo research house', machina: 'Machina, Case N° 0001 — lastfomo', hortus: 'Hortus, nature research — lastfomo', arca: 'Arca, art & collections — lastfomo', start: 'Start a project — lastfomo' };
+  const TITLES = { home: 'lastfomo research house', machina: 'Machina, Case N° 0001 — lastfomo', hortus: 'Hortus, nature research — lastfomo', arca: 'Arca, art & artifacts — lastfomo', start: 'Start a project — lastfomo' };
   let cur = null;
   let pendingAnchor = null;
 
@@ -157,6 +160,12 @@
   /* ---------------- films: real links, played in place where the page may embed ---------------- */
   const embedSrc = (k) => 'https://www.youtube-nocookie.com/embed/' + filmId(k) + '?autoplay=1&rel=0&playsinline=1';
   const filmFrame = (k) => {
+    if (!EMBED && filmSrc(k)) {
+      const v = document.createElement('video');
+      v.src = filmSrc(k); v.controls = true; v.autoplay = true; v.playsInline = true; v.preload = 'auto';
+      v.setAttribute('aria-label', (NAMES[k] || 'lastfomo') + ' film');
+      return v;
+    }
     const f = document.createElement('iframe');
     f.src = embedSrc(k);
     f.title = (NAMES[k] || 'lastfomo') + ' film';
@@ -168,8 +177,9 @@
   $$('a[data-play]').forEach((a) => {
     // Three "Play the film" buttons share one visible label; the name says which film, and where it opens.
     const label = a.getAttribute('aria-label') || a.textContent.trim() + ', ' + (NAMES[a.dataset.play] || '');
-    a.setAttribute('aria-label', EMBED ? label : label + ' (opens YouTube in a new tab)');
-    if (EMBED) return;
+    const here = inPage(a.dataset.play);
+    a.setAttribute('aria-label', here ? label : label + ' (opens YouTube in a new tab)');
+    if (here) return;
     const ne = '<svg aria-hidden="true"><use href="#g-ne"/></svg>';
     if (a.classList.contains('btn')) a.insertAdjacentHTML('beforeend', ne);
     else a.querySelector('.pl')?.insertAdjacentHTML('beforeend', ne);
@@ -296,7 +306,7 @@
     const sc = e.target.closest('[data-scroll]');
     if (sc) { e.preventDefault(); const t = document.getElementById(sc.dataset.scroll); if (t) t.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' }); return; }
     const pl = e.target.closest('[data-play]');
-    if (pl && EMBED && filmId(pl.dataset.play)) {
+    if (pl && inPage(pl.dataset.play)) {
       e.preventDefault();
       if (pl.classList.contains('frame')) { if (!pl.classList.contains('playing')) { pl.classList.add('playing'); pl.append(filmFrame(pl.dataset.play)); } }
       else openReel(pl.dataset.play);
@@ -315,7 +325,8 @@
     // Start on Close, not inside the cross-origin player, so Escape (handled by the page) closes the dialog.
     $('#reel-x').focus();
   }
-  function closeReel() { if (dlg.open) dlg.close(); else { dlg.removeAttribute('open'); dlg.dispatchEvent(new Event('close')); } }
+  // Remove the player first, so the film stops at once; Escape reaches the same cleanup through the close event.
+  function closeReel() { slot.replaceChildren(); if (dlg.open) dlg.close(); else { dlg.removeAttribute('open'); dlg.dispatchEvent(new Event('close')); } }
   $('#reel-x').addEventListener('click', closeReel);
   dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.classList.contains('reel-in')) closeReel(); });
   // Closing removes the player, which stops the film; focus returns to the control that opened it.
@@ -361,7 +372,7 @@
   }
 
   /* ---------------- start a project: compose the brief ---------------- */
-  const CONTACT = '[YOUR EMAIL]';
+  const CONTACT = 'lastfomo@gmail.com';
   const live = CONTACT.indexOf('@') > 0;
   const form = $('#brief'), sent = $('#sent'), out = $('#brief-text'), copyBtn = $('#copy-brief');
   if (form && sent) {

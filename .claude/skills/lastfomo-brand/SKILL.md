@@ -1,6 +1,6 @@
 ---
 name: lastfomo-brand
-description: Brand knowledge, layout system, video style and production playbook for lastfomo, a research house with three wings (MACHINA "What thinks." private local AI, HORTUS "What grows." nature research, ARCA "What lasts." art and collections). Use this skill whenever the user mentions lastfomo, Machina, Hortus, Arca, the horse mark, the Illuminated Protocol design system, or asks for any asset in this brand - films, showreels, GIF loops, thumbnails, social posts, stories, banners, landing pages, case pages, the walking experience, copy, decks or brand guidelines - even when they just continue work on these wings without naming the brand.
+description: Brand knowledge, layout system, video style and production playbook for lastfomo, a research house with three wings (MACHINA "What thinks." private local AI, HORTUS "What grows." nature research, ARCA "What lasts." art and artifacts). Use this skill whenever the user mentions lastfomo, Machina, Hortus, Arca, the horse mark, the Illuminated Protocol design system, or asks for any asset in this brand - films, showreels, GIF loops, thumbnails, social posts, stories, banners, landing pages, case pages, the walking experience, copy, decks or brand guidelines - even when they just continue work on these wings without naming the brand.
 ---
 
 # lastfomo brand
@@ -66,7 +66,7 @@ Read only what the task needs. A thumbnail needs `layouts.md` and `brand.md`; a 
 3. **Write the words first** from `references/copy.md`: label, wordmark, one line. Check every number against the facts ledger.
 4. **Build at 2x or at the 1920 x 1080 master**, then downscale once with area averaging and a light unsharp mask. Text stays crisp and edges clean.
 5. **Check at the size people will see it**: a thumbnail at 320 x 180, a GIF at native size, a page on a 390 x 844 phone. Render a contact sheet of key moments for anything that moves.
-6. **Deliver the light version first**, the master second, with a one-line note on anything that is a placeholder or needs a rights check.
+6. **Deliver the light version first**, the master second, with a one-line note on anything that is a placeholder.
 
 ## Before you deliver
 
@@ -76,4 +76,3 @@ Read only what the task needs. A thumbnail needs `layouts.md` and `brand.md`; a 
 - Every fact traceable to `references/copy.md`; placeholders named in your reply.
 - Content inside the format's safe area; legible at the smallest real viewing size.
 - File sizes inside the budgets in rule 12; videos decode with zero errors.
-- Rights noted when the Frazetta painting or museum photographs appear (see `references/copy.md`).

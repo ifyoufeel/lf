@@ -18,7 +18,7 @@ Five screens: cover (code label, wordmark, headline, brief, a live plate) → fi
 
 ## Start a project
 
-Cover (headline "Tell us what you want to grow, think or keep."), the brief (wing pills, name, email, organisation, timeline, a few lines), then "What happens next" (three steps). Sending composes an email to the house address with the brief filled in, with a copy button as a fallback. A database cannot collect public enquiries, because outside viewers can read artifact data but never write it. The contact address is still the placeholder `[YOUR EMAIL]`.
+Cover (headline "Tell us what you want to grow, think or keep."), the brief (wing pills, name, email, organisation, timeline, a few lines), then "What happens next" (three steps). Sending composes an email to the house address with the brief filled in, with a copy button as a fallback. A database cannot collect public enquiries, because outside viewers can read artifact data but never write it. The contact address is lastfomo@gmail.com.
 
 ## The walking experience
 
