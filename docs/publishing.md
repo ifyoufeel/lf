@@ -74,9 +74,23 @@ Vercel’s fair use guidelines restrict Hobby to non-commercial personal use and
 | Install Command | none | the repo has no `package.json`, so nothing installs |
 | Root Directory | the repo root | dashboard |
 | Node.js Version | 22.x, as in `.github/workflows/brand.yml` | dashboard → Settings → Build and Deployment |
-| Production Branch | `main` | dashboard → Settings → Git |
+| Production Branch | the repo’s default branch, today `claude/great-hamilton-2sna3z` (the only branch); `main` once it exists | Vercel takes the default branch at import; change it under dashboard → Settings → Git |
 
 The build runs the brand check before it writes anything, so a brand error fails the Vercel build and no preview or production deployment ships an off-brand page. That is the same rail as the pre-commit hook and CI, now at the door.
+
+### Connecting the repository
+
+State on 18 October 2026: the owner’s Vercel account (`ifyoufeel`, plan Hobby, team “AAA”) already sees the `ifyoufeel` GitHub account, and it has no projects yet. The Vercel connector in Claude can read the account but may not create a project (the API answers 403 to both a Git-linked and a bare project), so the first import is done by hand, once:
+
+1. Open [vercel.com/new](https://vercel.com/new) signed in as `ifyoufeel`, and choose Import next to `ifyoufeel/lf`.
+2. Name the project `lastfomo`, which gives `lastfomo.vercel.app` if the name is free. Leave the preset and the build settings as they are: `vercel.json` supplies them.
+3. Deploy.
+
+From then on every push builds: a push to the production branch updates the live address, and a push to any other branch gets its own preview URL. Read access is enough for a later session to check each build’s log and fetch the page through the connector.
+
+The build was run from a clean clone of the branch with Node 22, as Vercel will run it: 0 brand errors, 0 warnings, `dist/web` 908 KB.
+
+The account is on Hobby today. Move to Pro before the house domain goes live (see above).
 
 ### The proposed `vercel.json`
 
@@ -150,9 +164,9 @@ The Vercel Toolbar on preview deployments needs `vercel.live` in five directives
 
 ### Preview deployments
 
-- Connect the GitHub repository. Every push to `main` builds production; every push to another branch builds a preview with its own URL, and pull requests get a comment with the link ([deployments](https://vercel.com/docs/deployments)).
+- Connect the GitHub repository (steps above). Every push to the production branch builds production; every push to another branch builds a preview with its own URL, and pull requests get a comment with the link ([deployments](https://vercel.com/docs/deployments)).
 - Previews sit behind Vercel Authentication. Standard Protection covers preview and deployment URLs on every plan and leaves the production domain public ([deployment protection](https://vercel.com/docs/deployment-protection)). Check it is on under Settings → Deployment Protection after the import.
-- Promote a tested preview with `vercel promote <url>`, or merge to `main`.
+- Promote a tested preview with `vercel promote <url>`, or merge into the production branch.
 
 ### Custom domain
 
