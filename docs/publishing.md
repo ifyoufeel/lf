@@ -10,8 +10,8 @@ Research date: 17 October 2026. Every price below is as seen on that date. `verc
 
 | Question | Recommendation | Cost per month |
 |---|---|---|
-| Where the site lives now | The claude.ai Artifact built from `dist/artifact/lastfomo.html`, videos in its asset store | included in the owner’s claude.ai plan |
-| Where it lives later | Vercel, plan **Pro** (the site is commercial), framework preset “Other”, `vercel.json` in this repo | $20 per seat (*reported*) |
+| Where the site lives now | **https://lastfomo.vercel.app**, built by Vercel from this repo on every push (see “The live project”), and the claude.ai Artifact built from `dist/artifact/lastfomo.html` | Hobby today; the Artifact is included in the owner’s claude.ai plan |
+| Where it lives at launch | Vercel, plan **Pro** (the site is commercial), on the house domain | $20 per seat (*reported*) |
 | Where the videos live | Loops: small MP4 and WebM files in `site/media/`, as the build already does. Films: YouTube now (links in the Artifact, a privacy-enhanced embed on click in the web build); **Vercel Blob** if the films should leave YouTube | $0 at launch scale; Blob within the Pro allowance |
 | How “Send the brief” works later | A zero-dependency Vercel Function that sends the brief by email through Resend; the copy and mailto fallback stays | $0 on Resend Free |
 | Analytics | None at launch, or Vercel Web Analytics (cookieless). Never a third-party tracker. | $0 on Hobby; about $0.03 per 1,000 events on Pro |
@@ -58,7 +58,7 @@ The original page (`https://claude.ai/artifact/Ckgt4AxvQpeKTKaPFByNMx`) still re
 
 If the owner can open that Artifact as an editor, publishing the new build to it (`url` set to the old Artifact) keeps the old link, and those URLs keep working there without a re-upload. They resolve only inside that one Artifact.
 
-## 2. Later: `dist/web` on Vercel
+## 2. `dist/web` on Vercel
 
 ### Plan: Pro, not Hobby
 
@@ -78,23 +78,41 @@ Vercel’s fair use guidelines restrict Hobby to non-commercial personal use and
 
 The build runs the brand check before it writes anything, so a brand error fails the Vercel build and no preview or production deployment ships an off-brand page. That is the same rail as the pre-commit hook and CI, now at the door.
 
-### Connecting the repository
+### The live project
 
-State on 18 October 2026: the owner’s Vercel account (`ifyoufeel`, plan Hobby, team “AAA”) already sees the `ifyoufeel` GitHub account, and it has no projects yet. The Vercel connector in Claude can read the account but may not create a project (the API answers 403 to both a Git-linked and a bare project), so the first import is done by hand, once:
+Live since 18 October 2026 at **https://lastfomo.vercel.app**.
 
-1. Open [vercel.com/new](https://vercel.com/new) signed in as `ifyoufeel`, and choose Import next to `ifyoufeel/lf`.
-2. Name the project `lastfomo`, which gives `lastfomo.vercel.app` if the name is free. Leave the preset and the build settings as they are: `vercel.json` supplies them.
-3. Deploy.
+| Item | Value |
+|---|---|
+| Account | `ifyoufeel`, plan Hobby, team “AAA” (`team_j3ojVdoC9TpjZyNBYPIp0MUA`) |
+| Project | `lastfomo` (`prj_IEqPNaVDoC1R1lJD4VmLKX6N38Ty`) |
+| Repository | `ifyoufeel/lf`, connected through the Vercel GitHub app |
+| Production branch | the repo’s default branch, today `claude/great-hamilton-2sna3z` (its only branch) |
+| Build | `node tools/build.mjs` → `dist/web`, from `vercel.json`; Node 22.x set on the project |
+| Production addresses | `lastfomo.vercel.app` and `lastfomo-aaa-d3d3.vercel.app`, public |
+| Deployment Protection | Vercel Authentication on previews and on each deployment’s own URL (`prod_deployment_urls_and_all_previews`); the production addresses stay public |
+| Firewall | no custom rules |
 
-From then on every push builds: a push to the production branch updates the live address, and a push to any other branch gets its own preview URL. Read access is enough for a later session to check each build’s log and fetch the page through the connector.
+Every push builds. A push to the production branch updates the live address; a push to any other branch gets its own preview URL behind the Vercel login. A brand error fails the build, so an off-brand page never ships.
 
-The build was run from a clean clone of the branch with Node 22, as Vercel will run it: 0 brand errors, 0 warnings, `dist/web` 908 KB.
+**Checked on 18 October 2026**, from a Vercel sandbox outside the project (the session container cannot reach `*.vercel.app`):
+
+- `/` answers 200 without a login; a deployment’s own URL answers 302 to the Vercel login.
+- All 22 files of `dist/web` are byte-identical to a fresh build of the same commit (`/index.html` answers 308 to `/`, as `cleanUrls` intends, and `/` matches it).
+- Every header in `vercel.json` arrives: the CSP, HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and the year-long immutable cache on `/media/`.
+- `www.youtube-nocookie.com/embed/…` answers 200, and YouTube’s oEmbed resolves all three film ids to the lastfomo channel.
+
+**For later sessions.**
+
+- The Vercel connector in Claude works in its own default scope: leave `teamId` out of project and deployment calls. With the team id set, creating a project answered 403 and reading one answered 404.
+- Check the live site with a handful of requests, never a crawl. A burst of requests for paths that do not exist made Vercel’s automatic bot protection answer one sandbox address with its Security Checkpoint (403, `x-vercel-mitigated: challenge`). Browsers pass that checkpoint on their own; scripts do not.
+- The connector reads and writes the project, its deployments and its sandboxes. The Hobby plan includes some sandbox time; stop a sandbox when the check is done.
 
 The account is on Hobby today. Move to Pro before the house domain goes live (see above).
 
 ### The proposed `vercel.json`
 
-The file sits at the repo root. Nothing is deployed yet.
+The file sits at the repo root, and the live project builds with it.
 
 | Key | Value | Why |
 |---|---|---|

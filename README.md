@@ -4,6 +4,8 @@ The landing page of lastfomo, a research house with three wings: Machina (privat
 
 This repo holds the page as source, the brand as data, and the tools that keep one true to the other. One build turns the source into two publishable pages and refuses anything off brand.
 
+Live at **https://lastfomo.vercel.app**. Vercel builds it from this repo on every push.
+
 ## What this is
 
 - `site/` is the page: one HTML document with hash routes for home, the three case pages and Start a project.
@@ -84,7 +86,9 @@ There are two targets, built from the same source in one run.
 
 **claude.ai Artifact: `dist/artifact/lastfomo.html`.** A fragment with no doctype, `html`, `head` or `body`, because the Artifact supplies its own skeleton. CSS, JS and images are inlined; nothing else is needed. Publish it with the Artifact tool in Claude Code, and republish to the same URL for every update. Keep it under 16 MB. Videos are not inlined: they belong in the Artifact’s asset store.
 
-**Static host: `dist/web/`.** A full HTML document with `tokens.css`, `styles.css`, `boot.js`, `main.js` and `media/` beside it. Any static host serves the folder as it is, Vercel included. `dist/` is not committed, so a host that builds from Git runs `node tools/build.mjs` itself and serves `dist/web/`.
+**Static host: `dist/web/`.** A full HTML document with `tokens.css`, `styles.css`, `boot.js`, `main.js` and `media/` beside it. Any static host serves the folder as it is. `dist/` is not committed, so a host that builds from Git runs `node tools/build.mjs` itself and serves `dist/web/`.
+
+**Vercel, live: https://lastfomo.vercel.app.** The Vercel project `lastfomo` is connected to this repo and builds `dist/web/` with `vercel.json`. A push to the production branch (today `claude/great-hamilton-2sna3z`, the default) updates the live address; a push to any other branch gets a preview URL behind the Vercel login. A brand error fails the build, so nothing off brand goes live. Details and the checks behind them: `docs/publishing.md` → “The live project”.
 
 Publish only from `dist/`, after a build that passed.
 
