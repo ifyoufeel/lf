@@ -22,6 +22,19 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
 const BRAND = path.join(ROOT, 'brand');
 const FIXTURES = path.join(HERE, 'fixtures', 'brandcheck');
+
+// Fixtures check against a frozen copy of the brand data, so the owner's live ledger (placeholders cleared,
+// rights confirmed) cannot change what a rule test expects. The copy keeps one placeholder and one rights check.
+const FIX_BRAND = fs.mkdtempSync(path.join(os.tmpdir(), 'lf-brand-'));
+fs.cpSync(BRAND, FIX_BRAND, { recursive: true });
+{
+  const lp = path.join(FIX_BRAND, 'ledger.json');
+  const led = JSON.parse(fs.readFileSync(lp, 'utf8'));
+  led.placeholders = [{ token: '[YOUR EMAIL]', where: 'fixture', owner: 'fixture' }];
+  if (led.media && led.media['arca-salon.jpg']) led.media['arca-salon.jpg'].rights = 'check';
+  fs.writeFileSync(lp, JSON.stringify(led, null, 2));
+}
+process.on('exit', () => fs.rmSync(FIX_BRAND, { recursive: true, force: true }));
 const CLI = path.join(HERE, 'brandcheck.mjs');
 
 let passed = 0;
@@ -72,7 +85,7 @@ for (const f of fixtureFiles) {
   test(f, () => {
     const file = path.join(FIXTURES, f);
     const expect = parseExpect(fs.readFileSync(file, 'utf8'), f);
-    const res = check({ root: ROOT, html: file });
+    const res = check({ root: ROOT, html: file, brandDir: FIX_BRAND });
     const problems = [];
     const own = /^r(\d+)-/.exec(f);
     if (own) {
@@ -101,7 +114,7 @@ test('Artifact fragment (no html, head or body) passes like clean.html', () => {
     .replace(/<\/?(?:html|head|body)\b[^>]*>\n?/gi, '')
     .replace(/<meta charset="utf-8">\n?/, '');
   if (/<(?:html|head|body)\b/i.test(fragment)) return ['fragment still has document tags'];
-  const res = check({ root: ROOT, htmlText: fragment, file: 'fragment.html' });
+  const res = check({ root: ROOT, htmlText: fragment, file: 'fragment.html', brandDir: FIX_BRAND });
   return res.errors.length || res.warnings.length ? show([...res.errors, ...res.warnings]) : [];
 });
 
@@ -115,7 +128,7 @@ test('1.2 MB page of base64 data URIs checks in under 2 s', () => {
     .replace('.lead{', `.plate{background:url(data:image/png;base64,${b64})}\n.lead{`);
   if (big.length < 1_200_000) return [`fixture is only ${big.length} bytes`];
   const t0 = performance.now();
-  const res = check({ root: ROOT, htmlText: big, file: 'big.html' });
+  const res = check({ root: ROOT, htmlText: big, file: 'big.html', brandDir: FIX_BRAND });
   const ms = performance.now() - t0;
   const problems = [];
   if (ms > 2000) problems.push(`took ${Math.round(ms)} ms`);
