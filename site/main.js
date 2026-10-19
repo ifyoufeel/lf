@@ -379,7 +379,7 @@
   if (form && sent) {
     const title = $('#sent-title'), lead = $('#sent-lead'), submit = form.querySelector('button[type="submit"]');
     const leadText = live ? 'Your email app may open with the brief filled in. If it does not, copy the brief and send it to ' : lead.firstChild.textContent;
-    let shownAt = Date.now(); // the server refuses briefs filled faster than a person types
+    const shownAt = Date.now(); // the server refuses briefs filled faster than a person types; edits keep the time already spent
     $('#contact-mail').textContent = CONTACT;
     const show = (wasSent) => {
       title.textContent = wasSent ? 'Brief sent.' : 'Brief ready.';
@@ -421,7 +421,7 @@
       try { await navigator.clipboard.writeText(out.textContent); copyBtn.textContent = 'Copied'; }
       catch (_) { const r = document.createRange(); r.selectNodeContents(out); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); copyBtn.textContent = 'Selected, press copy'; }
     });
-    $('#brief-again').addEventListener('click', () => { sent.hidden = true; form.hidden = false; shownAt = Date.now(); form.querySelector('input[name="name"]').focus(); });
+    $('#brief-again').addEventListener('click', () => { sent.hidden = true; form.hidden = false; form.querySelector('input[name="name"]').focus(); });
   }
 
   route();

@@ -7,6 +7,7 @@
 import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const P = (...p) => join(ROOT, ...p);
@@ -72,10 +73,16 @@ const loopFiles = Object.values(media.loops).flatMap((v) => (v && typeof v === '
 for (const f of loopFiles) if (!existsSync(P('site', f))) fail(`missing loop ${f}`);
 // The web build posts the brief to the Vercel Function in api/brief.mjs; the Artifact cannot reach it, so it keeps copy and mailto.
 if (!existsSync(P('api/brief.mjs'))) fail('missing api/brief.mjs, the endpoint the web build posts the brief to');
-const webHtml = withManifest(html, { loops: media.loops, films: media.films, embed: true, brief: '/api/brief' });
-
 const refs = [...new Set([...html.matchAll(/(?:src|poster)="(media\/[^"]+)"/g)].map((m) => m[1]))];
 for (const r of refs) if (!existsSync(P('site', r))) fail(`missing ${r}`);
+
+// vercel.json caches /media/ for a year as immutable, so every media URL in dist/web carries its content's
+// fingerprint: a file replaced in site/media/ under the same name gets a new URL, and no browser keeps the old one.
+const stamp = (rel) => rel + '?v=' + createHash('sha256').update(readFileSync(P('site', rel))).digest('hex').slice(0, 10);
+const webLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, local(f) ? stamp(f) : f])) : local(v) ? stamp(v) : v]));
+const webHtml = withManifest(html, { loops: webLoops, films: media.films, embed: true, brief: '/api/brief' })
+  .replace(/(src|poster)="(media\/[^"?]+)"/g, (_, attr, rel) => `${attr}="${stamp(rel)}"`);
+if (/"media\/[^"?]+"/.test(webHtml)) fail('a media URL in dist/web has no content fingerprint (?v=)');
 
 // dist/web: the source as files, tokens generated, manifest filled. CSP-friendly: no inline script.
 rmSync(P('dist'), { recursive: true, force: true });
@@ -85,7 +92,8 @@ for (const f of ['tokens.css', 'styles.css', 'boot.js', 'main.js']) copyFileSync
 for (const r of [...refs, ...loopFiles]) { mkdirSync(dirname(P('dist/web', r)), { recursive: true }); copyFileSync(P('site', r), P('dist/web', r)); }
 
 // dist/artifact: a fragment (the Artifact skeleton supplies doctype, charset and viewport), everything inlined.
-// Loops are small (rule 12), so they travel inside the page as data URIs; films stay links, since an Artifact cannot embed YouTube.
+// Loops travel inside the page as data URIs, both formats of each (about 4.7 MB of the 16 MB limit); films stay links,
+// since an Artifact cannot embed YouTube.
 const loopUri = (rel) => `data:video/${rel.endsWith('.webm') ? 'webm' : 'mp4'};base64,` + readFileSync(P('site', rel)).toString('base64');
 const inline = (v) => (local(v) ? loopUri(v) : v);
 const artLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, inline(f)])) : inline(v)]));

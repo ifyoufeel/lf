@@ -11,9 +11,13 @@ const EMAIL = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[^\s@<>()",;:]+$/;
 const MAX_BODY = 20000; // bytes; a brief is a few kilobytes
 const MIN_FILL = 3000; // ms the visitor spent on the form, measured in their own browser
 
+// Field limits, the same as the maxlength attributes on the form. Longer values are refused, never cut short:
+// a brief that arrived without its end would read as complete.
+export const LIMITS = { name: 120, email: 200, org: 160, brief: 5000 };
+
 const strip = (v) => String(v ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '');
-const line = (v, max) => strip(v).replace(/\s+/g, ' ').trim().slice(0, max); // one line: no CR/LF reaches a header
-const text = (v, max) => strip(v).replace(/\r\n?/g, '\n').trim().slice(0, max);
+const line = (v) => strip(v).replace(/\s+/g, ' ').trim(); // one line: no CR/LF reaches a header
+const text = (v) => strip(v).replace(/\r\n?/g, '\n').trim();
 const json = (body, status, headers = {}) => Response.json(body, { status, headers: { 'cache-control': 'no-store', ...headers } });
 
 export async function handleBrief(request, { env = process.env, send = fetch } = {}) {
@@ -31,14 +35,15 @@ export async function handleBrief(request, { env = process.env, send = fetch } =
   try { f = JSON.parse(raw); } catch (_) { return json({ ok: false }, 400); }
   if (!f || typeof f !== 'object') return json({ ok: false }, 400);
 
-  if (line(f.website, 200)) return json({ ok: true }, 200); // honeypot: a bot filled the hidden field; answer as if sent
+  if (line(f.website)) return json({ ok: true }, 200); // honeypot: a bot filled the hidden field; answer as if sent
   if (!(Number(f.elapsed) >= MIN_FILL)) return json({ ok: false }, 400); // filled faster than a person types
 
   const b = {
-    wing: line(f.wing, 40), name: line(f.name, 120), email: line(f.email, 200),
-    org: line(f.org, 160), timeline: line(f.timeline, 40), brief: text(f.brief, 5000),
+    wing: line(f.wing), name: line(f.name), email: line(f.email),
+    org: line(f.org), timeline: line(f.timeline), brief: text(f.brief),
   };
-  if (!WINGS.has(b.wing) || !TIMELINES.has(b.timeline) || !b.name || !b.brief || !EMAIL.test(b.email)) {
+  const tooLong = Object.entries(LIMITS).some(([k, max]) => b[k].length > max);
+  if (tooLong || !WINGS.has(b.wing) || !TIMELINES.has(b.timeline) || !b.name || !b.brief || !EMAIL.test(b.email)) {
     return json({ ok: false }, 422);
   }
 

@@ -300,14 +300,16 @@ const brief = {
   timeline: '',
 };
 let briefSent = false;
-// The brief endpoint is mocked: nothing is emailed. "sent" answers {ok:true}; "refused" answers {ok:false}
-// with a 200, so the fallback is exercised without an HTTP error landing in the console check.
+// The brief endpoint is mocked: nothing is emailed. "sent" answers {ok:true} when the post passes the server's
+// 3 s fill-time rule (api/brief.mjs, MIN_FILL); "refused" answers {ok:false}. Both use a 200, so the fallback is
+// exercised without an HTTP error landing in the console check.
 const endpoint = { mode: 'sent', posts: [] };
 const briefUrl = await page.evaluate(() => { try { return JSON.parse(document.getElementById('lf-media').textContent).brief || ''; } catch (_) { return ''; } });
 if (briefUrl) {
   await page.route('**' + briefUrl, async (route) => {
-    endpoint.posts.push(route.request().postDataJSON());
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: endpoint.mode === 'sent' }) });
+    const post = route.request().postDataJSON();
+    endpoint.posts.push(post);
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: endpoint.mode === 'sent' && post.elapsed >= 3000 }) });
   });
 }
 await step('brief: fill and send', async () => {

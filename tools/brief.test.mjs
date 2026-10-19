@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const { handleBrief, WINGS, TIMELINES } = await import(pathToFileURL(join(ROOT, 'api/brief.mjs')).href);
+const { handleBrief, WINGS, TIMELINES, LIMITS } = await import(pathToFileURL(join(ROOT, 'api/brief.mjs')).href);
 
 const HOST = 'https://lastfomo.vercel.app';
 const good = { wing: 'Machina, private AI', name: 'Ada Example', email: 'ada@example.org', org: '', timeline: 'This year',
@@ -98,12 +98,20 @@ await test('malformed JSON and oversize bodies are refused', async () => {
   eq((await handleBrief(req({ ...good, brief: 'x'.repeat(30000) }), { env: ENV, send: m.send })).status, 413, 'oversize');
   eq(m.calls.length, 0, 'calls');
 });
+await test('an over-length field is refused, never sent cut short', async () => {
+  const m = mock();
+  eq((await handleBrief(req({ ...good, brief: 'word '.repeat(1001) + 'THE END' }), { env: ENV, send: m.send })).status, 422, 'long brief');
+  eq((await handleBrief(req({ ...good, name: 'N'.repeat(121) }), { env: ENV, send: m.send })).status, 422, 'long name');
+  eq(m.calls.length, 0, 'calls');
+  const at = await handleBrief(req({ ...good, brief: 'x'.repeat(5000) }), { env: ENV, send: m.send });
+  eq(at.status, 200, 'a brief of exactly 5000 characters');
+});
 await test('line breaks never reach the subject; control characters are stripped', async () => {
   const m = mock();
   await handleBrief(req({ ...good, name: 'Ada\r\nBcc: x@y.z\u0007' }), { env: ENV, send: m.send });
   eq(m.calls[0].body.subject, 'Project brief: Machina, private AI, Ada Bcc: x@y.z', 'subject');
 });
-await test('the wing and timeline lists match the form in site/index.html', async () => {
+await test('the wing and timeline lists and the field limits match the form in site/index.html', async () => {
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const form = html.slice(html.indexOf('<form class="form" id="brief">'), html.indexOf('</form>'));
   const radios = [...form.matchAll(/name="wing" value="([^"]+)"/g)].map((m) => m[1]);
@@ -112,6 +120,10 @@ await test('the wing and timeline lists match the form in site/index.html', asyn
   eq(JSON.stringify(radios.slice().sort()), JSON.stringify([...WINGS].sort()), 'wings');
   eq(JSON.stringify(options.slice().sort()), JSON.stringify([...TIMELINES].sort()), 'timelines');
   if (!/name="website"[^>]*tabindex="-1"/.test(form)) throw new Error('the honeypot input (name="website", tabindex="-1") is missing from the form');
+  for (const [field, max] of Object.entries(LIMITS)) {
+    const tag = (form.match(new RegExp(`<(?:input|textarea)[^>]*name="${field}"[^>]*>`)) || [])[0] || '';
+    eq((tag.match(/maxlength="(\d+)"/) || [])[1], String(max), `maxlength on ${field}`);
+  }
 });
 
 console.log(`\n${failed ? 'Failed' : 'Passed'}: ${passed} passed, ${failed} failed.`);

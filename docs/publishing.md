@@ -30,13 +30,13 @@ Research date: 17 October 2026. Every price below is as seen on that date. `verc
 The page and the build already handle this:
 
 - Routing uses hash routes, and plain anchors (`#machina`) also work, because an Artifact link passes only plain anchors (`site/main.js`, `route()`).
-- The loops are small (the Arca loop is 151 KB as MP4, 45 KB as WebM), so the build inlines them into the Artifact as data URIs. No upload.
+- The build inlines the loops into the Artifact as data URIs, both formats of each (MP4 and WebM, so they play in browsers built without H.264). No upload. With all three loops that is about 4.7 MB of the page (Arca 153 + 44 KB, Machina 886 + 740 KB, Hortus 1,110 + 691 KB, a third more as base64), and it arrives with the page, where the web build loads each loop only when its screen is active. If the Artifact must get lighter, move the loops to its asset store (as for the films) and reference them by URL.
 - The films are on YouTube. In the Artifact every play control is a plain link that opens YouTube in a new tab; the web build plays the same film in place (`site/media.json` → `films`, `embed: false` for the Artifact).
 - The brief composer shows the brief with a copy button whenever there is no address, and opens the mail app only when one is set.
 
 ### Steps
 
-1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 1 MB with the stills inlined, plus a few hundred KB for each inlined loop; the limit is 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
+1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 5.8 MB: 1.2 MB of page and stills, 4.7 MB of inlined loops; the limit is 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
 2. Publish with the Artifact tool: `file_path` `dist/artifact/lastfomo.html` and a one-word icon. Keep the returned URL.
 3. For every later change, rebuild and republish with the same `file_path`, which keeps the same URL. A new path creates a new link.
 4. Share the link. Name the open items in the message: any loop still missing (the build names them; their posters stand in), the unconfirmed wording.
@@ -130,12 +130,7 @@ The file sits at the repo root, and the live project builds with it.
 - `/media/(.*)`: `public, max-age=31536000, immutable`. Stills and posters are a year in the browser.
 - Everything else keeps Vercel’s default for static files. HTML, CSS and JS file names carry no hash, so they must revalidate.
 
-A year-long immutable cache is only safe while a changed file gets a new URL. Two ways to hold that line:
-
-1. **Recommended, a build change:** `tools/build.mjs` appends a short content hash to every media reference in `dist/web/index.html`, for example `media/machina-rig.jpg?v=3f2a1c`. The file name, the ledger entry and the source stay as they are.
-2. **Without a build change:** never replace a file in `site/media/` in place. A new still gets a new name and a new ledger entry.
-
-If neither holds, lower the media rule to `public, max-age=604800` (a week) before launch.
+A year-long immutable cache is only safe while a changed file gets a new URL. Since 19 October 2026 `tools/build.mjs` holds that line: every media reference in `dist/web/index.html` (stills, posters and the loops in the manifest) carries a short content hash, for example `media/machina-loop.jpg?v=37ae69f546`, and the build fails if one is missing. The file name, the ledger entry and the source stay as they are, so a file may be replaced in `site/media/` in place. (The Machina and Hortus posters were, that day; the hash is what keeps visitors from seeing the old ones.)
 
 ### Security headers
 
@@ -350,10 +345,10 @@ Vercel Web Analytics uses no cookies. It identifies a visitor by a hash of the i
 
 | Item | Budget | Today |
 |---|---|---|
-| HTML + CSS + JS, uncompressed | 150 KB | about 89 KB (`index.html` 42.8, `main.js` 22.0, `styles.css` 21.6, `tokens.css` 2.1, `boot.js` 0.4) |
-| A still or poster | 80 KB | largest 76.5 KB (`hortus-loop.jpg`) |
-| A loop | 1.2 MB | 0.35 to 1.2 MB |
-| Video loaded on first paint | none | none: `preload="none"`, source set on the active screen |
+| HTML + CSS + JS, uncompressed | 150 KB | about 93 KB (`index.html` 39.7, `main.js` 27.7, `styles.css` 22.9, `tokens.css` 2.0, `boot.js` 0.4) |
+| A still or poster | 80 KB | largest 59 KB (`hortus-plants.jpg`) |
+| A loop | 1.2 MB | 44 KB to 1.1 MB (largest: `hortus-loop.mp4`, 1,110 KB) |
+| Video loaded on first paint | none | web: none (`preload="none"`, source set on the active screen); the Artifact carries its loops inline |
 | Fonts | `display=swap`; preconnect to both Google origins | both in place |
 | Core Web Vitals at the 75th percentile | LCP 2.5 s or less, INP 200 ms or less, CLS 0.1 or less ([Web Vitals](https://web.dev/articles/vitals)) | measure on the preview |
 
@@ -383,7 +378,6 @@ For the owner:
 For the orchestrator (they own `tools/build.mjs`, `site/` and the contract):
 
 - Two manifests: per-target video URLs in `site/media.json`.
-- A content hash on media references in `dist/web`, or the rename rule, so the year-long media cache stays safe.
 - Keep `dist/web` free of inline scripts, or emit CSP hashes; the contract says “inline CSS and JS”, the build writes files.
 - Web-only head tags (canonical, Open Graph, icons), `robots.txt`, `sitemap.xml`, `404.html`, `og.jpg` and the icons in `dist/web`.
 - The `data-endpoint` attribute, the honeypot and the `t` field on the form, and the fetch path in `main.js`.
