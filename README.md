@@ -112,9 +112,9 @@ git config core.hooksPath .githooks
 
 ## Open items for the owner
 
-1. **The Machina and Hortus loops.** Their GIF previews arrived in chat as single frames, so the old posters stand in. Send the GIF files again (zipped, or committed to this repo) and run `python3 tools/media/gif_to_loop.py <preview.gif> <wing>`, then list them in `site/media.json`.
+1. **The email key for the brief.** “Send the brief” posts to `api/brief.mjs`, which emails the brief to lastfomo@gmail.com through Resend. It needs one key: create a free account at resend.com with lastfomo@gmail.com, create an API key, and add it in Vercel (project `lastfomo` → Settings → Environment Variables) as `RESEND_API_KEY` for Production, then redeploy. Until then the form falls back to the composed brief with copy and the mail link, as before.
 2. **Films inside the Artifact.** The web build plays the YouTube films in a popup. An Artifact cannot embed YouTube, so there the popup needs the film files: upload the three MP4s and they go to the Artifact’s asset store (`site/media.json` → `films.<wing>.asset`). Until then the Artifact opens YouTube in a new tab.
-3. **Unconfirmed wording.** The roadmap’s “Next” items (more private builds; pilot beds to full farms; a private catalogue by invitation) and the “What happens next” steps on Start a project (we read the brief; a short call; a written plan) were written as suggestions. Confirm or rewrite them.
+3. **Unconfirmed wording.** The roadmap’s “Next” items (more private builds; pilot beds to full farms; a private catalogue by invitation), the “What happens next” steps on Start a project (we read the brief; a short call; a written plan) and the brief’s sending states (“Sending…”, “Brief sent.”, “It is on its way to lastfomo@gmail.com.”) were written as suggestions. Confirm or rewrite them.
 
 The contact address is lastfomo@gmail.com (`brand/ledger.json` → `contact`). Every image and film is the owner’s.
 

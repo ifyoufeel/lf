@@ -11,6 +11,7 @@
   const FILMS = MEDIA.films || {};
   // The web build plays films in place; an Artifact cannot embed other sites, so there the links open YouTube.
   const EMBED = MEDIA.embed !== false;
+  const BRIEF_URL = typeof MEDIA.brief === 'string' ? MEDIA.brief : ''; // the web build posts the brief here; the Artifact has none
   // A loop is { mp4, webm } (or one path); pick what this browser decodes. Some builds ship without H.264.
   const probe = document.createElement('video');
   const loopSrc = (k) => {
@@ -376,19 +377,43 @@
   const live = CONTACT.indexOf('@') > 0;
   const form = $('#brief'), sent = $('#sent'), out = $('#brief-text'), copyBtn = $('#copy-brief');
   if (form && sent) {
+    const title = $('#sent-title'), lead = $('#sent-lead'), submit = form.querySelector('button[type="submit"]');
+    const leadText = live ? 'Your email app may open with the brief filled in. If it does not, copy the brief and send it to ' : lead.firstChild.textContent;
+    let shownAt = Date.now(); // the server refuses briefs filled faster than a person types
     $('#contact-mail').textContent = CONTACT;
-    if (live) $('#sent-lead').firstChild.textContent = 'Your email app may open with the brief filled in. If it does not, copy the brief and send it to ';
-    form.addEventListener('submit', (e) => {
+    const show = (wasSent) => {
+      title.textContent = wasSent ? 'Brief sent.' : 'Brief ready.';
+      lead.firstChild.textContent = wasSent ? 'It is on its way to ' : leadText;
+      copyBtn.textContent = 'Copy the brief';
+      form.hidden = true; sent.hidden = false; sent.focus({ preventScroll: true });
+    };
+    // Posts the brief to the house inbox; resolves true only when the server says it was sent.
+    const post = async (f) => {
+      if (!BRIEF_URL) return false;
+      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 15000);
+      try {
+        const res = await fetch(BRIEF_URL, {
+          method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
+          body: JSON.stringify({ wing: f.get('wing'), name: f.get('name'), email: f.get('email'), org: f.get('org'),
+            timeline: f.get('timeline'), brief: f.get('brief'), website: f.get('website'), elapsed: Date.now() - shownAt }),
+        });
+        return res.ok && (await res.json()).ok === true;
+      } catch (_) { return false; } finally { clearTimeout(timer); }
+    };
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!form.reportValidity()) return;
+      if (submit.disabled || !form.reportValidity()) return;
       const f = new FormData(form);
       const wing = String(f.get('wing') || 'Not sure yet'), name = String(f.get('name') || '').trim();
       const body = ['Wing: ' + wing, 'Name: ' + name, 'Email: ' + f.get('email'), 'Organisation: ' + (String(f.get('org') || '').trim() || 'not given'),
         'Timeline: ' + f.get('timeline'), '', String(f.get('brief') || '').trim()].join('\n');
       out.textContent = body;
-      copyBtn.textContent = 'Copy the brief';
-      form.hidden = true; sent.hidden = false; sent.focus({ preventScroll: true });
-      if (live) {
+      const label = submit.textContent;
+      submit.disabled = true; submit.textContent = 'Sending…'; form.setAttribute('aria-busy', 'true');
+      const ok = await post(f);
+      submit.disabled = false; submit.textContent = label; form.removeAttribute('aria-busy');
+      show(ok);
+      if (!ok && live) {
         location.href = 'mailto:' + CONTACT + '?subject=' + encodeURIComponent('Project brief: ' + wing + ', ' + name) + '&body=' + encodeURIComponent(body);
       }
     });
@@ -396,7 +421,7 @@
       try { await navigator.clipboard.writeText(out.textContent); copyBtn.textContent = 'Copied'; }
       catch (_) { const r = document.createRange(); r.selectNodeContents(out); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); copyBtn.textContent = 'Selected, press copy'; }
     });
-    $('#brief-again').addEventListener('click', () => { sent.hidden = true; form.hidden = false; form.querySelector('input[name="name"]').focus(); });
+    $('#brief-again').addEventListener('click', () => { sent.hidden = true; form.hidden = false; shownAt = Date.now(); form.querySelector('input[name="name"]').focus(); });
   }
 
   route();

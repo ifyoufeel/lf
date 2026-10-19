@@ -70,7 +70,9 @@ const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
 for (const m of html.matchAll(/\bdata-(go|scroll)="([^"]+)"/g)) if (!ids.has(m[2])) fail(`data-${m[1]}="${m[2]}" points at no element (no id="${m[2]}" in site/index.html)`);
 const loopFiles = Object.values(media.loops).flatMap((v) => (v && typeof v === 'object' ? Object.values(v) : [v])).filter(local);
 for (const f of loopFiles) if (!existsSync(P('site', f))) fail(`missing loop ${f}`);
-const webHtml = withManifest(html, { loops: media.loops, films: media.films, embed: true });
+// The web build posts the brief to the Vercel Function in api/brief.mjs; the Artifact cannot reach it, so it keeps copy and mailto.
+if (!existsSync(P('api/brief.mjs'))) fail('missing api/brief.mjs, the endpoint the web build posts the brief to');
+const webHtml = withManifest(html, { loops: media.loops, films: media.films, embed: true, brief: '/api/brief' });
 
 const refs = [...new Set([...html.matchAll(/(?:src|poster)="(media\/[^"]+)"/g)].map((m) => m[1]))];
 for (const r of refs) if (!existsSync(P('site', r))) fail(`missing ${r}`);

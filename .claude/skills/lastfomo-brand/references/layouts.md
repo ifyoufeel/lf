@@ -85,6 +85,6 @@ To render crisply: draw at the master or at 2x, downscale once with area averagi
 - **Scroll by scroll.** Each section is a full screen (`height: 100%` of the scroll container, not `100vh`), with `scroll-snap-type: y mandatory` and `scroll-snap-stop: always`. Under 620 px of height, switch to proximity snapping and let sections grow.
 - **Fit a phone.** Every screen must fit 390 x 844 without scrolling: shrink holders (`min(34svh, 320px)` on mobile, `min(64svh, 620px)` on desktop), stack the copy below, and drop the lead paragraph on very short screens.
 - **Spacing.** Margins `clamp(20px, 5vw, 96px)`, content max width 1320 px, display type in `clamp()`.
-- **Chrome.** A fixed, blurred header with the lockup and a "Start a project" pill; a dots index on desktop and a two-pixel progress bar on mobile, both in the active wing colour.
+- **Chrome.** A fixed, blurred header with the horse mark alone (the owner’s choice, October 2026; the wordmark lives in the hero) and a "Start a project" pill; a dots index on desktop and a two-pixel progress bar on mobile, both in the active wing colour.
 - **Holders.** One arch holder class for all wings. Add `-webkit-mask-image: -webkit-radial-gradient(white, black)` so playing video stays clipped to the rounded top in Safari.
 - **Themes and safety.** Colour tokens on `:root`, redefined for dark, with explicit body backgrounds. `viewport-fit=cover` with safe-area padding. `prefers-reduced-motion` support and visible focus rings in the wing colour.

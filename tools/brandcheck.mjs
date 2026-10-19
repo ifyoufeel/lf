@@ -795,10 +795,12 @@ function loadBrand(brandDir, options, root, F) {
   const tokens = options.tokens || read('tokens.json');
   const ledger = options.ledger || read('ledger.json');
   if (!tokens || !ledger) return null;
-  const marks = {};
+  const marks = { viewBox: {} };
   for (const name of ['horse', 'lockup']) {
     const p = path.join(brandDir, 'marks', name + '.svg');
-    marks[name] = fs.existsSync(p) ? svgPathDs(fs.readFileSync(p, 'utf8')) : null;
+    const svg = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
+    marks[name] = svg ? svgPathDs(svg) : null;
+    marks.viewBox[name] = svg ? (svg.match(/\bviewBox="([^"]+)"/) || [])[1] || null : null;
   }
   return { tokens, ledger, marks };
 }
@@ -1237,18 +1239,27 @@ export function check(options = {}) {
         const target = ref && html.all.find((n) => n.attrs.id === ref);
         if (target) paths = [...descendants(target)].filter((n) => n.name === 'path' && n.attrs.d != null);
       }
+      // The header carries one exact mark: the horse alone (brand/marks/horse.svg, the owner's choice) or the full
+      // lockup (brand/marks/lockup.svg). Its viewBox must be the mark's own, so the frame never crops the horse.
       const line = hline(svg);
+      const sameBox = (a, b) => String(a || '').trim().split(/[\s,]+/).map(Number).join(' ') === String(b || '').trim().split(/[\s,]+/).map(Number).join(' ');
       if (!paths.length) {
-        r11('The header brand svg has no paths to check against brand/marks/lockup.svg.', hfile.display, line);
+        r11('The header brand svg has no paths to check against brand/marks/horse.svg or lockup.svg.', hfile.display, line);
       } else {
-        const hd = pathDiff(paths[0].attrs.d, lockup[0]);
+        const hd = pathDiff(paths[0].attrs.d, horse);
         if (hd) r11(`The header horse differs from brand/marks/horse.svg (${diffText(hd)}). Copy the d attribute exactly.`, hfile.display, hline(paths[0]));
-        if (paths.length !== lockup.length) {
-          r11(`The header brand svg has ${plural(paths.length, 'path', 'paths')}. brand/marks/lockup.svg has ${lockup.length}: the horse and ${lockup.length - 1} wordmark paths.`, hfile.display, line);
+        const mark = paths.length === 1 ? 'horse' : paths.length === lockup.length ? 'lockup' : null;
+        if (!mark) {
+          r11(`The header brand svg has ${plural(paths.length, 'path', 'paths')}. It holds either the horse alone (1 path, brand/marks/horse.svg) or the lockup (${lockup.length} paths, brand/marks/lockup.svg).`, hfile.display, line);
         } else {
-          const bad = [];
-          for (let k = 1; k < lockup.length; k++) if (pathDiff(paths[k].attrs.d, lockup[k])) bad.push(k);
-          if (bad.length) r11(`Wordmark ${bad.length === 1 ? 'path' : 'paths'} ${bad.join(', ')} in the header differ from brand/marks/lockup.svg.`, hfile.display, hline(paths[bad[0]]));
+          if (mark === 'lockup') {
+            const bad = [];
+            for (let k = 1; k < lockup.length; k++) if (pathDiff(paths[k].attrs.d, lockup[k])) bad.push(k);
+            if (bad.length) r11(`Wordmark ${bad.length === 1 ? 'path' : 'paths'} ${bad.join(', ')} in the header differ from brand/marks/lockup.svg.`, hfile.display, hline(paths[bad[0]]));
+          }
+          const want = marks.viewBox?.[mark];
+          const box = svg.attrs.viewbox;
+          if (want && !sameBox(box, want)) r11(`The header ${mark === 'horse' ? 'horse' : 'lockup'} svg has viewBox "${box || ''}"; brand/marks/${mark}.svg has "${want}". Use the mark's own viewBox so nothing is cropped.`, hfile.display, line);
         }
       }
     } else if (mode === 'source') {

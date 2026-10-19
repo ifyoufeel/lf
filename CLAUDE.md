@@ -46,7 +46,7 @@ The rest of `site/` is hand-written source. `dist/` and `out/` are generated and
 4. Look at the contact sheets, `out/qa/<route>/<viewport>-<scheme>-contact.jpg`, yourself. In `out/qa/report.json` → `summary`, expect `fontsLoaded: true` and zero `overflowScreens`, `clippedTextScreens`, `coveredTextScreens`, `consoleErrors` and `pageErrors`. After any behaviour change, also run `node tools/qa/smoke.mjs`.
 5. Publish, and name any placeholder in your reply.
 
-Other commands: `node tools/brandcheck.mjs` checks `site/` on its own (`--html <file>` for one page, `--json` for machine output). After changing the checker, run `node tools/brandcheck.test.mjs`.
+Other commands: `node tools/brandcheck.mjs` checks `site/` on its own (`--html <file>` for one page, `--json` for machine output). After changing the checker, run `node tools/brandcheck.test.mjs`. After changing `api/brief.mjs` or the brief form, run `node tools/brief.test.mjs`.
 
 ## Publishing targets
 
@@ -66,9 +66,10 @@ Publish only from `dist/`, after a build that passed: the build checks the page 
 
 ## Open items
 
-- Contact: lastfomo@gmail.com (`ledger.json` → `contact`), in the footer and the brief composer.
+- Contact: lastfomo@gmail.com (`ledger.json` → `contact`), in the footer and the brief composer. On the web build “Send the brief” posts to `api/brief.mjs` (a Vercel Function), which emails it through Resend once `RESEND_API_KEY` is set in the Vercel project; without the key, and in the Artifact, the form falls back to copy and mailto.
 - The roadmap “Next” items and the “What happens next” steps are unconfirmed wording (`ledger.json` → `unconfirmed`).
-- Loops: Arca plays (`site/media/arca-loop.*`). Machina and Hortus still show posters; make their loops from the owner’s GIF previews with `python3 tools/media/gif_to_loop.py <preview.gif> <wing>` and list them in `site/media.json`.
+- Loops: all three wings play, made from the owner’s GIF previews (`site/media/*_loop_v4.gif`, sources that do not ship) with `python3 tools/media/gif_to_loop.py <preview.gif> <wing>`, each resting at 3.6 s (`site/media.json` → `hold`).
+- The header shows the horse alone (the owner’s choice); R11 holds it to `brand/marks/horse.svg` and its viewBox.
 - Films are the owner’s YouTube uploads (`site/media.json` → `films`). Play controls are links to them; the web build plays them in place, the Artifact opens YouTube. The build fails if a link disagrees with `media.json`. Inside the Artifact the popup needs the film files in its asset store (`films.<wing>.asset`); until then it links out.
 - Every image and film is the owner’s; there is nothing to clear.
 

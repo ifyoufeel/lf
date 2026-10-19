@@ -268,7 +268,7 @@ await step('nav: Skip to content moves focus into the view', async () => {
   return 'focus on #view-machina, route kept';
 });
 
-await step('motion: plates and the Arca loop come to rest', async () => {
+await step('motion: plates and the wing loops come to rest', async () => {
   await go('#/', homeView);
   await page.evaluate(() => { const v = document.querySelector('main.view:not([hidden])'); v.style.scrollBehavior = 'auto'; v.scrollTop = 0; });
   await page.mouse.move(5, 5);
@@ -276,14 +276,21 @@ await step('motion: plates and the Arca loop come to rest', async () => {
   const hash = () => page.evaluate(() => [...document.querySelectorAll('.hero canvas.plate')].map((c) => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let h = 0; for (let i = 0; i < d.length; i += 97) h = (h * 31 + d[i]) | 0; return h; }).join());
   const a = await hash(); await page.waitForTimeout(600); const b = await hash();
   check(a === b, 'the hero plates still change 6 s after the pointer stopped');
-  const loop = await page.evaluate(async () => {
-    const v = document.querySelector('#view-home'); v.scrollTop = document.getElementById('arca').offsetTop;
-    await new Promise((r) => setTimeout(r, 6500));
-    const el = document.querySelector('video[data-loop="arca"]');
-    return el ? { paused: el.paused, t: +el.currentTime.toFixed(2), src: !!el.currentSrc } : null;
-  });
-  if (loop && loop.src) check(loop.paused && loop.t > 3 && loop.t < 4.5, `the Arca loop did not rest on its open frame (paused ${loop.paused}, t ${loop.t})`);
-  return `plates still; Arca loop ${loop && loop.src ? 'rests at ' + loop.t + ' s' : 'not loaded'}`;
+  // Each wing loop plays once when its screen becomes active, then rests on media.json's hold frame (3.6 s).
+  const rests = [];
+  for (const wing of ['hortus', 'machina', 'arca']) {
+    const loop = await page.evaluate(async (w) => {
+      const v = document.querySelector('#view-home'); const s = document.getElementById(w);
+      if (!s) return null;
+      v.scrollTop = s.offsetTop;
+      await new Promise((r) => setTimeout(r, 6500));
+      const el = document.querySelector(`video[data-loop="${w}"]`);
+      return el ? { paused: el.paused, t: +el.currentTime.toFixed(2), src: !!el.currentSrc } : null;
+    }, wing);
+    if (loop && loop.src) check(loop.paused && loop.t > 3 && loop.t < 4.5, `the ${wing} loop did not rest on its hold frame (paused ${loop.paused}, t ${loop.t})`);
+    rests.push(`${wing} ${loop && loop.src ? 'rests at ' + loop.t + ' s' : 'not loaded'}`);
+  }
+  return `plates still; ${rests.join(', ')}`;
 });
 
 const brief = {
@@ -293,6 +300,16 @@ const brief = {
   timeline: '',
 };
 let briefSent = false;
+// The brief endpoint is mocked: nothing is emailed. "sent" answers {ok:true}; "refused" answers {ok:false}
+// with a 200, so the fallback is exercised without an HTTP error landing in the console check.
+const endpoint = { mode: 'sent', posts: [] };
+const briefUrl = await page.evaluate(() => { try { return JSON.parse(document.getElementById('lf-media').textContent).brief || ''; } catch (_) { return ''; } });
+if (briefUrl) {
+  await page.route('**' + briefUrl, async (route) => {
+    endpoint.posts.push(route.request().postDataJSON());
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: endpoint.mode === 'sent' }) });
+  });
+}
 await step('brief: fill and send', async () => {
   await go('#/start', 'start');
   const form = page.locator('form#brief');
@@ -323,7 +340,21 @@ await step('brief: fill and send', async () => {
   await page.locator('#sent').waitFor({ state: 'visible', timeout: 4000 })
     .catch(() => { throw new Error('#sent did not become visible'); });
   briefSent = true;
-  return `sent, timeline "${brief.timeline}"`;
+  const title = (await page.locator('#sent-title').textContent()).trim();
+  check(title === (briefUrl ? 'Brief sent.' : 'Brief ready.'), `#sent-title reads "${title}"`);
+  return `"${title}", timeline "${brief.timeline}"`;
+});
+
+await step('brief: the endpoint receives the brief', async () => {
+  if (!briefUrl) throw new Skip('no endpoint in this page (the Artifact keeps copy and mailto)');
+  check(briefSent, 'the brief was not sent');
+  check(endpoint.posts.length === 1, `${endpoint.posts.length} posts to ${briefUrl}`);
+  const p = endpoint.posts[0];
+  const bad = Object.entries({ wing: /machina/i.test(p.wing), name: p.name === brief.name, email: p.email === brief.email,
+    timeline: p.timeline === brief.timeline, brief: p.brief === brief.text, website: p.website === '', elapsed: Number.isFinite(p.elapsed) && p.elapsed >= 0 })
+    .filter(([, ok]) => !ok).map(([k]) => k);
+  check(!bad.length, `wrong fields: ${bad.join(', ')} in ${JSON.stringify(p).slice(0, 200)}`);
+  return `posted ${Object.keys(p).length} fields`;
 });
 
 await step('brief: #brief-text holds the inputs', async () => {
@@ -348,6 +379,22 @@ await step('brief: #copy-brief', async () => {
   const copied = clip !== null && clip.trim() === out.trim();
   check(copied || after !== before, `nothing happened (label "${after}")`);
   return `${copied ? 'clipboard holds the brief' : 'clipboard not readable'}, label "${after}"`;
+});
+
+await step('brief: a refused send falls back to copy and mailto', async () => {
+  if (!briefUrl) throw new Skip('no endpoint in this page');
+  check(briefSent, 'the brief was not sent');
+  endpoint.mode = 'refused';
+  await page.locator('#brief-again').click();
+  await page.locator('form#brief').waitFor({ state: 'visible', timeout: 3000 });
+  await page.locator('form#brief [type="submit"]').first().click();
+  await page.locator('#sent').waitFor({ state: 'visible', timeout: 4000 });
+  const title = (await page.locator('#sent-title').textContent()).trim();
+  const lead = (await page.locator('#sent-lead').textContent()).trim();
+  check(title === 'Brief ready.', `#sent-title reads "${title}"`);
+  check(/copy the brief/i.test(lead), `the lead does not offer the copy: "${lead}"`);
+  check(endpoint.posts.length === 2, `${endpoint.posts.length} posts`);
+  return `"${title}"`;
 });
 
 await step('theme: button#theme cycles dark, light, auto', async () => {

@@ -292,7 +292,8 @@
   "unconfirmed": [
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
-    "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording."
+    "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
+    "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief."
   ],
   "conflicts": [
     {
@@ -318,17 +319,23 @@
       "site": "arca-film.jpg (the YouTube thumbnail) frames the painting in a rectangle beside two arched posters",
       "figma": "Rule 8: every wing uses the arch holder",
       "decision": "Owner: no change needed."
+    },
+    {
+      "topic": "Header mark",
+      "site": "the header carried the lockup (horse and wordmark)",
+      "figma": "the lockup (9:7) is the full signature; the horse (9:3) stands alone as the mark",
+      "decision": "Owner: the header shows the horse alone. The wordmark stays in the hero. R11 accepts the exact horse or the exact lockup, each with its own viewBox."
     }
   ],
   "media": {
     "machina-loop.jpg": {
       "alt": "",
-      "role": "loop poster",
+      "role": "loop poster (first frame of the Machina loop)",
       "rights": "own"
     },
     "hortus-loop.jpg": {
       "alt": "",
-      "role": "loop poster",
+      "role": "loop poster (first frame of the Hortus loop)",
       "rights": "own"
     },
     "arca-loop.jpg": {
@@ -405,6 +412,26 @@
       "alt": "",
       "role": "VP9 twin of arca-loop.mp4",
       "rights": "own"
+    },
+    "machina-loop.mp4": {
+      "alt": "",
+      "role": "loop: the rig, a card slides in, the crosshairs turn chartreuse (5 s, from the owner's GIF preview); rests at 3.6 s",
+      "rights": "own"
+    },
+    "machina-loop.webm": {
+      "alt": "",
+      "role": "VP9 twin of machina-loop.mp4",
+      "rights": "own"
+    },
+    "hortus-loop.mp4": {
+      "alt": "",
+      "role": "loop: a seed splits and the sprout rises (5 s, from the owner's GIF preview); rests at 3.6 s",
+      "rights": "own"
+    },
+    "hortus-loop.webm": {
+      "alt": "",
+      "role": "VP9 twin of hortus-loop.mp4",
+      "rights": "own"
     }
   },
   "videos": {
@@ -421,11 +448,11 @@
     ]
   },
   "videoSources": {
-    "$note": "Loops come from the owner's GIF previews via tools/media/gif_to_loop.py. Films are the owner's YouTube uploads (links confirmed by the owner); durations are the ledger's.",
+    "$note": "Loops come from the owner's GIF previews via tools/media/gif_to_loop.py; the GIFs stay in site/media as sources and do not ship. Films are the owner's YouTube uploads (links confirmed by the owner); durations are the ledger's.",
     "loops": {
-      "arca": "site/media/arca-loop.mp4 + .webm",
-      "machina": "waiting for the GIF (it arrived as a still)",
-      "hortus": "waiting for the GIF (it arrived as a still)"
+      "arca": "site/media/arca-loop.mp4 + .webm, from site/media/arca_loop_v4.gif",
+      "machina": "site/media/machina-loop.mp4 + .webm, from site/media/machina_loop_v4.gif",
+      "hortus": "site/media/hortus-loop.mp4 + .webm, from site/media/hortus_loop_v4.gif"
     },
     "films": {
       "machina": "https://www.youtube.com/watch?v=hWzvRWBzQFQ",

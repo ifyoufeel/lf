@@ -1,8 +1,16 @@
 {
   "$note": "Loops play muted inside the wing arches (3:4, made with tools/media/gif_to_loop.py, an MP4 and a WebM twin); null keeps the poster. \"hold\" (seconds) is where a loop rests after playing once per visit (WCAG 2.2.2); without it the loop rests on its last frame. Films live on YouTube: links everywhere, played in place on the web build only (Artifacts cannot embed other sites). A film's \"asset\" is its URL in the Artifact's asset store (upload the MP4 to the published Artifact); with it the Artifact plays the film in its own popup instead of linking out.",
   "loops": {
-    "machina": null,
-    "hortus": null,
+    "machina": {
+      "mp4": "media/machina-loop.mp4",
+      "webm": "media/machina-loop.webm",
+      "hold": 3.6
+    },
+    "hortus": {
+      "mp4": "media/hortus-loop.mp4",
+      "webm": "media/hortus-loop.webm",
+      "hold": 3.6
+    },
     "arca": {
       "mp4": "media/arca-loop.mp4",
       "webm": "media/arca-loop.webm",

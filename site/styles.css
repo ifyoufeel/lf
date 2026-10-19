@@ -10,7 +10,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 a{color:inherit}
 button{font:inherit;color:inherit}
 img,video,canvas{max-width:100%}
-.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sr,.hp{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.btn:disabled{opacity:.6;cursor:progress}
 :focus-visible{outline:2px solid var(--wing-t);outline-offset:4px}
 .skip{position:fixed;left:max(12px,env(safe-area-inset-left,0px));top:-60px;z-index:60;background:var(--fg);color:var(--bg);padding:10px 14px;font:500 12px/1 var(--mono);text-decoration:none}
 .skip:focus{top:calc(env(safe-area-inset-top,0px) + 12px)}

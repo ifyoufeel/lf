@@ -243,51 +243,21 @@ The Vercel Toolbar on preview deployments needs `vercel.live` in five directives
 
 ### How it works
 
-- The web build marks the form with an endpoint (for example `data-endpoint="/api/brief"`); the Artifact build does not. `main.js` posts the brief as JSON when the attribute is there. On success it shows a sent state. On any failure, or when there is no endpoint, it shows today’s composed brief with the copy button and the mailto link. The sent-state wording is new copy and needs the owner’s approval in `ledger.json` → `approvedLines` first.
+- The web build gives the page an endpoint (`brief: "/api/brief"` in its manifest); the Artifact build does not. `main.js` posts the brief as JSON when the endpoint is there. On success it shows a sent state. On any failure, or when there is no endpoint, it shows the composed brief with the copy button and the mailto link. The sent-state wording is new copy, shipped as suggested wording (`ledger.json` → `unconfirmed`) until the owner approves it into `approvedLines`.
 - `api/brief.mjs` at the repo root is a Vercel Function. Plain files in `/api` need no configuration and may export a web-standard `fetch` handler ([Node.js runtime](https://vercel.com/docs/functions/runtimes/node-js), [functions API](https://vercel.com/docs/functions/functions-api-reference)). Verify on the first preview that it deploys beside `dist/web` with the “Other” preset.
 - It calls Resend’s REST API with `fetch`, so it has zero dependencies ([Resend OpenAPI](https://github.com/resend/resend-openapi): `POST https://api.resend.com/emails`, bearer key, `from`, `to`, `subject`, `text`, `reply_to`).
 - Environment variables: `RESEND_API_KEY`, `BRIEF_TO` (`lastfomo@gmail.com`), `BRIEF_FROM` (for example `lastfomo <brief@send.[DOMAIN]>`). Set them for Production only; previews then fall back to copy, which keeps test briefs out of the house inbox.
 - Request bodies are capped at 4.5 MB on Vercel Functions ([limitations](https://vercel.com/docs/functions/limitations)); a brief is a few kilobytes.
 
-A sketch, syntax-checked and unit-tested against a mocked email API (send, honeypot, timing, validation, origin and method):
+Shipped on 19 October 2026 as `api/brief.mjs`, with `node tools/brief.test.mjs` (13 tests, the email API mocked) in CI. It follows the plan above with these choices:
 
-```js
-// api/brief.mjs: a proposal, not shipped. Zero dependencies; Node 22 globals only.
-const WINGS = new Set(['Machina, private AI', 'Hortus, nature research', 'Arca, art and artifacts', 'Not sure yet']);
-const TIMELINES = new Set(['As soon as possible', 'In the next three months', 'This year', 'Just exploring']);
-const clean = (v, max) => String(v ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim().slice(0, max);
-const EMAIL = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+- The browser sends `elapsed`, the time spent on the form measured on its own clock, instead of a timestamp, so a visitor whose clock runs fast is not refused. The function refuses anything under 3 s.
+- `BRIEF_TO` defaults to lastfomo@gmail.com and `BRIEF_FROM` to Resend’s test sender, `onboarding@resend.dev`, which delivers only to the address of the Resend account itself. So the one setting the owner must add is `RESEND_API_KEY`, from a Resend account opened with lastfomo@gmail.com. A verified sending domain (`BRIEF_FROM`) can wait for the house domain.
+- Without the key the function answers 503, and the page shows the composed brief with copy and the mail link, exactly as before.
+- The page shows “Sending…” on the button, then “Brief sent.” once the function confirms. These are suggested wording (`ledger.json` → `unconfirmed`).
+- The function also caps the body at 20 kB, collapses every single-line field so no line break reaches the subject, and answers with `cache-control: no-store`.
 
-export default {
-  async fetch(request) {
-    if (request.method !== 'POST') return new Response(null, { status: 405, headers: { allow: 'POST' } });
-    const origin = request.headers.get('origin');
-    if (!origin || new URL(origin).host !== new URL(request.url).host) return new Response(null, { status: 403 });
-    let f;
-    try { f = await request.json(); } catch { return Response.json({ ok: false }, { status: 400 }); }
-    if (clean(f.website, 200)) return Response.json({ ok: true });                // honeypot: answer as if sent
-    if (!(Date.now() - Number(f.t) > 3000)) return Response.json({ ok: false }, { status: 400 }); // filled too fast
-    const b = { wing: clean(f.wing, 40), name: clean(f.name, 120), email: clean(f.email, 200),
-      org: clean(f.org, 160), timeline: clean(f.timeline, 40), brief: clean(f.brief, 5000) };
-    if (!WINGS.has(b.wing) || !TIMELINES.has(b.timeline) || !b.name || !b.brief || !EMAIL.test(b.email)) {
-      return Response.json({ ok: false }, { status: 422 });
-    }
-    const text = ['Wing: ' + b.wing, 'Name: ' + b.name, 'Email: ' + b.email, 'Organisation: ' + (b.org || 'not given'),
-      'Timeline: ' + b.timeline, '', b.brief].join('\n');
-    const sent = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'content-type': 'application/json' },
-      body: JSON.stringify({ from: process.env.BRIEF_FROM, to: [process.env.BRIEF_TO], reply_to: b.email,
-        subject: 'Project brief: ' + b.wing + ', ' + b.name, text }),
-    });
-    // Never log the brief itself: runtime logs are kept by the host.
-    if (!sent.ok) console.error('brief: email API answered ' + sent.status);
-    return Response.json({ ok: sent.ok }, { status: sent.ok ? 200 : 502 });
-  },
-};
-```
-
-The wing and timeline lists must match the form in `site/index.html`. The form adds two fields: a hidden `website` input (the honeypot: visually hidden, `tabindex="-1"`, `autocomplete="off"`, `aria-hidden="true"`) and `t`, the time the form was shown.
+**Owner’s step, once:** open a free account at [resend.com](https://resend.com) with lastfomo@gmail.com, create an API key (sending access is enough), and add it in Vercel → project `lastfomo` → Settings → Environment Variables as `RESEND_API_KEY`, for Production. Then redeploy (or push any commit). Nobody else needs to see the key.
 
 ### Spam
 

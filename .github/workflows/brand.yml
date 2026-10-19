@@ -12,6 +12,8 @@ jobs:
           node-version: 22
       - name: Brand check fixtures
         run: node tools/brandcheck.test.mjs
+      - name: Brief endpoint (api/brief.mjs, email API mocked)
+        run: node tools/brief.test.mjs
       - name: Build both targets (fails on brand errors)
         run: node tools/build.mjs
       - name: Tokens CSS matches brand/tokens.json

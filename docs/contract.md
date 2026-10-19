@@ -14,8 +14,9 @@ How the lastfomo site is laid out, so every tool (and every future session) agre
 | `site/styles.css` | Component styles. Colours only through `var(--token)`; no hex, rgb or named colours. | hand |
 | `site/boot.js` | Runs in `<head>` before first paint: adds the `js` class that gates reveals, restores the saved theme. | hand |
 | `site/main.js` | Behaviour: plates, reveals, routing, curtain, player, cursor, brief composer, theme switch. | hand |
-| `site/media.json` | Video manifest. `loops`: per wing `{ "mp4", "webm", "hold" }` made by `tools/media/gif_to_loop.py`, or `null` to keep the poster. A loop plays once each time its screen becomes active and rests on `hold` seconds (Arca: 3.6, its open frame), so nothing moves for more than 5 s on its own (WCAG 2.2.2). `films`: per wing `{ "youtube": "<id>", "duration": "m:ss" }`. The build adds `embed` (true for web, false for the Artifact). | hand |
-| `site/media/*.jpg` | Posters and stills. Every file has an entry in `brand/ledger.json` → `media`. | hand |
+| `api/brief.mjs` | Vercel Function `POST /api/brief`: checks the brief (same origin, honeypot, at least 3 s on the form, the form’s own wing and timeline values, length caps) and emails it to `BRIEF_TO` (default lastfomo@gmail.com) through Resend with `RESEND_API_KEY`. Answers 503 without a key. Stores and logs nothing of the brief. | hand |
+| `site/media.json` | Video manifest. `loops`: per wing `{ "mp4", "webm", "hold" }` made by `tools/media/gif_to_loop.py`, or `null` to keep the poster. A loop plays once each time its screen becomes active and rests on `hold` seconds (Arca: 3.6, its open frame), so nothing moves for more than 5 s on its own (WCAG 2.2.2). `films`: per wing `{ "youtube": "<id>", "duration": "m:ss" }`. The build adds `embed` (true for web, false for the Artifact) and, on the web build only, `brief` (`/api/brief`, where the form posts). | hand |
+| `site/media/*.jpg` | Posters and stills. Every file has an entry in `brand/ledger.json` → `media`. The `*_loop_v4.gif` files beside them are the owner’s loop sources; the build ships only what the page references. | hand |
 | `dist/web/` | Build output for any static host (Vercel): a full document with its CSS and JS as files (no inline script, so the strict CSP in `vercel.json` holds), `media/` beside it. | generated |
 | `dist/artifact/lastfomo.html` | Build output for a claude.ai Artifact: a fragment (no doctype/html/head/body), CSS, JS and images inlined. | generated |
 
@@ -31,6 +32,8 @@ How the lastfomo site is laid out, so every tool (and every future session) agre
 - `[data-count]` marks a stat that counts up once; its final text is in the markup.
 - `button#theme` cycles the theme preference `auto → dark → light` and sets `data-theme` on `<html>` (no attribute for auto).
 - Images use `src="media/<name>.jpg"`, video posters `poster="media/<name>.jpg"`.
+- `form#brief` carries a honeypot, `label.hp > input[name="website"][tabindex="-1"]`, hidden from sight and from assistive technology. Its wing radios and timeline options must match `WINGS` and `TIMELINES` in `api/brief.mjs` (`tools/brief.test.mjs` checks). `#sent-title` reads “Brief sent.” after the endpoint confirms, otherwise “Brief ready.” with copy and mailto.
+- The header brand link holds one exact mark: the horse alone (`brand/marks/horse.svg`, `viewBox="0 0 420 120"`), the owner’s choice.
 - Every film control is `<a data-play="<wing>" href="https://www.youtube.com/watch?v=<id>" target="_blank" rel="noopener">`; the id must match `site/media.json`. `a.frame` on a case page plays in place; other controls open `dialog#reel`.
 
 ## Commands
@@ -40,5 +43,6 @@ How the lastfomo site is laid out, so every tool (and every future session) agre
 | `node tools/build.mjs` | Regenerates `site/tokens.css`, runs the brand check, writes `dist/web/` and `dist/artifact/lastfomo.html`. Fails on brand errors. |
 | `node tools/brandcheck.mjs` | Checks the source (`site/`). `--html <file>` checks one self-contained page. `--json` for machine output. Exit 1 on errors. |
 | `node tools/brandcheck.test.mjs` | Fixture tests for the brand check. |
+| `node tools/brief.test.mjs` | Tests for `api/brief.mjs` with the email API mocked: sending, the 503 without a key, origin, method, honeypot, timing, validation, size, and the form’s values. |
 | `node tools/qa/shoot.mjs` | Headless screenshots of every screen of every route, desktop 1440×900 and phone 390×844, dark and light, plus contact sheets and a JSON report in `out/qa/`. |
 | `node tools/qa/smoke.mjs` | Clicks through routes, player, brief form and theme switch; reports console errors. |
