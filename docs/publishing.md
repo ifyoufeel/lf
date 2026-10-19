@@ -102,6 +102,8 @@ Every push builds. A push to the production branch updates the live address; a p
 - Every header in `vercel.json` arrives: the CSP, HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and the year-long immutable cache on `/media/`.
 - `www.youtube-nocookie.com/embed/…` answers 200, and YouTube’s oEmbed resolves all three film ids to the lastfomo channel.
 
+**Checked on 19 October 2026**, after the loops, the horse-only header and the brief function went live (commit `dbe91b0`): the page and all 21 fingerprinted media URLs are byte-identical to a fresh build, and `/api/brief` is deployed beside `dist/web` with the “Other” preset. It answers GET with 405, a post from another origin with 403, and a valid same-origin brief with 503 `{"ok":false,"reason":"not-configured"}` until `RESEND_API_KEY` is set. No email was sent. The Vercel Firewall API answered “config not found” to a rate-limit rule (with and without the team id), so the rule in “Spam” below is still a dashboard step.
+
 **For later sessions.**
 
 - The Vercel connector in Claude works in its own default scope: leave `teamId` out of project and deployment calls. With the team id set, creating a project answered 403 and reading one answered 404.
