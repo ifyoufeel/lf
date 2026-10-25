@@ -1,5 +1,5 @@
 {
-  "$note": "Loops play muted inside the wing arches (3:4, made with tools/media/gif_to_loop.py, an MP4 and a WebM twin); null keeps the poster. \"hold\" (seconds) is where a loop rests after playing once per visit (WCAG 2.2.2); without it the loop rests on its last frame. Films live on YouTube: links everywhere, played in place on the web build only (Artifacts cannot embed other sites). A film's \"asset\" is its URL in the Artifact's asset store (upload the MP4 to the published Artifact); with it the Artifact plays the film in its own popup instead of linking out.",
+  "$note": "Loops play muted inside the wing arches (3:4, made with tools/media/gif_to_loop.py, an MP4 and a WebM twin); null keeps the poster. \"hold\" (seconds) is where a loop rests after playing once per visit (WCAG 2.2.2); without it the loop rests on its last frame. Films live on YouTube: links everywhere, played in place on the web build only (Artifacts cannot embed other sites). A film's \"asset\" is its URL in the Artifact's asset store (upload the MP4 to the published Artifact); with it the Artifact plays the film in its own popup instead of linking out. Covers are the case cover footage: per wing the owner's AV1 file (2560×1440) and an H.264 copy (1280×720), each under 1.2 MB; it loops while its cover is on screen, with a \"Pause footage\" control (WCAG 2.2.2). The Artifact carries only the H.264 copy.",
   "loops": {
     "machina": {
       "mp4": "media/machina-loop.mp4",
@@ -15,6 +15,20 @@
       "mp4": "media/arca-loop.mp4",
       "webm": "media/arca-loop.webm",
       "hold": 3.6
+    }
+  },
+  "covers": {
+    "machina": {
+      "av1": "media/machina-cover-av1.mp4",
+      "mp4": "media/machina-cover.mp4"
+    },
+    "hortus": {
+      "av1": "media/hortus-cover-av1.mp4",
+      "mp4": "media/hortus-cover.mp4"
+    },
+    "arca": {
+      "av1": "media/arca-cover-av1.mp4",
+      "mp4": "media/arca-cover.mp4"
     }
   },
   "films": {

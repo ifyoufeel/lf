@@ -82,6 +82,10 @@ const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
 for (const m of html.matchAll(/\bdata-(go|scroll)="([^"]+)"/g)) if (!ids.has(m[2])) fail(`data-${m[1]}="${m[2]}" points at no element (no id="${m[2]}" in site/index.html)`);
 const loopFiles = Object.values(media.loops).flatMap((v) => (v && typeof v === 'object' ? Object.values(v) : [v])).filter(local);
 for (const f of loopFiles) if (!existsSync(P('site', f))) fail(`missing loop ${f}`);
+// Case cover footage: per wing { av1, mp4 }, played full-bleed behind the case cover.
+const covers = media.covers || {};
+const coverFiles = Object.values(covers).flatMap((v) => Object.values(v || {})).filter(local);
+for (const f of coverFiles) if (!existsSync(P('site', f))) fail(`missing cover footage ${f}`);
 // The web build posts the brief to the Vercel Function in api/brief.mjs; the Artifact cannot reach it, so it keeps copy and mailto.
 if (!existsSync(P('api/brief.mjs'))) fail('missing api/brief.mjs, the endpoint the web build posts the brief to');
 const refsOf = (page) => [...new Set([...page.matchAll(/(?:src|poster)="(media\/[^"]+)"/g)].map((m) => m[1]))];
@@ -91,18 +95,19 @@ for (const r of refsOf(html)) if (!existsSync(P('site', r))) fail(`missing ${r}`
 // fingerprint: a file replaced in site/media/ under the same name gets a new URL, and no browser keeps the old one.
 const stamp = (rel) => rel + '?v=' + createHash('sha256').update(readFileSync(P('site', rel))).digest('hex').slice(0, 10);
 const webLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, local(f) ? stamp(f) : f])) : local(v) ? stamp(v) : v]));
+const webCovers = Object.fromEntries(Object.entries(covers).map(([k, v]) => [k, Object.fromEntries(Object.entries(v || {}).map(([t, f]) => [t, local(f) ? stamp(f) : f]))]));
 
 // A web build: the source as files, tokens generated, manifest filled. CSP-friendly: no inline script.
 // Returns how many images it carries.
 function writeWeb(dir, page) {
-  const out = withManifest(page, { loops: webLoops, films: media.films, embed: true, brief: '/api/brief' })
+  const out = withManifest(page, { loops: webLoops, covers: webCovers, films: media.films, embed: true, brief: '/api/brief' })
     .replace(/(src|poster)="(media\/[^"?]+)"/g, (_, attr, rel) => `${attr}="${stamp(rel)}"`);
   if (/"media\/[^"?]+"/.test(out)) fail(`a media URL in ${dir} has no content fingerprint (?v=)`);
   const own = refsOf(page);
   mkdirSync(P(dir, 'media'), { recursive: true });
   writeFileSync(P(dir, 'index.html'), out);
   for (const f of ['tokens.css', 'styles.css', 'boot.js', 'main.js']) copyFileSync(P('site', f), P(dir, f));
-  for (const r of [...own, ...loopFiles]) { mkdirSync(dirname(P(dir, r)), { recursive: true }); copyFileSync(P('site', r), P(dir, r)); }
+  for (const r of [...own, ...loopFiles, ...coverFiles]) { mkdirSync(dirname(P(dir, r)), { recursive: true }); copyFileSync(P('site', r), P(dir, r)); }
   return own.length;
 }
 rmSync(P('dist'), { recursive: true, force: true });
@@ -110,14 +115,16 @@ const webImages = writeWeb('dist/web', webSource);
 if (!shopLive) writeWeb('dist/preview', html);
 
 // dist/artifact: a fragment (the Artifact skeleton supplies doctype, charset and viewport), everything inlined.
-// Loops travel inside the page as data URIs, both formats of each (about 4.7 MB of the 16 MB limit); films stay links,
+// Loops travel inside the page as data URIs, both formats of each (about 4.7 MB of the 16 MB limit). The cover footage
+// travels as its H.264 copy only (about 4.4 MB more): the AV1 files would take the page past the limit. Films stay links,
 // since an Artifact cannot embed YouTube.
 const loopUri = (rel) => `data:video/${rel.endsWith('.webm') ? 'webm' : 'mp4'};base64,` + readFileSync(P('site', rel)).toString('base64');
 const inline = (v) => (local(v) ? loopUri(v) : v);
 const artLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, inline(f)])) : inline(v)]));
 // A film with an "asset" URL (uploaded to the Artifact's asset store) plays in the Artifact's own popup.
 const artFilms = Object.fromEntries(Object.entries(media.films).map(([k, f]) => [k, f && f.asset ? { ...f, src: f.asset } : f]));
-html = withManifest(html, { loops: artLoops, films: artFilms, embed: false });
+const artCovers = Object.fromEntries(Object.entries(covers).map(([k, v]) => [k, v && v.mp4 ? { mp4: inline(v.mp4) } : {}]));
+html = withManifest(html, { loops: artLoops, covers: artCovers, films: artFilms, embed: false });
 const scriptSafe = (s) => s.replace(/<\/script/gi, '<\\/script');
 const dataUri = (rel) => 'data:image/jpeg;base64,' + readFileSync(P('site', rel)).toString('base64');
 let head = html.slice(html.indexOf('<head>') + 6, html.indexOf('</head>'));

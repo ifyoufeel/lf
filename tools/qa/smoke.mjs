@@ -297,18 +297,68 @@ await step('header: the trail names the page', async () => {
   return seen.join(' · ');
 });
 
-await step('case: the cover plays the wing loop behind the copy', async () => {
+// The case cover footage (site/media.json → covers) loops for as long as the cover is on screen; "Pause footage" holds it.
+await step('case: the cover footage loops; Pause footage holds it', async () => {
   await go('#/machina', 'machina');
-  await page.waitForTimeout(4500);
-  const st = await page.evaluate(() => {
-    const v = document.querySelector('#view-machina .case-cover .cover-reel video');
-    const bg = document.querySelector('#view-machina .cover-bg');
-    return v ? { src: !!v.currentSrc, t: +v.currentTime.toFixed(2), hidden: bg && bg.getAttribute('aria-hidden'), z: getComputedStyle(bg).zIndex } : null;
+  const playable = await page.evaluate(() => {
+    let c = {};
+    try { c = (JSON.parse(document.querySelector('#lf-media').textContent).covers || {}).machina || {}; } catch { /* reported below */ }
+    const v = document.createElement('video');
+    return (c.av1 && v.canPlayType('video/mp4; codecs="av01.0.12M.10"')) || (c.mp4 && v.canPlayType('video/mp4; codecs="avc1.640028"')) ? Object.keys(c).join(' + ') : '';
   });
-  check(st, 'no wing loop in the Machina cover');
-  check(st.src && st.t > 0, `the Machina cover loop did not start (src ${st.src}, t ${st.t})`);
-  check(st.hidden === 'true', 'the cover backdrop is not aria-hidden');
-  return `playing, t ${st.t} s`;
+  if (!playable) {
+    const btnHidden = await page.evaluate(() => document.querySelector('#view-machina [data-footage]').hidden);
+    check(btnHidden, '"Pause footage" shows although this browser cannot play the footage');
+    throw new Skip('this browser decodes neither copy of the footage (the Artifact carries H.264 only); the poster stands');
+  }
+  const read = () => page.evaluate(() => {
+    const v = document.querySelector('#view-machina .case-cover video.cover-v');
+    const b = document.querySelector('#view-machina [data-footage]');
+    return v ? { src: (v.currentSrc || '').split('/').pop().split('?')[0], t: +v.currentTime.toFixed(2), paused: v.paused, loop: v.loop,
+      backdrop: v.closest('.cover-bg').getAttribute('aria-hidden'), label: b && !b.hidden ? b.textContent.trim() : '' } : null;
+  });
+  await page.waitForTimeout(1500);
+  let st = await read();
+  check(st, 'no footage in the Machina cover');
+  check(st.src && !st.paused, `the Machina footage is not playing (src ${st.src || 'none'}, paused ${st.paused})`);
+  check(st.loop, 'the Machina footage does not loop');
+  check(st.backdrop === 'true', 'the cover backdrop is not aria-hidden');
+  const file = st.src;
+  // The footage runs 10 s; still playing 11.5 s after the cover opened means it went round.
+  await page.waitForTimeout(10000);
+  st = await read();
+  check(!st.paused, `the footage stopped at ${st.t} s instead of looping`);
+  const looped = st.t;
+  check(st.label === 'Pause footage', `the cover's control reads "${st.label || 'nothing'}"`);
+  await page.locator('#view-machina [data-footage]').click();
+  await page.waitForTimeout(300);
+  st = await read();
+  check(st.paused && st.label === 'Play footage', `"Pause footage" left it ${st.paused ? 'paused' : 'playing'}, reading "${st.label}"`);
+  await page.locator('#view-machina [data-footage]').click();
+  await page.waitForTimeout(300);
+  st = await read();
+  check(!st.paused && st.label === 'Pause footage', `"Play footage" left it ${st.paused ? 'paused' : 'playing'}, reading "${st.label}"`);
+  // While a film plays over the cover, the footage rests; closing the film brings it back.
+  if (embeds) {
+    await page.locator('#view-machina .case-cover [data-play]').click();
+    await page.waitForFunction(() => document.querySelector('dialog#reel').open, null, { timeout: 3000 })
+      .catch(() => { throw new Error('"Play the film" on the cover did not open dialog#reel'); });
+    await page.waitForTimeout(300);
+    st = await read();
+    check(st.paused, 'the footage kept playing behind the film');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => !document.querySelector('dialog#reel').open, null, { timeout: 3000 });
+    await page.waitForTimeout(300);
+    st = await read();
+    check(!st.paused, 'the footage did not come back after the film closed');
+  }
+  // Off its screen the footage rests.
+  await page.evaluate(() => { const v = document.querySelector('#view-machina'); v.style.scrollBehavior = 'auto'; v.scrollTop = v.querySelectorAll('.screen')[1].offsetTop; });
+  await page.waitForTimeout(800);
+  st = await read();
+  check(st.paused, 'the footage kept playing after its cover scrolled away');
+  await page.evaluate(() => { const v = document.querySelector('#view-machina'); v.scrollTop = 0; });
+  return `${file} (${playable}), looped (t ${looped} s at 11.5 s), pauses and plays, rests off screen`;
 });
 
 await step('nav: See the work lands on a wing', async () => {

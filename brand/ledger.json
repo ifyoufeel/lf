@@ -477,6 +477,51 @@
       "role": "VP9 twin of hortus-loop.mp4",
       "rights": "own"
     },
+    "machina-cover-av1.mp4": {
+      "alt": "",
+      "role": "Machina case cover footage: GPUs hung on a rail under magenta light (10 s, loops); the owner's AV1 file, 2560×1440, as supplied",
+      "rights": "own"
+    },
+    "machina-cover.mp4": {
+      "alt": "",
+      "role": "H.264 copy of machina-cover-av1.mp4, 1280×720, for browsers without AV1",
+      "rights": "own"
+    },
+    "machina-cover.jpg": {
+      "alt": "",
+      "role": "Machina case cover poster (first frame of the cover footage)",
+      "rights": "own"
+    },
+    "hortus-cover-av1.mp4": {
+      "alt": "",
+      "role": "Hortus case cover footage: a bean germinating in soil, in section (10 s, loops); the owner's AV1 file, 2560×1440, as supplied",
+      "rights": "own"
+    },
+    "hortus-cover.mp4": {
+      "alt": "",
+      "role": "H.264 copy of hortus-cover-av1.mp4, 1280×720, for browsers without AV1",
+      "rights": "own"
+    },
+    "hortus-cover.jpg": {
+      "alt": "",
+      "role": "Hortus case cover poster (first frame of the cover footage)",
+      "rights": "own"
+    },
+    "arca-cover-av1.mp4": {
+      "alt": "",
+      "role": "Arca case cover footage: a private gallery with a painted ceiling, portraits and a marble Pietà (10 s, loops); the owner's AV1 file, 2560×1440, as supplied",
+      "rights": "own"
+    },
+    "arca-cover.mp4": {
+      "alt": "",
+      "role": "H.264 copy of arca-cover-av1.mp4, 1280×720, for browsers without AV1",
+      "rights": "own"
+    },
+    "arca-cover.jpg": {
+      "alt": "",
+      "role": "Arca case cover poster (first frame of the cover footage)",
+      "rights": "own"
+    },
     "shop-ponics-pilot.jpg": {
       "alt": "The PonicsPilot dosing controller: five peristaltic pumps above five labelled bottles",
       "role": "Hortus shop: PonicsPilot (also the hardware screen on the Hortus case)",
@@ -538,6 +583,12 @@
       "machina": "https://www.youtube.com/watch?v=hWzvRWBzQFQ",
       "hortus": "https://www.youtube.com/watch?v=61uIUCtCN6k",
       "arca": "https://www.youtube.com/watch?v=3GHNW57yH4Y"
+    },
+    "covers": {
+      "$note": "Case cover footage, supplied by the owner on 25 October 2026 as AV1 MP4s (lastfomo_<wing>_bg.av1.mp4, 10 s, 2560×1440). The AV1 file ships as supplied (remuxed for fast start, no re-encode); the H.264 copy is libx264, two-pass, 1280×720, 860 kbit/s; the poster is its first frame.",
+      "machina": "site/media/machina-cover-av1.mp4 + machina-cover.mp4 + machina-cover.jpg",
+      "hortus": "site/media/hortus-cover-av1.mp4 + hortus-cover.mp4 + hortus-cover.jpg",
+      "arca": "site/media/arca-cover-av1.mp4 + arca-cover.mp4 + arca-cover.jpg"
     }
   },
   "contact": {

@@ -36,7 +36,7 @@ site/
   styles.css             component styles; colours only through var(--token)
   boot.js                runs in <head> before first paint: the js class, the saved theme
   main.js                plates, reveals, routing, curtain, player, cursor, brief composer, theme switch, basket
-  media.json             video manifest; null means not uploaded yet
+  media.json             video manifest: wing loops, case cover footage, films; null means not uploaded yet
   media/*.jpg            posters and stills, each listed in brand/ledger.json under media
   shop.json              the Hortus hardware shop: products, English copy, prices; "live" says whether it ships to the web
 shop/

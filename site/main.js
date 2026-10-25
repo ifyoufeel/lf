@@ -8,6 +8,7 @@
   let MEDIA = {};
   try { MEDIA = JSON.parse(($('#lf-media') || {}).textContent || '{}'); } catch (_) { MEDIA = {}; }
   const LOOPS = MEDIA.loops || {};
+  const COVERS = MEDIA.covers || {};
   const FILMS = MEDIA.films || {};
   // The web build plays films in place; an Artifact cannot embed other sites, so there the links open YouTube.
   const EMBED = MEDIA.embed !== false;
@@ -19,6 +20,16 @@
     if (!l) return '';
     if (typeof l === 'string') return l;
     return (l.mp4 && probe.canPlayType('video/mp4; codecs="avc1.640028"')) ? l.mp4 : (l.webm && probe.canPlayType('video/webm; codecs="vp9"')) ? l.webm : (l.mp4 || '');
+  };
+  // Case cover footage is { av1, mp4 }: the owner's 2560×1440 AV1 file where it decodes, else the 1280×720 H.264 copy.
+  // Phones take the H.264 copy first, since every phone decodes it in hardware. The Artifact carries only the copy.
+  const narrow = matchMedia('(max-width: 900px)');
+  const coverSrc = (k) => {
+    const c = COVERS[k];
+    if (!c) return '';
+    const av1 = c.av1 && probe.canPlayType('video/mp4; codecs="av01.0.12M.10"') ? c.av1 : '';
+    const avc = c.mp4 && probe.canPlayType('video/mp4; codecs="avc1.640028"') ? c.mp4 : '';
+    return narrow.matches ? avc || av1 : av1 || avc; // neither: the poster stands
   };
   const filmId = (k) => (FILMS[k] && /^[\w-]{11}$/.test(FILMS[k].youtube || '') ? FILMS[k].youtube : '');
   // Inside an Artifact a film plays from the page's own asset store (set by the build); otherwise from YouTube.
@@ -212,11 +223,41 @@
     v.addEventListener('play', check);
     v.addEventListener('timeupdate', check);
   });
+  // Case cover footage loops for as long as its cover is the active screen of the open page, the tab is in view and no
+  // film is open; anywhere else it pauses, and it loads only once its cover is first active. "Pause footage" holds every
+  // cover (WCAG 2.2.2) and this browser remembers the choice. Reduced motion keeps the poster and hides the control.
+  let footageOff = false;
+  try { footageOff = localStorage.getItem('lf-footage') === 'off'; } catch (_) { /* storage blocked: the footage plays */ }
+  function runCover(v) {
+    const view = v.closest('main.view'), src = coverSrc(v.dataset.cover);
+    const on = src && !RM && !footageOff && !document.hidden && !$('#reel[open]') && view && !view.hidden && view._active === v.closest('.screen');
+    if (on) {
+      if (!v.src) { v.loop = true; v.src = src; }
+      v.play().catch(() => {});
+    } else if (!v.paused) v.pause();
+  }
+  const runCovers = () => $$('video.cover-v').forEach(runCover);
+  const footBtns = $$('[data-footage]');
+  const footLabel = () => footBtns.forEach((b) => { b.textContent = footageOff ? 'Play footage' : 'Pause footage'; });
+  footBtns.forEach((b) => {
+    const v = b.closest('.screen').querySelector('video.cover-v');
+    if (RM || !v || !coverSrc(v.dataset.cover)) return;
+    b.hidden = false;
+    b.addEventListener('click', () => {
+      footageOff = !footageOff;
+      try { if (footageOff) localStorage.setItem('lf-footage', 'off'); else localStorage.removeItem('lf-footage'); } catch (_) { /* per-viewer convenience only */ }
+      footLabel();
+      runCovers();
+    });
+  });
+  footLabel();
+  document.addEventListener('visibilitychange', runCovers);
   function activate(view, secs, i) {
     const s = secs[i];
     if (!s) return;
     const fresh = view._active !== s;
     view._active = s;
+    runCovers();
     s.classList.add('in');
     document.body.dataset.wing = s.dataset.wing || view.dataset.wing || '';
     $$('button', dotsNav).forEach((b, j) => b.setAttribute('aria-current', j === i ? 'true' : 'false'));
@@ -336,6 +377,7 @@
     if (dlg.open) return;
     opener = document.activeElement;
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    runCovers();
   };
   // Watch the films: the three films to choose from, in the same dialog that plays them.
   function openPicker() {
@@ -358,7 +400,7 @@
   $('#reel-x').addEventListener('click', closeReel);
   dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.classList.contains('reel-in')) closeReel(); });
   // Closing removes the player, which stops the film; focus returns to the control that opened it.
-  dlg.addEventListener('close', () => { slot.replaceChildren(); pick.hidden = true; if (opener && opener.focus) opener.focus({ preventScroll: true }); opener = null; });
+  dlg.addEventListener('close', () => { slot.replaceChildren(); pick.hidden = true; if (opener && opener.focus) opener.focus({ preventScroll: true }); opener = null; runCovers(); });
 
   /* ---------------- the plus cursor ---------------- */
   if (FINE && !RM) {
