@@ -1,0 +1,429 @@
+{
+  "$note": "Imported by tools/shop/import-emode.mjs from the maker’s pages, in the maker’s own words. Do not edit by hand; re-run the import.",
+  "source": "https://e-mode.pro",
+  "imported": "2026-10-25",
+  "products": [
+    {
+      "slug": "ponics-pilot",
+      "url": "https://e-mode.pro/catalog/controllers/ponics_pilot/",
+      "id": "6372",
+      "name": "ПониксПилот (PonicsPilot) Прибор для автоматизации приготовления питательного раствора",
+      "category": "Приборы",
+      "price": 140120,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 11,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/ponics_pilot/?action=ADD2BASKET&id=6372",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/d94/vvbkodppzkk840d54t62gzowbg424xl0.jpg",
+          "width": 800,
+          "height": 800,
+          "file": "img/ponics-pilot-1.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/c7e/banuvj8evev6cnpoy3x06tdlygxmbp6b.jpeg",
+          "width": 800,
+          "height": 1200,
+          "file": "img/ponics-pilot-2.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/3b2/bdr1wkmpe4ee0kgy12vj4a8y0vomi1l9.jpeg",
+          "width": 801,
+          "height": 800,
+          "file": "img/ponics-pilot-3.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "ponics-pilot-32",
+      "url": "https://e-mode.pro/catalog/controllers/ponikspilot_32_ponicspilot_32_pribor_dlya_avtomatizatsii_prigotovleniya_pitatelnogo_rastvora/",
+      "id": "6742",
+      "name": "ПониксПилот 32 (PonicsPilot 32) Прибор для автоматизации приготовления питательного раствора",
+      "category": "Приборы",
+      "price": 185116,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 2,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/ponikspilot_32_ponicspilot_32_pribor_dlya_avtomatizatsii_prigotovleniya_pitatelnogo_rastvora/?action=ADD2BASKET&id=6742",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/044/3v0otzr72bdzbc7sbroacmuogp0nrm1g.jpg",
+          "width": 800,
+          "height": 800,
+          "file": "img/ponics-pilot-32-1.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/17f/rbksp9vclpdtsj79kic0qo08k3cz78b4.png",
+          "width": 2550,
+          "height": 3300,
+          "file": "img/ponics-pilot-32-2.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/b28/87wdn3cp10iyr8i5v32bj8t6pg1tjnw9.png",
+          "width": 3000,
+          "height": 3000,
+          "file": "img/ponics-pilot-32-3.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "microclimate",
+      "url": "https://e-mode.pro/catalog/controllers/microclimate/",
+      "id": "6381",
+      "name": "Контроллер Микроклимата (Microclimate) Прибор для управления климатом",
+      "category": "Приборы",
+      "price": 25886,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 2,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/microclimate/?action=ADD2BASKET&id=6381",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/06d/ndtc2un20ie4soybmlkgrfzqo888gy5d.jpeg",
+          "width": 800,
+          "height": 800,
+          "file": "img/microclimate-1.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/3ff/e2pq0sjgj36wwx5u2zt01b5qyoxge5o0.png",
+          "width": 1200,
+          "height": 1200,
+          "file": "img/microclimate-2.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/e66/1b3igs1muko980dwkxq0mbm2v2m2q5xi.jpeg",
+          "width": 1200,
+          "height": 800,
+          "file": "img/microclimate-3.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "sensiroom-h",
+      "url": "https://e-mode.pro/catalog/controllers/sensiroom_h_poliv/",
+      "id": "6360",
+      "name": "Контроллер Полива (SensiRoom H) Прибор для управления поливом",
+      "category": "Приборы",
+      "price": 16239,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 10,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/sensiroom_h_poliv/?action=ADD2BASKET&id=6360",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/e47/4ud5tyvdzci2u0xjgxy0wxapgcsla1zc.jpeg",
+          "width": 800,
+          "height": 688,
+          "file": "img/sensiroom-h-1.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "sensiroom-co2-wifi",
+      "url": "https://e-mode.pro/catalog/controllers/sensiroom_co2_s_wi_fi/",
+      "id": "6605",
+      "name": "Контроллер CO2 с Wi-Fi (SensiRoom CO2 Wi-Fi) Прибор для контроля углекислого газа",
+      "category": "Приборы",
+      "price": 30454,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 7,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/sensiroom_co2_s_wi_fi/?action=ADD2BASKET&id=6605",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/e3a/izybgrtoj16hcxi61yc1hqc9nhnruzls.jpg",
+          "width": 2500,
+          "height": 2500,
+          "file": "img/sensiroom-co2-wifi-1.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/0fd/vzjoe2tt2ruzptgdylata9mqevcd3kf5.jpg",
+          "width": 2721,
+          "height": 2500,
+          "file": "img/sensiroom-co2-wifi-2.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/775/10ghhzihuy96v3wdbtxl3wrn5yfq3dsk.jpg",
+          "width": 1124,
+          "height": 699,
+          "file": "img/sensiroom-co2-wifi-3.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "sensiroom-co2",
+      "url": "https://e-mode.pro/catalog/controllers/sensiroom_co2/",
+      "id": "6361",
+      "name": "Контроллер CO2 (SensiRoom CO2) Прибор для контроля углекислого газа",
+      "category": "Приборы",
+      "price": 23450,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 6,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/sensiroom_co2/?action=ADD2BASKET&id=6361",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/099/mxczvqzsei33h3z3aubf1g15fwi36wow.jpeg",
+          "width": 800,
+          "height": 800,
+          "file": "img/sensiroom-co2-1.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/712/su7klm8v3b5eswojq27c0zfmrjhho7s3.jpeg",
+          "width": 1200,
+          "height": 800,
+          "file": "img/sensiroom-co2-2.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/4d6/jo3sl2m37cqnqlvrrh2dzllly83jd2l4.jpeg",
+          "width": 1200,
+          "height": 800,
+          "file": "img/sensiroom-co2-3.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "ph-ec-set-wifi",
+      "url": "https://e-mode.pro/catalog/controllers/nabor_kontrollerov_ph_i_ec_s_wi_fi/",
+      "id": "19228",
+      "name": "Набор контроллеров pH и EC с Wi-Fi",
+      "category": "Приборы",
+      "price": 72889,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 1,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/nabor_kontrollerov_ph_i_ec_s_wi_fi/?action=ADD2BASKET&id=19228",
+      "manual": null,
+      "description": [],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/679/n4ivbr4pgqeefkk6km43m70x4wjwtgns.png",
+          "width": 1081,
+          "height": 1080,
+          "file": "img/ph-ec-set-wifi-1.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "ph-ec-set",
+      "url": "https://e-mode.pro/catalog/controllers/nabor_kontrollerov_ph_i_ec_bez_wi_fi/",
+      "id": "19227",
+      "name": "Набор контроллеров pH и EC без Wi-Fi",
+      "category": "Приборы",
+      "price": 55653,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 6,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/nabor_kontrollerov_ph_i_ec_bez_wi_fi/?action=ADD2BASKET&id=19227",
+      "manual": null,
+      "description": [],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/7de/v8xxtibvtubsuesnf1uzhqzmzsv29tnw.png",
+          "width": 1081,
+          "height": 1080,
+          "file": "img/ph-ec-set-1.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "ph-wifi",
+      "url": "https://e-mode.pro/catalog/controllers/kontroller_ph_s_wi_fi_pribor_dlya_avtomaticheskoy_podachi_rn_reagentov/",
+      "id": "6337",
+      "name": "Контроллер pH с Wi-Fi Прибор для автоматической подачи рН-реагентов",
+      "category": "Приборы",
+      "price": 34077,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 6,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/kontroller_ph_s_wi_fi_pribor_dlya_avtomaticheskoy_podachi_rn_reagentov/?action=ADD2BASKET&id=6337",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/4ac/pjvs3k37lpbkjicq0xa01qsyaoowo1zy.jpg",
+          "width": 800,
+          "height": 800,
+          "file": "img/ph-wifi-1.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/b1e/sts50ueep70iwvn55igszqze0myhuggd.png",
+          "width": 2240,
+          "height": 2240,
+          "file": "img/ph-wifi-2.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/bb9/ssnbiorpy0sj0ijskxv5fa4vn4sgemyb.png",
+          "width": 2240,
+          "height": 2240,
+          "file": "img/ph-wifi-3.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "ph",
+      "url": "https://e-mode.pro/catalog/controllers/regulyator_ph_lite/",
+      "id": "6362",
+      "name": "Контроллер pH Прибор для автоматической подачи рН-реагентов",
+      "category": "Приборы",
+      "price": 27080,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 16,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/regulyator_ph_lite/?action=ADD2BASKET&id=6362",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/224/64e2hzki3quqqckdj6fi2as3r9v0hs1q.jpg",
+          "width": 800,
+          "height": 800,
+          "file": "img/ph-1.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "ec-wifi",
+      "url": "https://e-mode.pro/catalog/controllers/kontroller_ec_s_wi_fi_pribor_dlya_avtomaticheskoy_podachi_udobreniy/",
+      "id": "6337",
+      "name": "Контроллер EC с Wi-Fi Прибор для автоматической подачи удобрений",
+      "category": "Приборы",
+      "price": 46911,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 6,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/kontroller_ec_s_wi_fi_pribor_dlya_avtomaticheskoy_podachi_udobreniy/?action=ADD2BASKET&id=6337",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/d91/k1aijfjzq5v6de5pfsaogegce7zp1c4l.jpg",
+          "width": 800,
+          "height": 800,
+          "file": "img/ec-wifi-1.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/ac6/oa9dmaxo6v9lu9l02vo57e0hxagaryta.jpg",
+          "width": 1254,
+          "height": 1254,
+          "file": "img/ec-wifi-2.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/579/fqzn8gb4c3rjpysh79uuxei8xd645sr8.jpg",
+          "width": 1254,
+          "height": 1254,
+          "file": "img/ec-wifi-3.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "panel",
+      "url": "https://e-mode.pro/catalog/controllers/e_mode_shchit_elektricheskiy/",
+      "id": "6465",
+      "name": "Электрический щит для приборов автоматизации E-MODE®",
+      "category": "Приборы",
+      "price": 16890,
+      "currency": "RUB",
+      "availability": "InStock",
+      "canBuy": true,
+      "stock": 5,
+      "addToBasket": "https://e-mode.pro/catalog/controllers/e_mode_shchit_elektricheskiy/?action=ADD2BASKET&id=6465",
+      "manual": null,
+      "description": [
+        "Описание",
+        "•",
+        "Отзывы",
+        "<div class=\"product-item-detail-tab-content active\""
+      ],
+      "images": [
+        {
+          "src": "https://e-mode.pro/upload/iblock/246/1iz9v3kvm9a1sak7poge44icvgy8rzpp.jpg",
+          "width": 800,
+          "height": 800,
+          "file": "img/panel-1.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/59c/soos8cb0qjn7eblgm29b71j2rsvk219n.png",
+          "width": 1080,
+          "height": 1080,
+          "file": "img/panel-2.jpg"
+        },
+        {
+          "src": "https://e-mode.pro/upload/iblock/ad8/lf0es2l4bl5u6lnhdjohduiknyhaba0w.png",
+          "width": 1080,
+          "height": 1080,
+          "file": "img/panel-3.jpg"
+        }
+      ]
+    }
+  ]
+}
