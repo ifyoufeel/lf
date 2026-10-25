@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- expect: R12 error 2, R12 warning 2 -->
+<!-- expect: R12 error 2, R12 warning 3 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -34,6 +34,8 @@ body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 system-ui,s
   </nav>
   <img src="media/unknown-still.jpg">
   <img src="media/arca-salon.jpg" alt="A salon">
+  <div class="cover-bg" aria-hidden="true"><img src="media/machina-power.jpg" alt=""></div>
+  <img src="media/hortus-cnc.jpg" alt="">
 </main>
 <script>
 const note = document.querySelector('.lead');

@@ -19,13 +19,21 @@ img,video,canvas{max-width:100%}
 /* ---------- bar, progress, dots ---------- */
 .bar{position:fixed;top:0;left:0;right:0;z-index:30;padding-top:env(safe-area-inset-top,0px);background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line2)}
 .bar-in{height:var(--bar);display:flex;align-items:center;justify-content:space-between;gap:16px;padding-left:var(--gl);padding-right:var(--gr)}
+.bar-l{display:flex;align-items:center;gap:32px;min-width:0}
 .brand{display:inline-flex;align-items:center;min-height:44px;color:var(--fg);text-decoration:none}
-.brand svg{display:block;height:22px;width:auto}
+.brand svg{display:block;height:24px;width:auto}
 .links{display:flex;align-items:center;gap:clamp(14px,2.4vw,32px)}
 .links a{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:var(--fg2);padding:16px 0;transition:color .2s}
 .links a:hover{color:var(--fg)}
 .links a.btn{padding:0 18px;color:var(--fg)}
-@media (max-width:760px){.links .opt{display:none}}
+/* Inside a page the header names where you are, like a directory: Home / Machina. The house itself shows none. */
+.crumbs ol{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:0 10px;font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);white-space:nowrap}
+.crumbs li{display:inline-flex;align-items:center;gap:10px}
+.crumbs li+li::before{content:"/";color:var(--fg2)}
+.crumbs a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;transition:color .2s}
+.crumbs a:hover{color:var(--fg)}
+.crumbs [aria-current]{color:var(--fg)}
+@media (max-width:760px){.crumbs{display:none}}
 .progress{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + var(--bar));height:2px;z-index:29;pointer-events:none}
 .progress i{display:block;height:100%;width:0;background:var(--wing-t);transition:width .5s var(--ease),background .4s}
 .dots{position:fixed;right:max(clamp(12px,2vw,28px),env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);z-index:25;display:flex;flex-direction:column;gap:4px}
@@ -176,17 +184,27 @@ canvas.plate{image-rendering:pixelated;image-rendering:crisp-edges}
 @media (max-width:560px){.end .foot{margin-bottom:calc(clamp(14px,2.6vh,26px) - clamp(28px,6vh,72px))}}
 
 /* ---------- case pages ---------- */
-.case-cover .word{font-size:clamp(70px,9.6vw,176px)}
-.case-cover .arch{height:min(62svh,600px);aspect-ratio:3/4.4;width:auto}
-.player{width:min(100%,calc(68svh * 16 / 9),1180px);margin:0 auto;display:grid;gap:14px}
-.frame{position:relative;display:block;aspect-ratio:16/9;max-width:100%;background:var(--void);border:1px solid var(--line);overflow:hidden;color:var(--paper);text-decoration:none}
-.frame img,.frame iframe,.frame video{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;border:0;transition:transform .9s var(--ease)}
-.frame:hover img{transform:scale(1.02)}
-.frame iframe,.frame video{z-index:2}
-.frame video{object-fit:contain;background:var(--void)}
-.frame.playing .pl{display:none}
-.frame:focus-visible{outline:2px solid var(--wing-t);outline-offset:4px}
-.cap{display:flex;justify-content:space-between;gap:12px;font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+/* The cover stands on the wing’s footage: two stills either side of the wing loop, under a fall from void to clear.
+   It stays dark in both themes, so its text takes the night tokens and the wing colour at full strength. */
+.case-cover{align-items:end;isolation:isolate;background:var(--void);color:var(--paper);--fg:var(--paper);--fg2:var(--ash);--bg:var(--ink);--line:var(--paper-line);--wing-t:var(--wing)}
+.cover-bg{position:absolute;inset:0;z-index:-1;display:flex;justify-content:center;gap:48px;overflow:hidden;pointer-events:none}
+.cover-bg>img,.cover-reel{flex:none;display:block;height:100%;width:auto;aspect-ratio:4/5;object-fit:cover;background:var(--plate)}
+.cover-bg>img{opacity:.7}
+.cover-reel{position:relative;overflow:hidden}
+.cover-reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cover-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--void) 0%,var(--void) 8%,transparent 100%)}
+.case-cover .stack{gap:clamp(16px,2.4vh,22px);max-width:1056px}
+.case-cover .title{display:grid;gap:0}
+.case-cover .word{font-size:clamp(70px,9.6vw,176px);line-height:.9}
+.case-cover .lead{max-width:none;color:var(--fg2)}
+.case-cover .btn.solid{background:var(--wing);border-color:var(--wing);color:var(--on-wing)}
+.case-cover .btn.solid:hover{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+/* Phones: the wing loop alone, full-bleed behind the copy. */
+@media (max-width:900px){
+  .cover-bg{gap:0}
+  .cover-bg>img{display:none}
+  .cover-reel{width:100%;aspect-ratio:auto}
+}
 .rows{list-style:none;margin:clamp(18px,3.6vh,36px) 0 0;padding:0;border-bottom:1px solid var(--line)}
 .rows li{display:grid;grid-template-columns:72px minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:baseline;border-top:1px solid var(--line);padding:clamp(12px,2.4vh,22px) 0}
 .rows .n{font:500 12px/1 var(--mono);color:var(--fg2);letter-spacing:.1em}
@@ -208,7 +226,6 @@ canvas.plate{image-rendering:pixelated;image-rendering:crisp-edges}
 .next .big:hover{color:var(--wing-t)}
 .next .big svg{width:.6em;height:.6em}
 @media (max-width:900px){
-  .case-cover .arch{height:min(30svh,280px)}
   .rows li{grid-template-columns:40px minmax(0,1fr);gap:4px 12px}
   .rows .s{grid-column:2}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -216,11 +233,15 @@ canvas.plate{image-rendering:pixelated;image-rendering:crisp-edges}
 }
 
 /* ---------- reel dialog, curtain, cursor ---------- */
-dialog.reel{--wing-t:var(--paper);padding:0;border:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;background:var(--scrim-strong);color:var(--paper)}
+dialog.reel{--wing-t:var(--paper);--fg:var(--paper);--fg2:var(--ash);--line:var(--paper-line);padding:0;border:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;background:var(--scrim-strong);color:var(--paper)}
 dialog.reel::backdrop{background:transparent}
 .reel-in{position:absolute;inset:0;display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 72px) max(clamp(12px,4vw,64px),env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 32px) max(clamp(12px,4vw,64px),env(safe-area-inset-left,0px))}
 .reel-frame{width:min(100%,calc((100svh - 140px) * 16 / 9));aspect-ratio:16/9;max-width:100%;background:var(--void)}
 .reel-frame iframe,.reel-frame video{width:100%;height:100%;border:0;display:block;background:var(--void)}
+.reel-frame:empty{display:none}
+/* Watch the films: the three films to choose from, inside the player. */
+.reel-pick{width:min(100%,1180px);display:grid;gap:clamp(18px,3vh,28px)}
+.reel-pick .reels{margin-top:0}
 .reel .x:hover{border-color:var(--paper)}
 .reel .x{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:max(clamp(12px,3vw,40px),env(safe-area-inset-right,0px));color:var(--paper);border-color:var(--paper-line)}
 .curtain{position:fixed;inset:0;z-index:40;background:var(--void);color:var(--paper);display:grid;place-items:center;pointer-events:none;clip-path:inset(100% 0 0 0)}

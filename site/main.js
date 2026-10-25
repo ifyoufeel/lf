@@ -186,11 +186,6 @@
     if (a.classList.contains('btn')) a.insertAdjacentHTML('beforeend', ne);
     else a.querySelector('.pl')?.insertAdjacentHTML('beforeend', ne);
   });
-  const resetFrames = (keep) => $$('a.frame.playing').forEach((fr) => {
-    if (keep && keep.contains(fr)) return;
-    fr.querySelector('iframe')?.remove();
-    fr.classList.remove('playing');
-  });
 
   /* ---------------- screens: reveal, wing colour, previews, counters ---------------- */
   const dotsNav = $('#dots'), prog = $('#prog');
@@ -232,7 +227,6 @@
         if (fresh) { v.currentTime = 0; v.play().catch(() => {}); }
       } else { v.pause(); }
     });
-    resetFrames(s);
     $$('[data-count]', s).forEach(count);
   }
   function setup(view) {
@@ -262,18 +256,35 @@
     const el = document.getElementById(id);
     if (el && views.home.contains(el)) el.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' });
   }
+  // The header’s directory trail: Home, then each parent page, then this one. The house itself shows none.
+  const crumbNav = $('#crumbs');
+  const hrefOf = (key) => '#/' + (key.startsWith('hw-') ? 'hardware/' + key.slice(3) : key);
+  function crumbs(view) {
+    if (!crumbNav) return;
+    const ol = crumbNav.querySelector('ol');
+    while (ol.children.length > 1) ol.lastElementChild.remove();
+    const trail = [];
+    for (let n = view; n && n.dataset.crumb; n = views[n.dataset.crumbParent]) trail.unshift(n);
+    trail.forEach((n, i) => {
+      const li = document.createElement('li');
+      if (i === trail.length - 1) { li.textContent = n.dataset.crumb; li.setAttribute('aria-current', 'page'); }
+      else { const a = document.createElement('a'); a.href = hrefOf(n.dataset.view); a.textContent = n.dataset.crumb; li.append(a); }
+      ol.append(li);
+    });
+    crumbNav.hidden = trail.length === 0;
+  }
   let want = null, swapT = 0, offT = 0;
   function swap(k) {
     if (views[cur]) views[cur]._y = views[cur].scrollTop;
     if (dlg.open) closeReel();
     Object.entries(views).forEach(([n, v]) => { v.hidden = n !== k; });
     $$('video').forEach((v) => { if (!v.paused) v.pause(); });
-    resetFrames(null);
     const bk = $('#basket');
     if (bk && bk.open) bk.close();
     cur = k;
     const v = views[k];
     document.title = TITLES[k] || v.dataset.pageTitle || TITLES.home;
+    crumbs(v);
     // Back to the house returns to the screen the visitor left; a case always opens at its cover.
     if (!pendingAnchor) v.scrollTop = (k === 'home' && v._y) || 0;
     setup(v);
@@ -312,23 +323,33 @@
     }
     const sc = e.target.closest('[data-scroll]');
     if (sc) { e.preventDefault(); const t = document.getElementById(sc.dataset.scroll); if (t) t.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' }); return; }
+    if (e.target.closest('[data-reels]')) { e.preventDefault(); openPicker(); return; }
     const pl = e.target.closest('[data-play]');
-    if (pl && inPage(pl.dataset.play)) {
-      e.preventDefault();
-      if (pl.classList.contains('frame')) { if (!pl.classList.contains('playing')) { pl.classList.add('playing'); pl.append(filmFrame(pl.dataset.play)); } }
-      else openReel(pl.dataset.play);
-    }
+    if (pl && inPage(pl.dataset.play)) { e.preventDefault(); openReel(pl.dataset.play); }
   });
   addEventListener('hashchange', route);
 
   /* ---------------- film player ---------------- */
-  const dlg = $('#reel'), slot = $('#reel-frame');
+  const dlg = $('#reel'), slot = $('#reel-frame'), pick = $('#reel-pick');
   let opener = null;
-  function openReel(k) {
+  const openDialog = () => {
+    if (dlg.open) return;
     opener = document.activeElement;
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  };
+  // Watch the films: the three films to choose from, in the same dialog that plays them.
+  function openPicker() {
+    slot.replaceChildren(); pick.hidden = false;
+    dlg.setAttribute('aria-label', 'The films');
+    openDialog();
+    $('#reel-x').focus();
+  }
+  // A film chosen in the picker plays in its place; focus still returns to the control that opened the dialog.
+  function openReel(k) {
+    pick.hidden = true;
     slot.replaceChildren(filmFrame(k));
     dlg.setAttribute('aria-label', (NAMES[k] || 'lastfomo') + ' film');
-    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    openDialog();
     // Start on Close, not inside the cross-origin player, so Escape (handled by the page) closes the dialog.
     $('#reel-x').focus();
   }
@@ -337,7 +358,7 @@
   $('#reel-x').addEventListener('click', closeReel);
   dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.classList.contains('reel-in')) closeReel(); });
   // Closing removes the player, which stops the film; focus returns to the control that opened it.
-  dlg.addEventListener('close', () => { slot.replaceChildren(); if (opener && opener.focus) opener.focus({ preventScroll: true }); });
+  dlg.addEventListener('close', () => { slot.replaceChildren(); pick.hidden = true; if (opener && opener.focus) opener.focus({ preventScroll: true }); opener = null; });
 
   /* ---------------- the plus cursor ---------------- */
   if (FINE && !RM) {

@@ -1307,10 +1307,12 @@ export function check(options = {}) {
       F.error('R12', `media/${name} does not exist in ${displayPath(path.join(siteDir, 'media'), root)}/.`, first.file.display, first.line);
     }
   }
+  // A still used as backdrop inside an aria-hidden layer is decoration: alt="" is right there, not a mismatch.
+  const hiddenBackdrop = (n) => { if (n.attrs.alt.trim() !== '') return false; for (let p = n.parent; p; p = p.parent) if (p.attrs?.['aria-hidden'] === 'true') return true; return false; };
   for (const node of html.all) {
     if (node.name !== 'img' || !('alt' in node.attrs)) continue;
     const m = /(?:^|\/)media\/([^?#/]+)$/.exec((node.attrs.src || '').trim());
-    if (!m || !media[m[1]] || media[m[1]].alt == null) continue;
+    if (!m || !media[m[1]] || media[m[1]].alt == null || hiddenBackdrop(node)) continue;
     if (node.attrs.alt.trim() !== media[m[1]].alt) {
       F.warn('R12', `Alt text for media/${m[1]} differs from the ledger: "${clip(node.attrs.alt, 50)}" vs "${clip(media[m[1]].alt, 50)}".`, hfile.display, hline(node));
     }

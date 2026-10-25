@@ -227,23 +227,88 @@ await step('film: Close shuts dialog#reel', async () => {
   return 'closed, player removed';
 });
 
-await step('film: Escape closes dialog#reel', async () => {
-  if (!embeds) throw new Skip('Artifact build links out; there is no in-page player');
+// "Watch the films" opens the three films to choose from, inside the same dialog.
+await step('film: Watch the films opens the picker; Escape closes', async () => {
   await go('#/', homeView);
-  const card = page.locator(`main.view[data-view="${homeView}"] a.film[data-play]`).first();
-  await bringIntoView(card);
-  await card.focus();
+  await page.evaluate(() => { const v = document.querySelector('main.view:not([hidden])'); v.style.scrollBehavior = 'auto'; v.scrollTop = 0; });
+  await page.waitForTimeout(600);
+  const btn = page.locator(`main.view[data-view="${homeView}"] [data-reels]`, { hasText: /watch the films/i }).first();
+  check(await btn.count(), 'no "Watch the films" control on #/');
+  await btn.focus();
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => document.querySelector('dialog#reel').open, null, { timeout: 3000 })
     .catch(() => { throw new Error('dialog#reel did not open from the keyboard'); });
-  const first = await page.evaluate(() => document.activeElement && (document.activeElement.id || document.activeElement.tagName));
-  check(first === 'reel-x', `focus opened on ${first}, not the Close button`);
+  const st = await page.evaluate(() => ({
+    focus: document.activeElement && (document.activeElement.id || document.activeElement.tagName),
+    picker: !document.querySelector('#reel-pick').hidden,
+    films: [...document.querySelectorAll('#reel-pick a.film[data-play]')].map((a) => a.dataset.play).join(),
+    frames: document.querySelectorAll('#reel-frame > *').length,
+  }));
+  check(st.focus === 'reel-x', `focus opened on ${st.focus}, not the Close button`);
+  check(st.picker, 'the film picker is hidden');
+  check(st.films === 'hortus,machina,arca', `the picker offers ${st.films || 'no films'}, not hortus, machina, arca`);
+  check(st.frames === 0, 'a film started before one was chosen');
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => !document.querySelector('dialog#reel').open, null, { timeout: 3000 })
     .catch(() => { throw new Error('Escape did not close dialog#reel'); });
-  const back = await page.evaluate(() => document.activeElement && document.activeElement.matches('a.film[data-play]'));
-  check(back, 'focus did not return to the film card');
-  return 'focus on Close, Escape closes, focus returns';
+  const back = await page.evaluate(() => document.activeElement && document.activeElement.matches('[data-reels]'));
+  check(back, 'focus did not return to "Watch the films"');
+  return 'three films, focus on Close, Escape closes, focus returns';
+});
+
+await step('film: a film chosen in the picker plays in place', async () => {
+  if (!embeds) throw new Skip('Artifact build links out; there is no in-page player');
+  await go('#/', homeView);
+  await page.locator(`main.view[data-view="${homeView}"] [data-reels]`).first().click();
+  await page.waitForFunction(() => document.querySelector('dialog#reel').open, null, { timeout: 3000 })
+    .catch(() => { throw new Error('dialog#reel did not open'); });
+  const card = page.locator('#reel-pick a.film[data-play="arca"]');
+  const href = await card.getAttribute('href');
+  await card.click();
+  await page.waitForTimeout(300);
+  const st = await page.evaluate(() => ({
+    picker: !document.querySelector('#reel-pick').hidden,
+    src: (document.querySelector('#reel-frame iframe') || {}).src || '',
+  }));
+  const id = (href || '').split('v=')[1];
+  check(!st.picker, 'the picker stayed up over the film');
+  check(st.src.startsWith('https://www.youtube-nocookie.com/embed/' + id), `the player loads ${st.src || 'nothing'}, not film ${id}`);
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('dialog#reel').open, null, { timeout: 3000 })
+    .catch(() => { throw new Error('Escape did not close dialog#reel'); });
+  return `plays ${id}`;
+});
+
+// The header names where you are inside a page, like a directory; the house itself shows no trail.
+await step('header: the trail names the page', async () => {
+  const trail = () => page.evaluate(() => { const n = document.querySelector('#crumbs'); return n && !n.hidden ? [...n.querySelectorAll('li')].map((li) => li.textContent.trim()).join(' / ') : ''; });
+  await go('#/', homeView);
+  const home = await trail();
+  check(home === '', `the house shows a trail: ${home}`);
+  const seen = [];
+  for (const [hash, view, want] of [['#/machina', 'machina', /^home \/ machina$/i], ['#/hortus', 'hortus', /^home \/ hortus$/i], ['#/arca', 'arca', /^home \/ arca$/i], ['#/start', 'start', /^home \/ start a project$/i]]) {
+    await go(hash, view);
+    const t = await trail();
+    check(want.test(t), `${hash} shows "${t || 'no trail'}"`);
+    seen.push(t);
+  }
+  await page.locator('#crumbs a', { hasText: /^home$/i }).click();
+  await waitView(homeView);
+  return seen.join(' · ');
+});
+
+await step('case: the cover plays the wing loop behind the copy', async () => {
+  await go('#/machina', 'machina');
+  await page.waitForTimeout(4500);
+  const st = await page.evaluate(() => {
+    const v = document.querySelector('#view-machina .case-cover .cover-reel video');
+    const bg = document.querySelector('#view-machina .cover-bg');
+    return v ? { src: !!v.currentSrc, t: +v.currentTime.toFixed(2), hidden: bg && bg.getAttribute('aria-hidden'), z: getComputedStyle(bg).zIndex } : null;
+  });
+  check(st, 'no wing loop in the Machina cover');
+  check(st.src && st.t > 0, `the Machina cover loop did not start (src ${st.src}, t ${st.t})`);
+  check(st.hidden === 'true', 'the cover backdrop is not aria-hidden');
+  return `playing, t ${st.t} s`;
 });
 
 await step('nav: See the work lands on a wing', async () => {

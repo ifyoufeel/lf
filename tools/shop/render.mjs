@@ -57,7 +57,7 @@ function indexView(shop) {
   const x = shop.index;
   const bySlug = Object.fromEntries(shop.products.map((p) => [p.slug, p]));
   const cover = shop.products.find((p) => p.image === x.image);
-  let out = `<main class="view" id="view-hardware" data-view="hardware" data-wing="hortus" data-page-title="Hardware, Hortus — lastfomo" tabindex="-1" hidden>`
+  let out = `<main class="view" id="view-hardware" data-view="hardware" data-wing="hortus" data-crumb="Hardware" data-crumb-parent="hortus" data-page-title="Hardware, Hortus — lastfomo" tabindex="-1" hidden>`
     + `<section class="screen shop-cover" data-title="Hardware" data-wing="hortus"><div class="wrap split"><div class="stack">`
     + `<p class="code" data-fade style="--d:.1s">${esc(shop.hardware.code)}</p>`
     + `<h1 class="h1" data-rise style="--d:.2s"><span>${esc(x.title)}</span></h1>`
@@ -82,7 +82,7 @@ function productView(shop, p, next) {
   const does = p.does.map((d) => `<li><span class="n">HRT</span><span class="t">${esc(d.t)}</span><span class="s">${esc(d.s)}</span></li>`).join('');
   const specs = p.specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
   const box = p.box.map(esc).join('<i>·</i>');
-  return `<main class="view" id="view-hw-${p.slug}" data-view="hw-${p.slug}" data-wing="hortus" data-page-title="${esc(p.name)}, Hortus hardware — lastfomo" tabindex="-1" hidden>`
+  return `<main class="view" id="view-hw-${p.slug}" data-view="hw-${p.slug}" data-wing="hortus" data-crumb="${esc(p.name)}" data-crumb-parent="hardware" data-page-title="${esc(p.name)}, Hortus hardware — lastfomo" tabindex="-1" hidden>`
     + `<section class="screen shop-cover" data-title="${esc(p.name)}" data-wing="hortus"><div class="wrap split"><div class="stack">`
     + `<p class="code" data-fade style="--d:.1s">${CODE}${esc(p.kind)}</p>`
     + `<h1 class="h1" data-rise style="--d:.2s"><span>${esc(p.name)}</span></h1>`
