@@ -57,14 +57,16 @@ function parse(html, url) {
   const slider = pick(/'SLIDER':\[([\s\S]*?)\]/) || '';
   const images = [...slider.matchAll(/'SRC':'([^']+)','WIDTH':'(\d+)','HEIGHT':'(\d+)'/g)]
     .map((m) => ({ src: new URL(m[1], ORIGIN).href, width: +m[2], height: +m[3] }));
-  const tab = html.indexOf('data-value="description"');
+  // The description panel, not its tab button (both carry data-value="description").
+  const panel = /<div[^>]*data-entity="tab-container"[^>]*data-value="description"[^>]*>/i.exec(html);
   let description = [];
-  if (tab >= 0) {
-    const start = html.indexOf('>', tab) + 1;
+  if (panel) {
+    const start = panel.index + panel[0].length;
     const next = html.indexOf('data-entity="tab-container"', start);
-    description = lines(html.slice(start, next > 0 ? next : start + 20000));
+    description = lines(html.slice(start, next > 0 ? html.lastIndexOf('<div', next) : start + 20000));
   }
-  const manual = pick(/<a[^>]+href="([^"]+)"[^>]*>[^<]*(?:<[^>]+>)*\s*Скачать руководство/i);
+  const dl = html.indexOf('Скачать руководство');
+  const manual = dl > 0 ? ([...html.slice(Math.max(0, dl - 600), dl).matchAll(/href="([^"#][^"]*)"/g)].pop() || [])[1] : null;
   return {
     url, id: id || null, name, category,
     price: Number.isFinite(price) && price > 0 ? price : null, currency,
@@ -88,7 +90,9 @@ async function get(url, as = 'text') {
   }
 }
 
-const hasConvert = (() => { try { execFileSync('convert', ['-version'], { stdio: 'ignore' }); return true; } catch { return false; } })();
+// ImageMagick 7 ships `magick`, 6 ships `convert`; without either the photos are kept as published.
+const IM = ['magick', 'convert'].find((bin) => { try { execFileSync(bin, ['-version'], { stdio: 'ignore' }); return true; } catch { return false; } });
+if (!IM) console.warn('import-emode: ImageMagick not found; photos are kept at full size and in their own format');
 
 const config = JSON.parse(readFileSync(join(ROOT, 'shop/emode-products.json'), 'utf8'));
 const list = config.products.filter((p) => !ONLY || p.slug === ONLY);
@@ -107,10 +111,11 @@ for (const p of list) {
       const file = `img/${p.slug}-${n + 1}.jpg`;
       const raw = await get(img.src, 'binary');
       const target = join(OUT, file);
-      if (hasConvert) {
+      if (IM) {
+        // Every photo becomes a JPEG at most 1000 px on its long side; transparent PNGs are laid on white, as the maker shows them.
         const tmp = target + '.src';
         writeFileSync(tmp, raw);
-        execFileSync('convert', [tmp, '-auto-orient', '-resize', '1000x1000>', '-strip', '-interlace', 'JPEG', '-quality', '82', target]);
+        execFileSync(IM, [tmp + '[0]', '-auto-orient', '-background', 'white', '-alpha', 'remove', '-alpha', 'off', '-resize', '1000x1000>', '-strip', '-interlace', 'JPEG', '-quality', '82', 'jpeg:' + target]);
         rmSync(tmp);
       } else {
         writeFileSync(target, raw);
