@@ -2,3 +2,6 @@
 dist/
 node_modules/
 out/
+
+# Personal Claude Code overrides
+.claude/settings.local.json
