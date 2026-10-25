@@ -1,0 +1,17 @@
+{
+  "$note": "Products the importer reads from e-mode.pro, the maker of the Hortus wing's automation hardware. slug is ours; url is the maker's product page. tools/shop/import-emode.mjs writes shop/source/emode.json and shop/source/img/ from these. Which products the page shows, and in what words, is site/shop.json.",
+  "products": [
+    { "slug": "ponics-pilot", "url": "https://e-mode.pro/catalog/controllers/ponics_pilot/" },
+    { "slug": "ponics-pilot-32", "url": "https://e-mode.pro/catalog/controllers/ponikspilot_32_ponicspilot_32_pribor_dlya_avtomatizatsii_prigotovleniya_pitatelnogo_rastvora/" },
+    { "slug": "microclimate", "url": "https://e-mode.pro/catalog/controllers/microclimate/" },
+    { "slug": "sensiroom-h", "url": "https://e-mode.pro/catalog/controllers/sensiroom_h_poliv/" },
+    { "slug": "sensiroom-co2-wifi", "url": "https://e-mode.pro/catalog/controllers/sensiroom_co2_s_wi_fi/" },
+    { "slug": "sensiroom-co2", "url": "https://e-mode.pro/catalog/controllers/sensiroom_co2/" },
+    { "slug": "ph-ec-set-wifi", "url": "https://e-mode.pro/catalog/controllers/nabor_kontrollerov_ph_i_ec_s_wi_fi/" },
+    { "slug": "ph-ec-set", "url": "https://e-mode.pro/catalog/controllers/nabor_kontrollerov_ph_i_ec_bez_wi_fi/" },
+    { "slug": "ph-wifi", "url": "https://e-mode.pro/catalog/controllers/kontroller_ph_s_wi_fi_pribor_dlya_avtomaticheskoy_podachi_rn_reagentov/" },
+    { "slug": "ph", "url": "https://e-mode.pro/catalog/controllers/regulyator_ph_lite/" },
+    { "slug": "ec-wifi", "url": "https://e-mode.pro/catalog/controllers/kontroller_ec_s_wi_fi_pribor_dlya_avtomaticheskoy_podachi_udobreniy/" },
+    { "slug": "panel", "url": "https://e-mode.pro/catalog/controllers/e_mode_shchit_elektricheskiy/" }
+  ]
+}
