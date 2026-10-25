@@ -1,0 +1,208 @@
+{
+  "$note": "The Hortus hardware shop: what the page shows and in what words. Hand-written in English from the maker's own pages (shop/source/emode.json, imported by tools/shop/import-emode.mjs). tools/shop/render.mjs turns this into markup. Every number here is a fact in brand/ledger.json (hortus.shop.*); every photo is in ledger → media.",
+  "live": false,
+  "$live": "false: the shop renders in the claude.ai Artifact and in dist/preview only, never on the live site. Set true once the owner approves the shop for lastfomo.vercel.app.",
+  "maker": { "name": "E-MODE", "country": "Russia", "url": "https://e-mode.pro/" },
+  "currency": { "code": "RUB", "symbol": "₽" },
+  "contact": "lastfomo@gmail.com",
+  "hardware": {
+    "code": "HRT — Hortus · Hardware",
+    "title": "The control hardware, to order.",
+    "lead": "Controllers for nutrient dosing, pH, climate, CO₂ and irrigation, made by E-MODE in Russia. Choose what your room needs and send the order.",
+    "image": "shop-ponics-pilot.jpg",
+    "cta": "See the hardware"
+  },
+  "index": {
+    "title": "Control hardware for growers.",
+    "lead": "Dosing, pH, climate, CO₂ and irrigation controllers by E-MODE. Add what you need to the basket and send the order. We confirm stock, delivery and payment by email.",
+    "image": "shop-ponics-pilot-32.jpg",
+    "groups": [
+      { "id": "feeding", "title": "Feeding, held to the recipe.", "label": "Feeding", "products": ["ponics-pilot", "ponics-pilot-32", "ph-wifi"] },
+      { "id": "climate", "title": "Air and water, on schedule.", "label": "Climate", "products": ["microclimate", "sensiroom-co2-wifi", "sensiroom-h"] }
+    ],
+    "steps": [
+      { "t": "Fill the basket", "s": "Choose the controllers and how many of each." },
+      { "t": "Send the order", "s": "Your name, email and where it should go. Nothing is charged here." },
+      { "t": "We confirm by email", "s": "Stock, delivery and payment, before anything ships." }
+    ]
+  },
+  "products": [
+    {
+      "slug": "ponics-pilot",
+      "source": "ponics-pilot",
+      "name": "PonicsPilot",
+      "kind": "Nutrient dosing",
+      "line": "Nutrient solution, held to the recipe.",
+      "lead": "Keeps the EC and pH of the feed in a hydroponic system or a water-preparation line. It doses up to three nutrients, tops up water from a level sensor and watches the temperature of the solution and the air.",
+      "price": 140120,
+      "image": "shop-ponics-pilot.jpg",
+      "alt": "The PonicsPilot dosing controller: five peristaltic pumps above five labelled bottles",
+      "does": [
+        { "t": "EC first, then pH", "s": "Feeds to the set EC, then corrects pH with pH+ and pH−" },
+        { "t": "Up to three nutrients", "s": "Each dose sized against the live reading" },
+        { "t": "Level kept", "s": "Tops up the control tank from the level sensor" },
+        { "t": "Temperature watched", "s": "Solution and air" },
+        { "t": "Run from anywhere", "s": "On the unit, over the local network or online, with history in the maker’s cloud" }
+      ],
+      "specs": [
+        ["Size", "555 × 412 × 205 mm"],
+        ["Weight", "7.5 kg net"],
+        ["Tank", "10 to 2,000 L"],
+        ["Pumps", "85 ml/min"],
+        ["Dosing pause", "1 min to 12 h"],
+        ["EC range", "0.1 to 5.0 mS"],
+        ["pH range", "3.0 to 14.0"],
+        ["Programmes", "Seedlings, growth, pre-flower, flower, harvest, preparation"],
+        ["Menu", "Russian, English"]
+      ],
+      "box": ["Controller", "pH and EC electrodes", "Level sensor", "Solution and air temperature sensors", "Sampler", "Submersible pump", "Tubing with micro-fittings", "Two 120 cm hoses", "Four Hanna calibration solutions", "Manual"]
+    },
+    {
+      "slug": "ponics-pilot-32",
+      "source": "ponics-pilot-32",
+      "name": "PonicsPilot 32",
+      "kind": "Nutrient dosing · Wi-Fi",
+      "line": "The whole feed line, on one panel.",
+      "lead": "The larger PonicsPilot. EC, pH, level and solution temperature for tanks of 60 to 2,000 litres, with a colour touch screen, Wi-Fi, and RS-485 to join a wider control system.",
+      "price": 185116,
+      "image": "shop-ponics-pilot-32.jpg",
+      "alt": "The PonicsPilot 32 panel: five pumps above five bottles, pH− and pH+ on the left",
+      "does": [
+        { "t": "EC first, then pH", "s": "Up to three nutrients, then pH+ and pH−" },
+        { "t": "Bottles watched", "s": "Warns before a nutrient or reagent runs out" },
+        { "t": "Faults caught", "s": "Leak, sampler and channel checks among 26 alarms" },
+        { "t": "Drains on command", "s": "The tank, a channel or the whole system" },
+        { "t": "Heats or cools", "s": "Drives outside equipment up to 100 W, not included" }
+      ],
+      "specs": [
+        ["Size", "490 × 550 × 200 mm"],
+        ["Weight", "10 kg"],
+        ["Tank", "60 to 2,000 L"],
+        ["Pumps", "140 ml/min"],
+        ["Sensors", "15"],
+        ["EC range", "0.2 to 5.50 mS/cm"],
+        ["pH range", "3.0 to 12.0"],
+        ["Solution", "10 to 20 °C"],
+        ["Connection", "Wi-Fi · RS-485 (Modbus)"],
+        ["Power", "220 V"]
+      ],
+      "box": ["Controller with sampler, tubing and five bottles fitted", "pH and EC sensors", "Five level sensors", "Five bottle-level sensors", "Solution temperature sensor", "Leak sensor", "Submersible pump", "Two 120 cm hoses", "Four Hanna calibration solutions", "Manual"]
+    },
+    {
+      "slug": "ph-wifi",
+      "source": "ph-wifi",
+      "name": "pH Controller Wi-Fi",
+      "kind": "pH dosing · Wi-Fi",
+      "line": "pH, corrected as it drifts.",
+      "lead": "Measures and corrects the pH of a nutrient solution between 3.0 and 12.0, in reservoirs of 20 to 2,000 litres. Two pumps, pH+ and pH−, run under an adaptive controller.",
+      "price": 34077,
+      "image": "shop-ph-wifi.jpg",
+      "alt": "The pH controller: two peristaltic pumps marked pH− and pH+, with its electrode on a cable",
+      "does": [
+        { "t": "Adaptive dosing", "s": "A PI controller that follows the solution as it changes" },
+        { "t": "A floating set point", "s": "pH allowed to swing, as it does in nature" },
+        { "t": "Guard rails", "s": "Holds 5.0 to 8.0 with protection on; alarms if the electrode fails" },
+        { "t": "Remote", "s": "Wi-Fi to the maker’s cloud, with alarms by email" }
+      ],
+      "specs": [
+        ["Tank", "20 to 2,000 L"],
+        ["Pumps", "60 ml/min"],
+        ["Dosing pause", "0.5 to 48 h"],
+        ["pH range", "3.0 to 12.0"],
+        ["Manual dose", "1 to 50 ml per press"],
+        ["Screen", "Colour touch screen"],
+        ["Wi-Fi", "2.4 GHz"],
+        ["Power", "10 W, 220–240 V"],
+        ["Size", "100 × 200 × 150 mm"],
+        ["Protection", "IP64"],
+        ["Weight", "1.8 kg"]
+      ],
+      "box": ["Controller", "pH electrode", "pH 4.01 and 7.01 calibration solutions", "Four tubes with micro-fittings", "Two wall brackets"]
+    },
+    {
+      "slug": "microclimate",
+      "source": "microclimate",
+      "name": "Microclimate",
+      "kind": "Climate",
+      "line": "Heat and humidity, on two channels.",
+      "lead": "Holds air temperature and humidity on two independent channels: a heater on one, a cooler on the other, each up to 1,500 W.",
+      "price": 25886,
+      "image": "shop-microclimate.jpg",
+      "alt": "The Microclimate controller: two sockets beside a small screen, with its sensor on a cable",
+      "does": [
+        { "t": "Two channels", "s": "Each set on its own, up to 1,500 W" },
+        { "t": "By reading, timer or clock", "s": "Automatic, a repeating timer, or set times" },
+        { "t": "One probe", "s": "Temperature and humidity in one digital sensor" },
+        { "t": "Rests when idle", "s": "Dims the screen and keeps working" }
+      ],
+      "specs": [
+        ["Size", "240 × 80 × 60 mm"],
+        ["Weight", "900 g"],
+        ["Temperature", "−40 to +80 °C"],
+        ["Timer", "1 second to 50 days"],
+        ["Load", "Up to 1,500 W per channel"],
+        ["Modes", "Automatic, manual"],
+        ["Menu", "Russian"],
+        ["Protection", "IP44"]
+      ],
+      "box": ["Controller", "Temperature and humidity sensor", "Two brackets", "Manual"]
+    },
+    {
+      "slug": "sensiroom-co2-wifi",
+      "source": "sensiroom-co2-wifi",
+      "name": "SensiRoom CO₂ Wi-Fi",
+      "kind": "CO₂ · Wi-Fi",
+      "line": "CO₂, raised while the light is on.",
+      "lead": "Measures carbon dioxide and holds it in a greenhouse, grow room or tent, switching a regulator, fan or damper from one controlled socket. In a public room it ventilates when CO₂ climbs.",
+      "price": 30454,
+      "image": "shop-sensiroom-co2-wifi.jpg",
+      "alt": "The SensiRoom CO₂ controller: a white case with a screen and three buttons, cables below",
+      "does": [
+        { "t": "Two modes", "s": "Enrichment for growing; ventilation for rooms" },
+        { "t": "One output", "s": "A switched socket for up to 100 W" },
+        { "t": "Remote", "s": "Wi-Fi to the maker’s cloud, with graphs of every reading" },
+        { "t": "For daylight", "s": "Plants use the extra CO₂ only while they photosynthesise" }
+      ],
+      "specs": [
+        ["Range", "300 to 5,000 ppm"],
+        ["Threshold", "400 to 2,000 ppm"],
+        ["Dosing", "1 second to 59 minutes"],
+        ["Pause", "1 min to 23 h 59 min"],
+        ["Modes", "Automatic on and off, manual"],
+        ["Menu", "Russian, English"],
+        ["Power", "5 W, 220–240 V"],
+        ["Size", "120 × 80 × 55 mm"],
+        ["Protection", "IP44"],
+        ["Weight", "800 g net"]
+      ],
+      "box": ["Controller", "CO₂ sensor", "Two brackets", "Manual"]
+    },
+    {
+      "slug": "sensiroom-h",
+      "source": "sensiroom-h",
+      "name": "SensiRoom H",
+      "kind": "Irrigation",
+      "line": "Water when the roots ask.",
+      "lead": "Reads moisture in the root zone and waters on time, in soil or substrate, with nobody in the room. One sensor can run a group of like plants.",
+      "price": 16239,
+      "image": "shop-sensiroom-h.jpg",
+      "alt": "The SensiRoom H controller: a socket below a small screen, its moisture probe on a cable",
+      "does": [
+        { "t": "Three settings", "s": "Moisture, watering time and the pause between" },
+        { "t": "Drives the pump", "s": "Up to 1,500 W" },
+        { "t": "One sensor, one group", "s": "Waters a bed of like plants from one reading" }
+      ],
+      "specs": [
+        ["Watering", "10 seconds to 60 minutes"],
+        ["Pause", "1 minute to 10 hours"],
+        ["Load", "1,500 W"],
+        ["Draw", "3.2 W"],
+        ["Mains", "220–240 V, 50 Hz"],
+        ["Size", "80 × 55 × 120 mm"],
+        ["Protection", "IP64"],
+        ["Weight", "1 kg"]
+      ],
+      "box": ["Controller", "Moisture sensor", "Hanging bracket", "Instructions"]
+    }
+  ]
+}

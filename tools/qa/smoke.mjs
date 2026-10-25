@@ -399,6 +399,104 @@ await step('brief: a refused send falls back to copy and mailto', async () => {
   return `"${title}"`;
 });
 
+// The Hortus hardware shop: in the Artifact and dist/preview; absent from dist/web while site/shop.json is not live.
+const SHOP = await page.evaluate(() => { try { return JSON.parse(document.getElementById('lf-shop').textContent); } catch (_) { return null; } });
+const noShop = () => new Skip('no shop in this page (site/shop.json is not live; run with --dir dist/preview)');
+const money = (n) => SHOP.symbol + n.toLocaleString('en-GB');
+const basketState = () => page.evaluate(() => ({
+  open: !!document.querySelector('dialog#basket[open]'),
+  lines: document.querySelectorAll('#basket-lines li').length,
+  total: (document.getElementById('basket-total') || {}).textContent || '',
+  badge: (() => { const b = document.getElementById('basket-count'); return b && !b.hidden ? b.textContent : ''; })(),
+  qty: [...document.querySelectorAll('#basket-lines .qv')].map((q) => q.textContent).join(','),
+  focus: document.activeElement ? (document.activeElement.id || document.activeElement.className || document.activeElement.tagName) : '',
+  stored: (() => { try { return localStorage.getItem('lf-basket'); } catch (_) { return 'blocked'; } })(),
+}));
+
+await step('shop: Hortus case to the hardware to a product', async () => {
+  if (!SHOP) throw noShop();
+  await go('#/hortus', 'hortus');
+  const link = page.locator('main.view[data-view="hortus"] a[href="#/hardware"]').first();
+  check(await link.count(), 'no link to #/hardware on the Hortus case');
+  await bringIntoView(link);
+  await link.click();
+  await waitView('hardware');
+  const card = page.locator('main.view[data-view="hardware"] a.good').first();
+  check(await card.count(), 'no product cards on #/hardware');
+  const href = await card.getAttribute('href');
+  await bringIntoView(card);
+  await card.click();
+  await waitView('hw-' + href.replace('#/hardware/', ''));
+  const title = await page.title();
+  check(!/^lastfomo research house$/.test(title), `the product page kept the house title "${title}"`);
+  return `${href}, “${title}”`;
+});
+
+await step('shop: add, change the quantity, keep the focus, remove', async () => {
+  if (!SHOP) throw noShop();
+  const p = SHOP.products[0];
+  // A clean basket: storage cleared, then the page loaded fresh on the product.
+  await page.evaluate(() => { try { localStorage.removeItem('lf-basket'); } catch (_) { /* nothing to clear */ } });
+  await page.goto('about:blank');
+  await page.goto(base + '#/hardware/' + p.slug, { waitUntil: 'load', timeout: 60000 });
+  await waitView('hw-' + p.slug);
+  const add = page.locator(`main.view[data-view="hw-${p.slug}"] button[data-add="${p.slug}"]`).first();
+  check(await add.count(), `no Add to basket button for ${p.slug}`);
+  await add.click();
+  await page.locator('dialog#basket[open]').waitFor({ timeout: 3000 }).catch(() => { throw new Error('the basket did not open'); });
+  let s = await basketState();
+  check(s.lines === 1 && s.total.trim() === money(p.price) && s.badge === '1', `after one add: ${JSON.stringify(s)}`);
+  await page.locator(`#basket-lines button[data-slug="${p.slug}"][data-q="1"]`).click();
+  s = await basketState();
+  check(s.qty === '2' && s.total.trim() === money(p.price * 2) && s.badge === '2', `after one more: ${JSON.stringify(s)}`);
+  check(/\bq\b/.test(s.focus), `focus left the stepper (on ${s.focus})`);
+  await page.locator(`#basket-lines button[data-slug="${p.slug}"][data-q="-1"]`).click();
+  s = await basketState();
+  check(s.qty === '1' && JSON.parse(s.stored || '{}')[p.slug] === 1, `after one fewer: ${JSON.stringify(s)}`);
+  await page.keyboard.press('Escape');
+  s = await basketState();
+  const back = await page.evaluate(() => (document.activeElement && document.activeElement.dataset.add) || '');
+  check(!s.open && back === p.slug, `Escape: open ${s.open}, focus on ${back || s.focus}`);
+  // Remove empties the basket and leaves the empty note.
+  await add.click();
+  await page.locator(`#basket-lines button[data-rm="${p.slug}"]`).click();
+  s = await basketState();
+  const empty = await page.locator('#basket-empty').isVisible();
+  check(s.lines === 0 && !s.badge && empty, `after remove: ${JSON.stringify(s)}`);
+  await page.keyboard.press('Escape');
+  return `${p.name}: 1, 2, 1, removed; Escape returns focus to Add to basket`;
+});
+
+let orderText = '';
+await step('shop: the basket survives a reload and composes the order', async () => {
+  if (!SHOP) throw noShop();
+  const [a, b] = SHOP.products;
+  await go('#/hardware/' + a.slug, 'hw-' + a.slug);
+  await page.locator(`main.view[data-view="hw-${a.slug}"] button[data-add="${a.slug}"]`).first().click();
+  await page.keyboard.press('Escape');
+  await go('#/hardware/' + b.slug, 'hw-' + b.slug);
+  await page.locator(`main.view[data-view="hw-${b.slug}"] button[data-add="${b.slug}"]`).first().click();
+  await page.keyboard.press('Escape');
+  await page.reload({ waitUntil: 'load' });
+  await waitView('hw-' + b.slug);
+  await page.locator('header .basket-link').click();
+  await page.locator('dialog#basket[open]').waitFor({ timeout: 3000 });
+  const s = await basketState();
+  check(s.lines === 2 && s.badge === '2' && s.total.trim() === money(a.price + b.price), `after reload: ${JSON.stringify(s)}`);
+  const f = page.locator('form#order');
+  await f.locator('[name="name"]').fill('Smoke Test');
+  await f.locator('[name="email"]').fill('qa@example.com');
+  await f.locator('[name="place"]').fill('Tbilisi, Georgia');
+  await f.locator('[type="submit"]').click();
+  await page.locator('#order-sent').waitFor({ state: 'visible', timeout: 3000 }).catch(() => { throw new Error('#order-sent did not show'); });
+  orderText = await page.locator('#order-text').textContent();
+  const want = ['1 × ' + a.name, '1 × ' + b.name, 'Subtotal: ' + money(a.price + b.price), 'Smoke Test', 'qa@example.com', 'Tbilisi, Georgia'];
+  const missing = want.filter((w) => !orderText.includes(w));
+  check(!missing.length, `the order lacks: ${missing.join('; ')}`);
+  await page.keyboard.press('Escape');
+  return `${orderText.split('\n').length} lines, subtotal ${money(a.price + b.price)}`;
+});
+
 await step('theme: button#theme cycles dark, light, auto', async () => {
   const btn = page.locator('button#theme');
   if (!(await btn.count())) throw new Skip('button#theme not present');

@@ -5,7 +5,7 @@
  * Zero dependencies. Reads brand/tokens.json, brand/ledger.json and brand/marks/*.svg,
  * then checks either the source or one self-contained page against the brand rules.
  *
- *   node tools/brandcheck.mjs                 check site/ (index.html, styles.css, main.js, tokens.css)
+ *   node tools/brandcheck.mjs                 check site/ (index.html with site/shop.json rendered in, styles.css, main.js, tokens.css)
  *   node tools/brandcheck.mjs --html <file>   check one page: a full document or an Artifact fragment
  *   node tools/brandcheck.mjs --json          machine output
  *   node tools/brandcheck.mjs --root <dir>    repo root (default: the folder above tools/)
@@ -22,6 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadShop, withShop } from './shop/render.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_ROOT = path.resolve(HERE, '..');
@@ -900,14 +901,26 @@ export function check(options = {}) {
       }
     }
     if (missing.length || !brand) return done();
-    const load = (name) => {
+    // The Hortus shop (site/shop.json) renders into index.html at its markers, one line each, and is checked as
+    // part of the page whether or not it is live: its findings point at the marker's line.
+    let shop = null;
+    try { shop = loadShop(siteDir); } catch (err) {
+      F.error('R0', `Cannot read the shop: ${err.message}.`, displayPath(path.join(siteDir, 'shop.json'), root));
+      return done();
+    }
+    const load = (name, transform = (t) => t) => {
       const abs = path.join(siteDir, name);
-      const file = makeFile(abs, displayPath(abs, root), fs.readFileSync(abs, 'utf8'));
+      const file = makeFile(abs, displayPath(abs, root), transform(fs.readFileSync(abs, 'utf8')));
       files.push(file.display);
       rawFiles.push(file);
       return file;
     };
-    const htmlFile = load(want.html);
+    let htmlFile;
+    try { htmlFile = load(want.html, (t) => withShop(t, shop, true)); } catch (err) {
+      F.error('R0', `${err.message}.`, displayPath(path.join(siteDir, want.html), root));
+      return done();
+    }
+    if (shop) files.push(displayPath(path.join(siteDir, 'shop.json'), root));
     const stylesFile = load(want.styles);
     const jsFile = load(want.js);
     const tokensFile = load(want.tokens);
@@ -1131,7 +1144,8 @@ export function check(options = {}) {
 
   /* ---- R6 facts-ledger ---- */
   const allowedNumbers = new Set((ledger.facts || []).flatMap((f) => (f.numbers || []).map(String)));
-  for (const m of vis.text.matchAll(/\$?\d+(?:[.:]\d+)*/g)) {
+  // A number grouped in thousands (2,000 or 140,120) is one number, as the page writes it.
+  for (const m of vis.text.matchAll(/\$?\d{1,3}(?:,\d{3})+(?![\d,])|\$?\d+(?:[.:]\d+)*/g)) {
     const num = m[0].replace(/^\$/, '');
     if (allowedNumbers.has(num)) continue;
     F.error('R6', `${num} is not in the facts ledger: "${snippet(vis.text, m.index, m[0].length)}"`, hfile.display, visLine(m.index));

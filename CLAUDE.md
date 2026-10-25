@@ -18,8 +18,10 @@ This repo is its landing page, built from one source in `site/` with the brand o
 | `brand/ledger.json` | facts, approved lines, banned copy, British spelling, placeholders, media rights | by hand, owner-approved |
 | `brand/marks/*.svg` | the exact Figma vectors: horse, wordmark, lockup, glyphs | nobody |
 | `site/tokens.css` | generated from `brand/tokens.json` by `node tools/build.mjs` | nobody |
+| `site/shop.json` | the Hortus hardware shop: products, English copy, prices, `live` | by hand, from `shop/source/emode.json` |
+| `shop/source/` | the maker’s pages as imported: Russian text, prices, photos | the `shop-import` workflow |
 
-The rest of `site/` is hand-written source. `dist/` and `out/` are generated and ignored by git.
+The rest of `site/` is hand-written source. `tools/shop/render.mjs` renders `site/shop.json` into `site/index.html` at its `<!-- shop:… -->` markers, for the build and the brand check alike. `dist/` and `out/` are generated and ignored by git.
 
 ## The rules, web edition
 
@@ -41,7 +43,7 @@ The rest of `site/` is hand-written source. `dist/` and `out/` are generated and
 ## Workflow
 
 1. Edit `site/`. A Claude Code hook runs the brand check after every edit under `site/` or `brand/`. Fix what it reports before moving on.
-2. `node tools/build.mjs`: regenerates `site/tokens.css`, checks the source and the built Artifact, writes both targets. It fails on brand errors.
+2. `node tools/build.mjs`: regenerates `site/tokens.css`, checks the source and the built Artifact, writes both targets (and `dist/preview/` while the shop is not live). It fails on brand errors.
 3. `node tools/qa/shoot.mjs`: every screen of every route, desktop 1440×900 and phone 390×844, dark and light, into `out/qa/`.
 4. Look at the contact sheets, `out/qa/<route>/<viewport>-<scheme>-contact.jpg`, yourself. In `out/qa/report.json` → `summary`, expect `fontsLoaded: true` and zero `overflowScreens`, `clippedTextScreens`, `coveredTextScreens`, `consoleErrors` and `pageErrors`. After any behaviour change, also run `node tools/qa/smoke.mjs`.
 5. Publish, and name any placeholder in your reply.
@@ -71,7 +73,8 @@ Publish only from `dist/`, after a build that passed: the build checks the page 
 - Loops: all three wings play, made from the owner’s GIF previews (`site/media/*_loop_v4.gif`, sources that do not ship) with `python3 tools/media/gif_to_loop.py <preview.gif> <wing>`, each resting at 3.6 s (`site/media.json` → `hold`).
 - The header shows the horse alone (the owner’s choice); R11 holds it to `brand/marks/horse.svg` and its viewBox.
 - Films are the owner’s YouTube uploads (`site/media.json` → `films`). Play controls are links to them; the web build plays them in place, the Artifact opens YouTube. The build fails if a link disagrees with `media.json`. Inside the Artifact the popup needs the film files in its asset store (`films.<wing>.asset`); until then it links out.
-- Every image and film is the owner’s; there is nothing to clear.
+- Every image and film is the owner’s, except the shop’s product photos (`site/media/shop-*.jpg`), which are E-MODE’s: rights “check” until the owner agrees their use with the maker.
+- The Hortus hardware shop is a demonstration: `site/shop.json` → `"live": false` puts it in the Artifact and `dist/preview/` only, never on lastfomo.vercel.app. QA it with `node tools/qa/shoot.mjs --dir dist/preview --routes "#/hortus,#/hardware,#/hardware/ponics-pilot"`. Going live waits on the owner: selling prices and currency (today the maker’s list prices in roubles), photo rights, the in-house versus E-MODE wording (`ledger.json` → `conflicts`), and how a web order is taken. Every shop price and spec is a fact in `ledger.json` (`hortus.shop.*`).
 
 ## Never
 

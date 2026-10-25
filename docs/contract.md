@@ -16,9 +16,13 @@ How the lastfomo site is laid out, so every tool (and every future session) agre
 | `site/main.js` | Behaviour: plates, reveals, routing, curtain, player, cursor, brief composer, theme switch. | hand |
 | `api/brief.mjs` | Vercel Function `POST /api/brief`: checks the brief (same origin, honeypot, at least 3 s on the form, the form’s own wing and timeline values, length caps) and emails it to `BRIEF_TO` (default lastfomo@gmail.com) through Resend with `RESEND_API_KEY`. Answers 503 without a key. Stores and logs nothing of the brief. | hand |
 | `site/media.json` | Video manifest. `loops`: per wing `{ "mp4", "webm", "hold" }` made by `tools/media/gif_to_loop.py`, or `null` to keep the poster. A loop plays once each time its screen becomes active and rests on `hold` seconds (Arca: 3.6, its open frame), so nothing moves for more than 5 s on its own (WCAG 2.2.2). `films`: per wing `{ "youtube": "<id>", "duration": "m:ss" }`. The build adds `embed` (true for web, false for the Artifact) and, on the web build only, `brief` (`/api/brief`, where the form posts). | hand |
-| `site/media/*.jpg` | Posters and stills. Every file has an entry in `brand/ledger.json` → `media`. The `*_loop_v4.gif` files beside them are the owner’s loop sources; the build ships only what the page references. | hand |
+| `site/media/*.jpg` | Posters and stills. Every file has an entry in `brand/ledger.json` → `media`. The `*_loop_v4.gif` files beside them are the owner’s loop sources; the build ships only what the page references. `shop-<product>.jpg` are the maker’s product photos, resized from `shop/source/img/`. | hand |
+| `site/shop.json` | The Hortus hardware shop: maker, currency, the Hardware screen, the hardware view (groups, ordering steps) and each product (`slug`, `name`, `kind`, `line`, `lead`, `price` as a whole number, `image`, `alt`, `does`, `specs`, `box`). Written in English by hand from `shop/source/emode.json`. `"live": false` keeps it off the web build. | hand |
+| `tools/shop/render.mjs` | Renders `site/shop.json` at the four markers in `site/index.html`, each on its own line: `<!-- shop:bar -->` (the basket button), `<!-- shop:hardware -->` (the Hardware screen on the Hortus case), `<!-- shop:views -->` (the hardware views), `<!-- shop:basket -->` (`dialog#basket` and the `#lf-shop` data). One line of markup per marker, so line numbers in reports hold. The brand check always checks the page with the shop in place. | hand |
+| `shop/emode-products.json`, `shop/source/` | The maker’s product pages, and what `tools/shop/import-emode.mjs` brings back from them (the maker’s own Russian text, price, stock, photos). Refreshed by the `shop-import` workflow. Nothing here ships. | workflow |
 | `dist/web/` | Build output for any static host (Vercel): a full document with its CSS and JS as files (no inline script, so the strict CSP in `vercel.json` holds), `media/` beside it. Every media URL carries its content hash (`?v=`), because `/media/` is cached for a year. | generated |
-| `dist/artifact/lastfomo.html` | Build output for a claude.ai Artifact: a fragment (no doctype/html/head/body), CSS, JS and images inlined. | generated |
+| `dist/artifact/lastfomo.html` | Build output for a claude.ai Artifact: a fragment (no doctype/html/head/body), CSS, JS and images inlined. Always carries the shop. | generated |
+| `dist/preview/` | While the shop is not live: the web build with the shop in place, for QA. Never deployed (`vercel.json` serves `dist/web`). | generated |
 
 ## Markup conventions
 
@@ -35,12 +39,13 @@ How the lastfomo site is laid out, so every tool (and every future session) agre
 - `form#brief` carries a honeypot, `label.hp > input[name="website"][tabindex="-1"]`, hidden from sight and from assistive technology. Its wing radios and timeline options must match `WINGS` and `TIMELINES` in `api/brief.mjs` (`tools/brief.test.mjs` checks). `#sent-title` reads “Brief sent.” after the endpoint confirms, otherwise “Brief ready.” with copy and mailto.
 - The header brand link holds one exact mark: the horse alone (`brand/marks/horse.svg`, `viewBox="0 0 420 120"`), the owner’s choice.
 - Every film control is `<a data-play="<wing>" href="https://www.youtube.com/watch?v=<id>" target="_blank" rel="noopener">`; the id must match `site/media.json`. `a.frame` on a case page plays in place; other controls open `dialog#reel`.
+- The Hortus hardware: `#/hardware` is `main.view[data-view="hardware"]`, `#/hardware/<slug>` is `main.view[data-view="hw-<slug>"]`; both carry `data-wing="hortus"` and a `data-page-title`. A page built without the shop sends these routes to the Hortus case. Product photos sit in `span.arch.goods` on paper, sealed in grey until their screen is active. `[data-add="<slug>"]` adds one to the basket and opens it; `[data-basket]` opens it. The basket lives in `localStorage` (`lf-basket`) and sends its order as an email (mailto with copy); nothing is charged on the page.
 
 ## Commands
 
 | Command | Does |
 |---|---|
-| `node tools/build.mjs` | Regenerates `site/tokens.css`, runs the brand check, writes `dist/web/` and `dist/artifact/lastfomo.html`. Fails on brand errors. |
+| `node tools/build.mjs` | Regenerates `site/tokens.css`, runs the brand check, writes `dist/web/` and `dist/artifact/lastfomo.html` (and `dist/preview/` while the shop is not live). Fails on brand errors. |
 | `node tools/brandcheck.mjs` | Checks the source (`site/`). `--html <file>` checks one self-contained page. `--json` for machine output. Exit 1 on errors. |
 | `node tools/brandcheck.test.mjs` | Fixture tests for the brand check. |
 | `node tools/brief.test.mjs` | Tests for `api/brief.mjs` with the email API mocked: sending, the 503 without a key, origin, method, honeypot, timing, validation, size, and the form’s values. |

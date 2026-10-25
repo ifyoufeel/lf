@@ -269,6 +269,82 @@ dialog.reel::backdrop{background:transparent}
 .steps .s{font-size:14px;line-height:1.5;color:var(--fg2)}
 @media (max-width:900px){.fields{grid-template-columns:1fr}.steps{grid-template-columns:1fr;gap:14px}}
 
+/* ---------- Hortus hardware: products and the basket (rendered from site/shop.json) ---------- */
+.basket-link{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;min-height:44px;font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);transition:color .2s}
+.basket-link:hover{color:var(--fg)}
+.basket-link:focus-visible{outline:2px solid var(--wing-t);outline-offset:2px}
+.basket-link b{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--fg);color:var(--bg);font-weight:500;letter-spacing:0}
+/* Phones keep the bar to the horse and Start a project: the basket shows as its count, and only once it holds something. */
+@media (max-width:560px){
+  .basket-link span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .basket-link.empty{display:none}
+}
+/* A product photo stands whole on paper inside the arch, clear of its round top, and sweeps from grey to colour
+   behind a line in the wing colour when its screen is active (sealed until you look). */
+.goods{background:var(--paper)}
+.arch.goods img{object-fit:contain;padding:22% 8% 8%}
+.goods .seal{display:none}
+.js .goods .seal{display:block;position:absolute;inset:0;z-index:2;pointer-events:none;-webkit-backdrop-filter:grayscale(1);backdrop-filter:grayscale(1);transition:transform 1.2s var(--ease) .45s}
+.js .goods .seal::before{content:"";position:absolute;top:0;bottom:0;left:0;width:2px;background:var(--wing)}
+.js .screen.in .goods .seal{transform:translateX(101%)}
+.shop-cover .arch{height:min(62svh,600px);aspect-ratio:3/4.4;width:auto}
+.shop-cover .h1{font-size:clamp(40px,5.4vw,88px)}
+.h2.sub{font-size:clamp(22px,2.4vw,36px)}
+.strip .price{font:400 clamp(18px,1.6vw,24px)/1 var(--mono);letter-spacing:.02em;color:var(--fg)}
+.goods-row{list-style:none;margin:clamp(20px,4vh,40px) 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.4vw,36px)}
+.good{display:grid;gap:12px;align-content:start;color:var(--fg);text-decoration:none}
+.good .arch{width:min(100%,calc(46svh * .75),330px);aspect-ratio:3/4;transition:transform .5s var(--ease)}
+.good:hover .arch{transform:translateY(-6px)}
+.good:hover .gl b{color:var(--wing-t)}
+.good:focus-visible{outline:2px solid var(--wing-t);outline-offset:4px}
+.gl{display:grid;gap:4px;font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.gl b{font:300 clamp(20px,1.8vw,28px)/1.1 var(--sans);letter-spacing:-.02em;text-transform:none;color:var(--fg);transition:color .3s}
+.gp{font:400 15px/1 var(--mono);letter-spacing:.04em}
+.lead.gap{margin-top:14px}
+.spec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(20px,4vw,64px);margin:clamp(18px,3.6vh,36px) 0 0;border-bottom:1px solid var(--line)}
+.spec div{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:12px;align-items:baseline;border-top:1px solid var(--line);padding:clamp(9px,1.6vh,14px) 0}
+.spec dt{font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.spec dd{margin:0;font-size:16px;line-height:1.4}
+.inbox{margin-top:clamp(16px,3vh,28px);color:var(--fg2);max-width:120ch}
+.inbox b{display:block;color:var(--fg);font-weight:500;margin-bottom:6px}
+.order{max-width:760px}
+@media (max-width:900px){
+  .shop-cover .arch{height:min(30svh,280px)}
+  .goods-row{grid-template-columns:1fr;gap:12px;margin-top:18px}
+  .good{grid-template-columns:96px minmax(0,1fr);align-items:center;column-gap:16px;row-gap:6px}
+  .good .arch{width:96px;grid-row:span 2}
+  .good .gp{align-self:start}
+  .spec{grid-template-columns:1fr}
+}
+dialog.basket{padding:0;border:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;background:var(--scrim);color:var(--fg)}
+dialog.basket::backdrop{background:transparent}
+.basket-in{position:absolute;top:0;right:0;bottom:0;width:min(560px,100%);overflow-y:auto;overscroll-behavior:contain;background:var(--bg);border-left:1px solid var(--line);display:grid;gap:clamp(16px,2.6vh,24px);align-content:start;padding:calc(env(safe-area-inset-top,0px) + 14px) max(clamp(20px,3vw,40px),env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 32px) clamp(20px,3vw,40px)}
+.basket-head{display:flex;justify-content:space-between;align-items:center;gap:16px}
+#basket-main{display:grid;gap:clamp(16px,2.6vh,24px)}
+.basket .h2{font-size:clamp(28px,3vw,40px)}
+.basket .h2[tabindex]:focus{outline:none}
+.basket .lead a{color:var(--fg)}
+.lines{list-style:none;margin:0;padding:0}
+.lines:not(:empty){border-bottom:1px solid var(--line)}
+.line{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"info rm" "qty lt";gap:8px 16px;align-items:center;border-top:1px solid var(--line);padding:14px 0}
+.line .li{grid-area:info;display:grid;gap:4px;min-width:0}
+.line .ln{font:300 22px/1.15 var(--sans);letter-spacing:-.02em;color:var(--fg);text-decoration:none;transition:color .2s}
+.line .ln:hover{color:var(--wing-t)}
+.line .lk{font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.line .rm{all:unset;grid-area:rm;cursor:pointer;justify-self:end;min-height:44px;display:inline-flex;align-items:center;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);transition:color .2s}
+.line .rm:hover{color:var(--fg)}
+.line .lt{grid-area:lt;justify-self:end;font:400 15px/1 var(--mono)}
+.qty{grid-area:qty;justify-self:start;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px}
+.qty .q{all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center;border-radius:999px;font:400 18px/1 var(--mono)}
+.qty .q:disabled{opacity:.35;cursor:default}
+.qty .qv{min-width:28px;text-align:center;font:500 15px/1 var(--mono)}
+.line .rm:focus-visible,.qty .q:focus-visible{outline:2px solid var(--wing-t);outline-offset:2px}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:16px;font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.total b{font:300 clamp(28px,3vw,40px)/1 var(--sans);letter-spacing:-.02em;text-transform:none;color:var(--fg)}
+.basket .note{margin:0;font-size:15px;line-height:1.5;color:var(--fg2)}
+.basket .fields{grid-template-columns:1fr}
+.basket .brief-out{max-height:40svh}
+
 /* ---------- reduced motion: instant, no shimmer, no bob ---------- */
 @media (prefers-reduced-motion:reduce){
   .view{scroll-behavior:auto}

@@ -30,7 +30,8 @@
   const HORSE = new Path2D("M322.101 1.53716C320.348 2.91274 319.256 3.04607 312.945 2.65567C306.632 2.26447 305.449 2.40897 302.994 3.87317C301.461 4.7865 298.595 6.29781 296.625 7.23109C294.655 8.16358 292.505 9.19666 291.848 9.52479C291.074 9.91279 290.742 11.001 290.904 12.6153C291.159 15.1556 290.591 15.5205 286.943 15.1612C284.536 14.9249 284.411 16.8258 286.713 18.666C290.052 21.3366 280.896 33.3256 275.917 32.8019C273.957 32.5959 273.62 32.8657 273.397 34.8129C273.13 37.1482 272.314 37.3813 267.256 36.5693C264.172 36.0743 264.506 37.8116 267.86 39.7013C273.171 42.6952 282.031 40.4111 290.636 33.8286C293.788 31.4175 294.967 31.7648 298.904 36.262C302.231 40.0614 302.251 40.0198 295.63 43.1319C288.638 46.4187 278.291 46.7133 268.85 43.8959C265.955 43.0313 260.899 41.813 257.615 41.1871C254.331 40.5619 246.542 38.7489 240.305 37.1593C225.232 33.3168 216.24 33.201 199.61 36.6372C182.405 40.1923 180.226 40.3208 172.533 38.2395C156.02 33.7711 141.289 40.8885 116.24 65.4365C87.5356 93.5685 68.5251 101.841 56.5125 91.428C52.7374 88.1556 53.2039 86.7983 58.717 85.022C80.3809 78.0411 90.8641 63.0255 78.5458 56.6202C73.0988 53.7884 64.3853 55.8075 56.7132 61.681C54.7253 63.2027 50.6619 65.2457 47.6828 66.2205C34.6862 70.4742 21.2796 80.3204 12.5439 92.0276C9.49555 96.1128 5.29683 100.96 3.21419 102.798C-1.1318 106.634 -1.06413 107.74 3.37819 105.457C7.05386 103.567 11.6968 99.05 15.0047 94.1457C19.9446 86.8199 21.9651 85.3956 21.9651 89.2365C21.9651 92.0771 23.4721 96.5408 24.4315 96.5408C24.8263 96.5408 25.1496 96.1703 25.1496 95.7168C25.1496 92.6551 27.5952 89.1288 28.6835 90.6201C29.7495 92.0803 29.943 91.9949 32.9252 88.7567C36.4082 84.9757 36.2108 85.0244 43.1641 86.2387C47.8205 87.0514 48.4288 87.4123 51.7892 91.357C65.964 107.996 89.8013 99.9841 126.35 66.298C144.675 49.4078 150.883 46.2439 165.696 46.2439C177.439 46.2439 179.814 47.5213 176.76 52.1949C175.232 54.5341 175.133 58.6361 176.445 65.284C177.247 69.3445 177.247 70.475 176.448 70.9708C173.76 72.6362 159.196 73.3443 151.642 72.1763C147.518 71.5384 145.366 73.3132 145.36 77.3585C145.353 82.2221 128.895 99.7885 122.892 101.34C115.95 103.134 114.366 103.879 110.799 107.027C104.039 112.994 106.86 114.569 117.671 110.863C128.5 107.149 128.909 106.867 140.188 95.3265C153.829 81.3703 153.741 81.4118 163.559 84.3019C175.953 87.9496 190.66 86.487 201.83 80.4961C206.816 77.8216 207.396 77.7665 213.559 79.376C216.081 80.0346 219.725 80.5735 221.657 80.5735C225.947 80.5735 225.565 81.2337 218.093 86.7361C211.051 91.9214 211.307 92.822 220.409 94.9009C224.466 95.8278 229.699 97.4756 232.039 98.563C234.379 99.6504 239.024 101.242 242.363 102.099C251.276 104.389 252.174 106.287 247.664 113.306C241.691 122.603 248.317 121.646 260.386 111.47C267.603 105.385 262.642 98.6636 248.212 94.9784C231.949 90.8245 230.512 89.4593 238.845 86.075C245.772 83.2608 252.218 76.6942 254.693 69.9289C255.537 67.6208 256.984 68.7673 258.109 72.6378C261.071 82.8265 269.803 87.2215 287.868 87.6175C299.163 87.8642 301.227 88.1068 302.596 89.3483C303.472 90.1419 307.548 92.8244 311.656 95.3089C326.608 104.354 327.287 105.407 320.555 109.115C313.554 112.971 304.892 112.971 301.877 109.115C300.087 106.826 299.661 106.638 298.252 107.515C296.911 108.351 295.939 108.192 292.163 106.517C286.892 104.18 285.267 104.053 283.484 105.841C279.964 109.371 300.701 121.934 306.438 119.746C307.665 119.278 310.264 118.895 312.211 118.895C314.159 118.895 318.337 118.176 321.498 117.298C324.658 116.42 328.505 115.676 330.046 115.646C334.342 115.559 335.709 114.697 336.982 111.269C339.197 105.304 339.164 105.053 335.921 103.327C329.752 100.042 325.115 93.9221 323.406 86.8095C322.712 83.9202 324.007 83.3103 325.615 85.7701C327.394 88.4933 346.535 88.7376 356.334 86.162C359.618 85.299 363.737 84.5845 365.489 84.5741C367.24 84.5637 369.7 84.0184 370.953 83.363C372.208 82.7067 373.669 82.1702 374.2 82.1702C376.474 82.1702 399.232 93.5285 402.423 96.2557C405.397 98.7985 416.519 103.726 419.284 103.726C420.49 103.726 420.122 101.104 418.556 98.5367C417.437 96.702 413.841 94.5153 403.198 89.1958C395.554 85.3756 386.849 80.4362 383.854 78.2183C377.31 73.3746 372.212 72.7751 364.84 75.9829C359.614 78.2574 346.865 78.6055 344.796 76.5314C342.695 74.4237 342.461 57.5423 344.463 52.4496C349.497 39.643 361.461 34.8225 361.496 45.5868C361.512 50.4066 363.672 53.3557 368.324 54.9053C370.267 55.5528 373.291 56.9356 375.042 57.9782C376.794 59.0209 379.458 60.4324 380.962 61.115C382.468 61.7984 384.83 63.2227 386.213 64.2797C392.676 69.224 399.272 63.6115 393.913 57.7267C387.154 50.3068 385.115 46.3876 384.558 39.7548C384.366 37.4675 383.451 34.025 382.524 32.1041C381.179 29.3178 380.94 27.7714 381.34 24.4542C382.308 16.4155 374.85 9.54474 373.726 17.4406C373.414 19.6281 372.39 20.2093 370.718 19.149C369.766 18.5463 369.739 17.8884 370.55 15.1724C371.759 11.1271 370.633 6.22275 367.858 3.43966C364.402 -0.0260346 362.312 1.35194 364.693 5.52738C367.205 9.93435 365.952 10.5443 362.421 6.63392C358.956 2.79539 358.956 2.79538 352.271 2.62613C342.432 2.37704 334.807 1.68645 331.66 0.758755C327.501 -0.466732 324.323 -0.208058 322.101 1.53716ZM332.511 6.26428C334.573 8.33124 334.839 9.15195 334.839 13.4495C334.839 18.6988 333.952 19.569 332.135 16.1057C331.501 14.8986 329.164 12.1274 326.939 9.94871C321.859 4.96932 321.79 3.93066 326.541 3.93066C329.506 3.93066 330.617 4.36497 332.511 6.26428ZM302.886 24.7424C306.421 26.7582 308.426 29.3657 309.114 32.8402C309.633 35.466 309.633 35.466 306.112 32.5807C300.89 28.3007 297.288 26.2912 294.834 26.288C292.475 26.2848 292.082 25.5711 293.6 24.0494C295.075 22.57 299.679 22.9133 302.886 24.7424ZM76.9942 59.0696C80.931 61.1829 79.8522 66.8888 75.2101 68.5118C70.2272 70.2539 60.5918 69.0092 59.6309 66.5C57.9097 61.9996 71.5655 56.1564 76.9942 59.0696Z");
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const FINE = matchMedia('(pointer: fine)').matches;
-  const views = { home: $('#view-home'), machina: $('#view-machina'), hortus: $('#view-hortus'), arca: $('#view-arca'), start: $('#view-start') };
+  // Every main.view is a route. The Hortus hardware views come from site/shop.json and carry their own page titles.
+  const views = Object.fromEntries($$('main.view[data-view]').map((v) => [v.dataset.view, v]));
   const TITLES = { home: 'lastfomo research house', machina: 'Machina, Case N° 0001 — lastfomo', hortus: 'Hortus, nature research — lastfomo', arca: 'Arca, art & artifacts — lastfomo', start: 'Start a project — lastfomo' };
   let cur = null;
   let pendingAnchor = null;
@@ -268,9 +269,11 @@
     Object.entries(views).forEach(([n, v]) => { v.hidden = n !== k; });
     $$('video').forEach((v) => { if (!v.paused) v.pause(); });
     resetFrames(null);
+    const bk = $('#basket');
+    if (bk && bk.open) bk.close();
     cur = k;
-    document.title = TITLES[k];
     const v = views[k];
+    document.title = TITLES[k] || v.dataset.pageTitle || TITLES.home;
     // Back to the house returns to the screen the visitor left; a case always opens at its cover.
     if (!pendingAnchor) v.scrollTop = (k === 'home' && v._y) || 0;
     setup(v);
@@ -291,6 +294,9 @@
   }
   function route() {
     // "#/machina" inside the page; plain "#machina" also works, because an Artifact link only passes plain anchors.
+    // "#/hardware" and "#/hardware/<product>" open the Hortus hardware; a page built without it opens the Hortus case.
+    const hw = location.hash.match(/^#\/?hardware(?:\/([a-z0-9-]+))?\/?$/);
+    if (hw) { show(views['hw-' + hw[1]] ? 'hw-' + hw[1] : views.hardware ? 'hardware' : 'hortus'); return; }
     const m = location.hash.match(/^#\/?(machina|hortus|arca|start)\b/);
     show(m ? m[1] : 'home');
   }
@@ -422,6 +428,111 @@
       catch (_) { const r = document.createRange(); r.selectNodeContents(out); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); copyBtn.textContent = 'Selected, press copy'; }
     });
     $('#brief-again').addEventListener('click', () => { sent.hidden = true; form.hidden = false; form.querySelector('input[name="name"]').focus(); });
+  }
+
+  /* ---------------- Hortus hardware: the basket and the order (site/shop.json, rendered by the build) ---------------- */
+  let SHOP = null;
+  try { SHOP = JSON.parse(($('#lf-shop') || {}).textContent || 'null'); } catch (_) { SHOP = null; }
+  const bk = $('#basket');
+  if (SHOP && bk) {
+    const BY = Object.fromEntries(SHOP.products.map((p) => [p.slug, p]));
+    const MAX = 99;
+    const money = (n) => SHOP.symbol + n.toLocaleString('en-GB');
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const lines = $('#basket-lines'), badge = $('#basket-count'), main = $('#basket-main'), order = $('#order'), done = $('#order-sent');
+    const title = $('#basket-title'), status = $('#basket-status'), copyOrder = $('#copy-order');
+    // The basket stays in this browser, so a visitor can come back to it; with storage blocked it lasts the visit.
+    let items = {};
+    try {
+      const saved = JSON.parse(localStorage.getItem('lf-basket') || '{}');
+      for (const [s, q] of Object.entries(saved || {})) if (BY[s] && Number.isInteger(q) && q > 0) items[s] = Math.min(q, MAX);
+    } catch (_) { items = {}; }
+    const save = () => { try { localStorage.setItem('lf-basket', JSON.stringify(items)); } catch (_) { /* per-viewer convenience only */ } };
+    const count = () => Object.values(items).reduce((a, q) => a + q, 0);
+    const total = () => Object.entries(items).reduce((a, [s, q]) => a + BY[s].price * q, 0);
+    const line = (p, q) => {
+      const li = el('li', 'line');
+      const info = el('div', 'li');
+      const name = el('a', 'ln', p.name); name.href = '#/hardware/' + p.slug;
+      info.append(name, el('span', 'lk', p.kind + ' · ' + money(p.price)));
+      const step = el('div', 'qty');
+      const btn = (d, label, text) => { const b = el('button', 'q', text); b.type = 'button'; b.dataset.slug = p.slug; b.dataset.q = d; b.setAttribute('aria-label', label + p.name); return b; };
+      const less = btn('-1', 'One fewer ', '−'), more = btn('1', 'One more ', '+');
+      less.disabled = q <= 1; more.disabled = q >= MAX;
+      const val = el('span', 'qv', String(q)); val.setAttribute('aria-label', 'Quantity ' + q);
+      step.append(less, val, more);
+      const rm = el('button', 'rm', 'Remove'); rm.type = 'button'; rm.dataset.rm = p.slug; rm.setAttribute('aria-label', 'Remove ' + p.name);
+      li.append(info, step, el('b', 'lt', money(p.price * q)), rm);
+      return li;
+    };
+    const render = () => {
+      const n = count();
+      badge.hidden = n === 0; badge.textContent = String(n);
+      $$('.basket-link').forEach((b) => { b.classList.toggle('empty', !n); b.setAttribute('aria-label', n ? 'Basket, ' + n + (n === 1 ? ' item' : ' items') : 'Basket, empty'); });
+      lines.replaceChildren(...Object.entries(items).map(([s, q]) => line(BY[s], q)));
+      $('#basket-empty').hidden = n > 0;
+      $('#basket-sum').hidden = $('#basket-note').hidden = order.hidden = n === 0;
+      $('#basket-total').textContent = money(total());
+    };
+    const set = (s, q) => { if (q > 0) items[s] = Math.min(q, MAX); else delete items[s]; save(); render(); };
+    let opener = null;
+    const open = (said) => {
+      if (!bk.open) {
+        opener = document.activeElement;
+        if (typeof bk.showModal === 'function') bk.showModal(); else bk.setAttribute('open', '');
+      }
+      done.hidden = true; main.hidden = false;
+      render();
+      title.focus();
+      status.textContent = said || '';
+    };
+    const close = () => {
+      if (!bk.open) return;
+      if (typeof bk.close === 'function') bk.close(); else { bk.removeAttribute('open'); bk.dispatchEvent(new Event('close')); }
+    };
+    // Focus goes back to the control that opened the basket, if it is still on the page.
+    bk.addEventListener('close', () => { if (opener && opener.focus && opener.isConnected) opener.focus({ preventScroll: true }); opener = null; status.textContent = ''; });
+    $('#basket-x').addEventListener('click', close);
+    bk.addEventListener('click', (e) => { if (e.target === bk) close(); });
+    document.addEventListener('click', (e) => {
+      const add = e.target.closest('[data-add]');
+      if (add && BY[add.dataset.add]) { const s = add.dataset.add; set(s, (items[s] || 0) + 1); open(BY[s].name + ' added to the basket.'); return; }
+      if (e.target.closest('[data-basket]')) { open(); return; }
+      // A link inside the basket leaves it: close first, then follow the link.
+      if (bk.contains(e.target) && e.target.closest('a[href^="#"]')) close();
+    });
+    lines.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.rm) { const p = BY[b.dataset.rm]; set(p.slug, 0); title.focus(); status.textContent = p.name + ' removed.'; return; }
+      const s = b.dataset.slug;
+      set(s, (items[s] || 0) + Number(b.dataset.q));
+      // Rendering replaced the buttons: keep focus on the same control, or its twin when this one is now disabled.
+      const same = lines.querySelector('button[data-slug="' + s + '"][data-q="' + b.dataset.q + '"]');
+      (same && !same.disabled ? same : lines.querySelector('button.q[data-slug="' + s + '"]:not([disabled])') || title).focus();
+      status.textContent = BY[s].name + ', quantity ' + items[s] + '. Subtotal ' + money(total()) + '.';
+    });
+    // The order goes to the house inbox as an email: no payment is taken on the page.
+    order.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!count() || !order.reportValidity()) return;
+      const f = new FormData(order);
+      const v = (k) => String(f.get(k) || '').trim();
+      const rows = Object.entries(items).map(([s, q]) => q + ' × ' + BY[s].name + ', ' + money(BY[s].price) + (q > 1 ? ' each, ' + money(BY[s].price * q) : ''));
+      const text = ['Order: Hortus hardware by ' + SHOP.maker, '', ...rows, '', 'Subtotal: ' + money(total()) + ' (the maker’s list prices, in roubles)', '',
+        'Name: ' + v('name'), 'Email: ' + v('email'), 'Organisation: ' + (v('org') || 'not given'), 'Deliver to: ' + v('place'), ...(v('note') ? ['', v('note')] : [])].join('\n');
+      $('#order-text').textContent = text;
+      copyOrder.textContent = 'Copy the order';
+      main.hidden = true; done.hidden = false; done.focus({ preventScroll: true });
+      location.href = 'mailto:' + SHOP.contact + '?subject=' + encodeURIComponent('Order: Hortus hardware, ' + v('name')) + '&body=' + encodeURIComponent(text);
+    });
+    copyOrder.addEventListener('click', async () => {
+      const pre = $('#order-text');
+      try { await navigator.clipboard.writeText(pre.textContent); copyOrder.textContent = 'Copied'; }
+      catch (_) { const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); copyOrder.textContent = 'Selected, press copy'; }
+    });
+    $('#order-again').addEventListener('click', () => { done.hidden = true; main.hidden = false; title.focus(); });
+    render();
   }
 
   route();

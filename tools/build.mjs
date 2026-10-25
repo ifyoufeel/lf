@@ -3,11 +3,13 @@
 //   site/  ──►  site/tokens.css (generated from brand/tokens.json)
 //          ──►  dist/web/                    full document + files, for any static host (Vercel)
 //          ──►  dist/artifact/lastfomo.html  fragment with CSS, JS and images inlined, for a claude.ai Artifact
+//          ──►  dist/preview/                the web build with the Hortus shop, while site/shop.json is not live
 // Usage: node tools/build.mjs [--no-check]
 import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
+import { loadShop, withShop } from './shop/render.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const P = (...p) => join(ROOT, ...p);
@@ -52,7 +54,16 @@ async function brandcheck(opts, label) {
 if (!args.has('--no-check') && !(await brandcheck({}, 'source'))) fail('brand check failed on site/. Fix the errors above (or run with --no-check to inspect the output).');
 
 /* ---------- 3. assemble ---------- */
-let html = read('site/index.html');
+// The Hortus shop renders from site/shop.json at its markers in site/index.html. The Artifact always carries it, for
+// the owner to review; the live site only once shop.json says "live": true. Until then dist/preview/ is the web
+// build with the shop in place, for QA. It is never deployed: vercel.json serves dist/web.
+let shop = null;
+try { shop = loadShop(P('site')); } catch (err) { fail(err.message); }
+const source = read('site/index.html');
+const shopIn = (include) => { try { return withShop(source, shop, include); } catch (err) { return fail(err.message); } };
+let html = shopIn(true);
+const shopLive = !shop || shop.live === true;
+const webSource = shopLive ? html : shopIn(false);
 const media = JSON.parse(read('site/media.json'));
 const once = (s, re, fn) => { let n = 0; const out = s.replace(re, (...m) => { n++; return fn(...m); }); if (n !== 1) fail(`expected exactly one match for ${re}, found ${n}`); return out; };
 const withManifest = (doc, obj) => once(doc, /(<script type="application\/json" id="lf-media">)[\s\S]*?(<\/script>)/, (_, a, b) => a + JSON.stringify(obj).replace(/</g, '\\u003c') + b);
@@ -73,23 +84,30 @@ const loopFiles = Object.values(media.loops).flatMap((v) => (v && typeof v === '
 for (const f of loopFiles) if (!existsSync(P('site', f))) fail(`missing loop ${f}`);
 // The web build posts the brief to the Vercel Function in api/brief.mjs; the Artifact cannot reach it, so it keeps copy and mailto.
 if (!existsSync(P('api/brief.mjs'))) fail('missing api/brief.mjs, the endpoint the web build posts the brief to');
-const refs = [...new Set([...html.matchAll(/(?:src|poster)="(media\/[^"]+)"/g)].map((m) => m[1]))];
-for (const r of refs) if (!existsSync(P('site', r))) fail(`missing ${r}`);
+const refsOf = (page) => [...new Set([...page.matchAll(/(?:src|poster)="(media\/[^"]+)"/g)].map((m) => m[1]))];
+for (const r of refsOf(html)) if (!existsSync(P('site', r))) fail(`missing ${r}`);
 
 // vercel.json caches /media/ for a year as immutable, so every media URL in dist/web carries its content's
 // fingerprint: a file replaced in site/media/ under the same name gets a new URL, and no browser keeps the old one.
 const stamp = (rel) => rel + '?v=' + createHash('sha256').update(readFileSync(P('site', rel))).digest('hex').slice(0, 10);
 const webLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, local(f) ? stamp(f) : f])) : local(v) ? stamp(v) : v]));
-const webHtml = withManifest(html, { loops: webLoops, films: media.films, embed: true, brief: '/api/brief' })
-  .replace(/(src|poster)="(media\/[^"?]+)"/g, (_, attr, rel) => `${attr}="${stamp(rel)}"`);
-if (/"media\/[^"?]+"/.test(webHtml)) fail('a media URL in dist/web has no content fingerprint (?v=)');
 
-// dist/web: the source as files, tokens generated, manifest filled. CSP-friendly: no inline script.
+// A web build: the source as files, tokens generated, manifest filled. CSP-friendly: no inline script.
+// Returns how many images it carries.
+function writeWeb(dir, page) {
+  const out = withManifest(page, { loops: webLoops, films: media.films, embed: true, brief: '/api/brief' })
+    .replace(/(src|poster)="(media\/[^"?]+)"/g, (_, attr, rel) => `${attr}="${stamp(rel)}"`);
+  if (/"media\/[^"?]+"/.test(out)) fail(`a media URL in ${dir} has no content fingerprint (?v=)`);
+  const own = refsOf(page);
+  mkdirSync(P(dir, 'media'), { recursive: true });
+  writeFileSync(P(dir, 'index.html'), out);
+  for (const f of ['tokens.css', 'styles.css', 'boot.js', 'main.js']) copyFileSync(P('site', f), P(dir, f));
+  for (const r of [...own, ...loopFiles]) { mkdirSync(dirname(P(dir, r)), { recursive: true }); copyFileSync(P('site', r), P(dir, r)); }
+  return own.length;
+}
 rmSync(P('dist'), { recursive: true, force: true });
-mkdirSync(P('dist/web/media'), { recursive: true });
-writeFileSync(P('dist/web/index.html'), webHtml);
-for (const f of ['tokens.css', 'styles.css', 'boot.js', 'main.js']) copyFileSync(P('site', f), P('dist/web', f));
-for (const r of [...refs, ...loopFiles]) { mkdirSync(dirname(P('dist/web', r)), { recursive: true }); copyFileSync(P('site', r), P('dist/web', r)); }
+const webImages = writeWeb('dist/web', webSource);
+if (!shopLive) writeWeb('dist/preview', html);
 
 // dist/artifact: a fragment (the Artifact skeleton supplies doctype, charset and viewport), everything inlined.
 // Loops travel inside the page as data URIs, both formats of each (about 4.7 MB of the 16 MB limit); films stay links,
@@ -120,8 +138,9 @@ if (!args.has('--no-check')) {
   ok = (await brandcheck({ html: P('dist/artifact/lastfomo.html') }, 'artifact')) && ok;
 }
 const kb = (p) => (statSync(P(p)).size / 1024).toFixed(0) + ' KB';
-console.log(`build: dist/web/index.html ${kb('dist/web/index.html')} + ${refs.length} images`);
-console.log(`build: dist/artifact/lastfomo.html ${kb('dist/artifact/lastfomo.html')}`);
+console.log(`build: dist/web/index.html ${kb('dist/web/index.html')} + ${webImages} images${shop ? (shopLive ? ', with the shop' : ', without the shop (site/shop.json: "live": false)') : ''}`);
+if (shop && !shopLive) console.log(`build: dist/preview/index.html ${kb('dist/preview/index.html')}, the web build with the shop, for QA only`);
+console.log(`build: dist/artifact/lastfomo.html ${kb('dist/artifact/lastfomo.html')}${shop ? ', with the shop' : ''}`);
 const missing = Object.entries(media.loops).filter(([, v]) => !v).map(([w]) => w);
 if (missing.length) console.log(`build: posters stand in for the ${missing.join(' and ')} loop${missing.length > 1 ? 's' : ''} (not uploaded yet)`);
 const ledger = JSON.parse(read('brand/ledger.json'));
