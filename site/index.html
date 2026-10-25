@@ -24,6 +24,7 @@
     <div class="links">
       <!-- shop:bar -->
       <a class="btn" href="#/start">Start a project</a>
+      <button class="menu" id="xp-menu" type="button" aria-label="Settings" aria-haspopup="dialog" aria-controls="xp-set" aria-expanded="false"><i></i><i></i></button>
     </div>
   </div>
 </header>
@@ -39,7 +40,7 @@
         <p class="h1" data-rise style="--d:.35s"><span>What grows. What thinks. What lasts.</span></p>
         <p class="lead" data-fade style="--d:.7s">A research house with three wings: nature, intelligence, and the objects worth keeping.</p>
         <div class="row" data-fade style="--d:.9s">
-          <a class="btn solid" href="#/" data-go="machina">See the work</a>
+          <a class="btn solid" href="#/explore"><svg aria-hidden="true"><use href="#g-lux"/></svg>Explore</a>
           <button class="btn" type="button" data-reels>Watch the films</button>
         </div>
       </div>
@@ -171,7 +172,7 @@
           <p class="h2" data-rise style="--d:.4s"><span>Local AI, built for a medical practice.</span></p>
         </div>
         <p class="lead" data-fade style="--d:.6s">The brief: analyse patient records with AI without a single byte leaving the clinic. We specified, built and installed a private inference server that lives on site.</p>
-        <div class="row" data-fade style="--d:.8s"><a class="btn solid" href="https://www.youtube.com/watch?v=hWzvRWBzQFQ" target="_blank" rel="noopener" data-play="machina"><svg aria-hidden="true"><use href="#g-play"/></svg>Play the film</a></div>
+        <div class="row" data-fade style="--d:.8s"><a class="btn solid" href="https://www.youtube.com/watch?v=hWzvRWBzQFQ" target="_blank" rel="noopener" data-play="machina"><svg aria-hidden="true"><use href="#g-play"/></svg>Play the film</a><a class="btn" href="#/explore/machina" aria-label="Explore, Machina"><svg aria-hidden="true"><use href="#g-lux"/></svg>Explore</a></div>
       </div>
     </div>
     <button class="footage" type="button" data-footage hidden>Pause footage</button>
@@ -226,7 +227,7 @@
           <p class="h2" data-rise style="--d:.4s"><span>Seed to sensor, under one roof.</span></p>
         </div>
         <p class="lead" data-fade style="--d:.6s">Research across plant science and cultivation, with the feeding systems and control hardware that tie it together, designed and built in-house.</p>
-        <div class="row" data-fade style="--d:.8s"><a class="btn solid" href="https://www.youtube.com/watch?v=61uIUCtCN6k" target="_blank" rel="noopener" data-play="hortus"><svg aria-hidden="true"><use href="#g-play"/></svg>Play the film</a></div>
+        <div class="row" data-fade style="--d:.8s"><a class="btn solid" href="https://www.youtube.com/watch?v=61uIUCtCN6k" target="_blank" rel="noopener" data-play="hortus"><svg aria-hidden="true"><use href="#g-play"/></svg>Play the film</a><a class="btn" href="#/explore/hortus" aria-label="Explore, Hortus"><svg aria-hidden="true"><use href="#g-lux"/></svg>Explore</a></div>
       </div>
     </div>
     <button class="footage" type="button" data-footage hidden>Pause footage</button>
@@ -282,7 +283,7 @@
           <p class="h2" data-rise style="--d:.4s"><span>Private by invitation.</span></p>
         </div>
         <p class="lead" data-fade style="--d:.6s">Vaults, private collections and direct lines to artists and their estates. We hunt off-market, keep what matters, and open the door only by invitation.</p>
-        <div class="row" data-fade style="--d:.8s"><a class="btn solid" href="https://www.youtube.com/watch?v=3GHNW57yH4Y" target="_blank" rel="noopener" data-play="arca"><svg aria-hidden="true"><use href="#g-play"/></svg>Play the film</a></div>
+        <div class="row" data-fade style="--d:.8s"><a class="btn solid" href="https://www.youtube.com/watch?v=3GHNW57yH4Y" target="_blank" rel="noopener" data-play="arca"><svg aria-hidden="true"><use href="#g-play"/></svg>Play the film</a><a class="btn" href="#/explore/arca" aria-label="Explore, Arca"><svg aria-hidden="true"><use href="#g-lux"/></svg>Explore</a></div>
       </div>
     </div>
     <button class="footage" type="button" data-footage hidden>Pause footage</button>
@@ -317,6 +318,46 @@
         <figure><img loading="lazy" decoding="async" src="media/arca-helmet.jpg" alt="The Sutton Hoo helmet on display"><figcaption>What lasts</figcaption></figure>
       </div>
       <div class="next" data-fade style="--d:.4s"><span class="code" style="color:var(--fg2)">Next case</span><a class="big" href="#/machina">Machina<svg aria-hidden="true"><use href="#g-ne"/></svg></a></div>
+    </div>
+  </section>
+</main>
+
+<!-- =============================== EXPLORE: walk the house (site/explore.js) =============================== -->
+<main class="view xp" id="view-explore" data-view="explore" data-crumb="Explore" data-crumb-icon="lux" tabindex="-1" hidden>
+  <canvas class="xp-c" id="xp-c" tabindex="0" aria-label="The lastfomo house, a space you can walk through. Signals mark objects you can inspect."></canvas>
+  <canvas class="xp-grain" id="xp-grain" aria-hidden="true"></canvas>
+  <div class="xp-hud" id="xp-hud" hidden><span class="xp-dots" id="xp-dots" aria-hidden="true"></span><span id="xp-count"></span></div>
+  <div class="xp-toast" id="xp-toast" role="status" aria-live="polite"></div>
+  <button class="xp-prompt" id="xp-prompt" type="button" tabindex="-1"><kbd>E</kbd><span id="xp-prompt-t">Inspect</span><i></i></button>
+  <button class="xp-walk" id="xp-walk" type="button" aria-label="Hold to walk" hidden><svg aria-hidden="true"><use href="#g-arrows"/></svg><span id="xp-walk-l">Auto</span></button>
+  <aside class="xp-panel" id="xp-panel" role="dialog" aria-modal="false" aria-labelledby="xp-p-title">
+    <div class="xp-timer" id="xp-p-timer" hidden><i></i></div>
+    <p class="code" id="xp-p-code"></p>
+    <h2 class="h2" id="xp-p-title"></h2>
+    <span class="arch xp-pic" id="xp-p-pic" hidden><img id="xp-p-img" alt=""><span class="seal" aria-hidden="true"></span></span>
+    <p class="xp-body" id="xp-p-body"></p>
+    <div class="xp-stats" id="xp-p-stats"></div>
+    <div class="row"><button class="btn" type="button" id="xp-p-close">Close<kbd>E</kbd></button></div>
+  </aside>
+  <section class="xp-over" id="xp-start" aria-labelledby="xp-start-t">
+    <div class="xp-in">
+      <h1 class="word" id="xp-start-t">lastfomo</h1>
+      <p class="h2" id="xp-start-line">Walk the house.</p>
+      <ul class="xp-lines"><li>Move to look around.</li><li>Follow the signal.</li><li>Wear headphones.</li></ul>
+      <div class="row xp-row">
+        <button class="btn solid" type="button" id="xp-go-sound" disabled><span class="xp-d" aria-hidden="true"></span>Enter with sound</button>
+        <button class="btn" type="button" id="xp-go-quiet" disabled>Enter in silence</button>
+        <a class="btn" href="#/" data-go="hero" id="xp-home" hidden>Back to the house</a>
+      </div>
+      <p class="xp-note" id="xp-note">Building the house…</p>
+    </div>
+  </section>
+  <section class="xp-over" id="xp-final" aria-labelledby="xp-final-t" hidden>
+    <div class="xp-in">
+      <p class="xp-lines" id="xp-final-n"></p>
+      <h2 class="h1" id="xp-final-t">You walked the whole house.</h2>
+      <p class="xp-note">Hortus, Machina and Arca are explored. The fourth wing is still sealed.</p>
+      <div class="row xp-row"><a class="btn solid" href="#/start">Start a project</a><button class="btn" type="button" id="xp-final-x">Keep walking</button></div>
     </div>
   </section>
 </main>
@@ -384,6 +425,36 @@
 </main>
 
 <!-- shop:basket -->
+<!-- Explore settings: the header's hamburger opens them while the walk is open. -->
+<dialog class="xp-set" id="xp-set" aria-labelledby="xp-set-t">
+  <div class="xp-set-in">
+    <div class="xp-set-head"><h2 class="h2" id="xp-set-t">Settings</h2><button class="btn" type="button" id="xp-set-x">Close</button></div>
+    <ul class="xp-opts">
+      <li><button class="xp-opt" type="button" role="switch" aria-checked="false" data-opt="auto"><span><b>Auto walk</b><span>Visits every signal for you, wing by wing.</span></span><i aria-hidden="true"></i></button></li>
+      <li><button class="xp-opt" type="button" role="switch" aria-checked="false" data-opt="music"><span><b>Music</b><span>The score of each wing.</span></span><i aria-hidden="true"></i></button></li>
+      <li><button class="xp-opt" type="button" role="switch" aria-checked="false" data-opt="sounds"><span><b>Sounds</b><span>Steps, signals and arches.</span></span><i aria-hidden="true"></i></button></li>
+      <li id="xp-opt-gyro" hidden><button class="xp-opt" type="button" role="switch" aria-checked="false" data-opt="gyro"><span><b>Look with your phone</b><span>Turn the phone to look around.</span></span><i aria-hidden="true"></i></button></li>
+    </ul>
+    <div class="xp-sec">
+      <h3>Walk to</h3>
+      <ul class="xp-wings">
+        <li><a href="#/explore" data-to="hub"><b>The house</b><span data-n></span></a></li>
+        <li data-wing="hortus"><a href="#/explore/hortus" data-to="hortus"><b>Hortus</b><span data-n></span></a></li>
+        <li data-wing="machina"><a href="#/explore/machina" data-to="machina"><b>Machina</b><span data-n></span></a></li>
+        <li data-wing="arca"><a href="#/explore/arca" data-to="arca"><b>Arca</b><span data-n></span></a></li>
+      </ul>
+    </div>
+    <div class="xp-sec"><h3>How to walk</h3><dl class="xp-keys" id="xp-keys"></dl></div>
+    <div class="row"><a class="btn solid" href="#/start">Start a project</a></div>
+  </div>
+</dialog>
+<!-- The Arca objects for the walk's vitrines and panels: inert until the walk reads them; the build inlines or fingerprints them. -->
+<template id="xp-media">
+  <img src="media/arca-necklace.jpg" alt="The jewelled Necklace of San Gennaro on black" data-k="necklace">
+  <img src="media/arca-helmet.jpg" alt="The Sutton Hoo helmet on display" data-k="helmet">
+  <img src="media/arca-gauntlet.jpg" alt="A Renaissance parade gauntlet in embossed and gilt steel" data-k="gauntlet">
+  <img src="media/arca-frazetta.jpg" alt="Frank Frazetta’s Man Ape, the 1966 cover painting" data-k="frazetta">
+</template>
 <dialog class="reel" id="reel" aria-label="Film player">
   <div class="reel-in">
     <div class="reel-pick" id="reel-pick" hidden>
@@ -402,6 +473,7 @@
 <div class="cur" aria-hidden="true"><svg><use href="#g-plus"/></svg></div>
 
 <script type="application/json" id="lf-media">{"loops":{"machina":null,"hortus":null,"arca":null},"films":{"machina":null,"hortus":null,"arca":null}}</script>
+<script src="explore.js"></script>
 <script src="main.js"></script>
 </body>
 </html>

@@ -43,9 +43,15 @@
   const FINE = matchMedia('(pointer: fine)').matches;
   // Every main.view is a route. The Hortus hardware views come from site/shop.json and carry their own page titles.
   const views = Object.fromEntries($$('main.view[data-view]').map((v) => [v.dataset.view, v]));
-  const TITLES = { home: 'lastfomo research house', machina: 'Machina, Case N° 0001 — lastfomo', hortus: 'Hortus, nature research — lastfomo', arca: 'Arca, art & artifacts — lastfomo', start: 'Start a project — lastfomo' };
+  const TITLES = { home: 'lastfomo research house', machina: 'Machina, Case N° 0001 — lastfomo', hortus: 'Hortus, nature research — lastfomo', arca: 'Arca, art & artifacts — lastfomo', start: 'Start a project — lastfomo', explore: 'Explore — lastfomo' };
   let cur = null;
   let pendingAnchor = null;
+  // The walk (site/explore.js) opens at #/explore, the house, and at #/explore/<wing>. It borrows the exact horse.
+  const XP = window.lfExplore || null;
+  if (XP) XP.init({ horse: HORSE });
+  let xpWing = '';
+  const titleOf = (k) => (k === 'explore' && xpWing ? 'Explore ' + NAMES[xpWing] + ' — lastfomo' : TITLES[k] || (views[k] && views[k].dataset.pageTitle) || TITLES.home);
+  let stage = () => {}; // the theme section below fills it in
 
   /* ---------------- colours come from the tokens, never from here ---------------- */
   const css = getComputedStyle(root);
@@ -305,26 +311,38 @@
     const ol = crumbNav.querySelector('ol');
     while (ol.children.length > 1) ol.lastElementChild.remove();
     const trail = [];
-    for (let n = view; n && n.dataset.crumb; n = views[n.dataset.crumbParent]) trail.unshift(n);
-    trail.forEach((n, i) => {
+    for (let n = view; n && n.dataset.crumb; n = views[n.dataset.crumbParent]) trail.unshift({ href: hrefOf(n.dataset.view), label: n.dataset.crumb, icon: n.dataset.crumbIcon });
+    // Inside the walk the wing joins the trail, and the walk itself shows as its glyph: Home / Explore / Hortus.
+    if (view === views.explore && xpWing) trail.push({ label: NAMES[xpWing] });
+    trail.forEach((c, i) => {
       const li = document.createElement('li');
-      if (i === trail.length - 1) { li.textContent = n.dataset.crumb; li.setAttribute('aria-current', 'page'); }
-      else { const a = document.createElement('a'); a.href = hrefOf(n.dataset.view); a.textContent = n.dataset.crumb; li.append(a); }
+      const box = i === trail.length - 1 ? li : document.createElement('a');
+      if (c.icon) {
+        box.insertAdjacentHTML('beforeend', '<svg aria-hidden="true"><use href="#g-' + c.icon + '"/></svg>');
+        const sr = document.createElement('span'); sr.className = 'sr'; sr.textContent = c.label; box.append(sr);
+      } else box.textContent = c.label;
+      if (box === li) li.setAttribute('aria-current', 'page');
+      else { box.href = c.href; li.append(box); }
       ol.append(li);
     });
     crumbNav.hidden = trail.length === 0;
   }
   let want = null, swapT = 0, offT = 0;
   function swap(k) {
+    const was = cur;
     if (views[cur]) views[cur]._y = views[cur].scrollTop;
     if (dlg.open) closeReel();
+    if (XP && was === 'explore' && k !== 'explore') XP.leave();
     Object.entries(views).forEach(([n, v]) => { v.hidden = n !== k; });
     $$('video').forEach((v) => { if (!v.paused) v.pause(); });
     const bk = $('#basket');
     if (bk && bk.open) bk.close();
     cur = k;
     const v = views[k];
-    document.title = TITLES[k] || v.dataset.pageTitle || TITLES.home;
+    // The walk is a dark stage: the header trades Start a project for the walk's settings and takes the night tokens.
+    document.body.classList.toggle('xp-on', k === 'explore');
+    stage(k === 'explore');
+    document.title = titleOf(k);
     crumbs(v);
     // Back to the house returns to the screen the visitor left; a case always opens at its cover.
     if (!pendingAnchor) v.scrollTop = (k === 'home' && v._y) || 0;
@@ -332,6 +350,7 @@
     plates.forEach((p) => { if (v.contains(p.cv) && !p.ready) p.build(); });
     v.focus({ preventScroll: true });
     if (pendingAnchor) { const a = pendingAnchor; pendingAnchor = null; requestAnimationFrame(() => scrollToId(a)); }
+    if (XP && k === 'explore') XP.enter(xpWing);
   }
   function show(k) {
     // One route can be pending under the curtain; a newer one replaces it, so the URL and the view never part.
@@ -349,6 +368,15 @@
     // "#/hardware" and "#/hardware/<product>" open the Hortus hardware; a page built without it opens the Hortus case.
     const hw = location.hash.match(/^#\/?hardware(?:\/([a-z0-9-]+))?\/?$/);
     if (hw) { show(views['hw-' + hw[1]] ? 'hw-' + hw[1] : views.hardware ? 'hardware' : 'hortus'); return; }
+    // "#/explore" walks the house; "#/explore/<wing>" (or "#explore-hortus", from an Artifact link) opens a wing.
+    const xp = views.explore && location.hash.match(/^#\/?explore(?:[\/-](hortus|machina|arca))?\/?$/);
+    if (xp) {
+      xpWing = xp[1] || '';
+      // Already walking: the walk changes worlds under its own curtain, and the trail and title follow.
+      if (cur === 'explore' && want === null) { document.title = titleOf('explore'); crumbs(views.explore); if (XP) XP.enter(xpWing); return; }
+      show('explore');
+      return;
+    }
     const m = location.hash.match(/^#\/?(machina|hortus|arca|start)\b/);
     show(m ? m[1] : 'home');
   }
@@ -422,7 +450,7 @@
 
   /* ---------------- theme: follow the viewer, or Night / Day by choice ---------------- */
   const themeBtn = $('#theme');
-  if (themeBtn) {
+  {
     const ORDER = ['auto', 'dark', 'light'];
     const LABEL = { auto: 'Theme · Auto', dark: 'Theme · Night', light: 'Theme · Day' };
     const hostTheme = root.getAttribute('data-host-theme') || '';
@@ -431,13 +459,15 @@
     const apply = () => {
       if (pref === 'auto') { if (hostTheme) root.setAttribute('data-theme', hostTheme); else root.removeAttribute('data-theme'); }
       else root.setAttribute('data-theme', pref);
-      themeBtn.textContent = LABEL[pref];
+      if (themeBtn) themeBtn.textContent = LABEL[pref];
     };
-    themeBtn.addEventListener('click', () => {
+    if (themeBtn) themeBtn.addEventListener('click', () => {
       pref = ORDER[(ORDER.indexOf(pref) + 1) % ORDER.length];
       try { if (pref === 'auto') localStorage.removeItem('lf-theme'); else localStorage.setItem('lf-theme', pref); } catch (_) { /* per-viewer convenience only */ }
       apply();
     });
+    // The walk is a dark stage: night tokens while it is open, the viewer's own theme again after.
+    stage = (on) => { if (on) root.setAttribute('data-theme', 'dark'); else apply(); };
     apply();
   }
 
@@ -598,5 +628,21 @@
     render();
   }
 
-  route();
+  /* ---------------- an open Artifact keeps its place when the page is republished ---------------- */
+  // The claude.ai viewer reloads open pages to a new version at a quiet moment. The route and the walk's finds come
+  // back with them; anywhere else (the web build) there is no window.claude and the page starts as it always did.
+  const hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({ hash: location.hash, walk: XP ? XP.save() : null }));
+  let booted = false;
+  const start = (data) => {
+    if (booted) return;
+    booted = true;
+    if (data && data.walk && XP) XP.load(data.walk);
+    if (data && typeof data.hash === 'string' && /^#\/?[\w/-]*$/.test(data.hash) && !location.hash) {
+      try { history.replaceState(null, '', data.hash); } catch (_) { /* the page keeps its own address */ }
+    }
+    route();
+  };
+  if (hot && typeof hot.ready === 'function') { hot.ready(start); setTimeout(() => start({}), 1500); }
+  else start((hot && hot.data) || {});
 })();

@@ -38,7 +38,7 @@ The QA tools need Playwright and Chromium, so they run on a workstation, not in 
 
 ### Brand check (`tools/brandcheck.mjs`)
 
-Source mode checks `site/index.html`, `site/styles.css`, `site/main.js`, `site/boot.js` and `site/tokens.css`. `--html <file>` checks one self-contained page, such as the built Artifact.
+Source mode checks `site/index.html`, `site/styles.css`, `site/main.js`, `site/boot.js`, `site/explore.js` and `site/tokens.css` (every local script and stylesheet the page loads; three.js, which the walk loads on its own, is third-party code and is not checked). `--html <file>` checks one self-contained page, such as the built Artifact.
 
 | Rail | The rule in plain words | Severity | How to fix a failure |
 |---|---|---|---|

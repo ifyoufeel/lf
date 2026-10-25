@@ -8,7 +8,7 @@ Live at **https://lastfomo.vercel.app**. Vercel builds it from this repo on ever
 
 ## What this is
 
-- `site/` is the page: one HTML document with hash routes for home, the three case pages and Start a project.
+- `site/` is the page: one HTML document with hash routes for home, the three case pages, Start a project, and the walk (`#/explore`): the house and its wings in 3D, with signals to find, a score for each wing, auto walk and phone controls.
 - `brand/` is the brand as data: tokens, a ledger of facts and approved copy, and the exact Figma marks.
 - `tools/` builds the page, checks it against the brand rules, and photographs every screen for review.
 - `dist/` is what ships: a claude.ai Artifact and a folder for any static host.
@@ -31,11 +31,13 @@ brand/
   ledger.json            facts, approved lines, banned copy, British spelling, placeholders, media rights
   marks/*.svg            exact Figma vectors: horse, wordmark, lockup, glyphs; never edited by hand
 site/
-  index.html             the page: routes #/, #/machina, #/hortus, #/arca, #/start
+  index.html             the page: routes #/, #/machina, #/hortus, #/arca, #/start, #/explore, #/explore/<wing>
   tokens.css             generated from brand/tokens.json by tools/build.mjs; never edited by hand
   styles.css             component styles; colours only through var(--token)
   boot.js                runs in <head> before first paint: the js class, the saved theme
   main.js                plates, reveals, routing, curtain, player, cursor, brief composer, theme switch, basket
+  explore.js             the walk: worlds, signals, score, auto walk, walk button, motion look, settings
+  vendor/three.min.js    three.js r128 for the walk, loaded only when it opens; never edited
   media.json             video manifest: wing loops, case cover footage, films; null means not uploaded yet
   media/*.jpg            posters and stills, each listed in brand/ledger.json under media
   shop.json              the Hortus hardware shop: products, English copy, prices; "live" says whether it ships to the web

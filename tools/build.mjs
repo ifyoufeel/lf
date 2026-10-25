@@ -96,17 +96,26 @@ for (const r of refsOf(html)) if (!existsSync(P('site', r))) fail(`missing ${r}`
 const stamp = (rel) => rel + '?v=' + createHash('sha256').update(readFileSync(P('site', rel))).digest('hex').slice(0, 10);
 const webLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, local(f) ? stamp(f) : f])) : local(v) ? stamp(v) : v]));
 const webCovers = Object.fromEntries(Object.entries(covers).map(([k, v]) => [k, Object.fromEntries(Object.entries(v || {}).map(([t, f]) => [t, local(f) ? stamp(f) : f]))]));
+// three.js r128 for the walk (#/explore), loaded by site/explore.js when the walk first opens. The web build serves the
+// site's own copy, since its CSP allows scripts from 'self' only; the Artifact loads the same file from cdnjs, pinned
+// to the copy's hash (cdnjs's r128 and npm's three@0.128.0 build are the same bytes).
+const THREE_FILE = 'vendor/three.min.js';
+if (!existsSync(P('site', THREE_FILE))) fail(`missing site/${THREE_FILE}, the three.js r128 build the walk loads`);
+const THREE_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+const THREE_SRI = 'sha512-' + createHash('sha512').update(readFileSync(P('site', THREE_FILE))).digest('base64');
 
 // A web build: the source as files, tokens generated, manifest filled. CSP-friendly: no inline script.
 // Returns how many images it carries.
 function writeWeb(dir, page) {
-  const out = withManifest(page, { loops: webLoops, covers: webCovers, films: media.films, embed: true, brief: '/api/brief' })
+  const out = withManifest(page, { loops: webLoops, covers: webCovers, films: media.films, embed: true, brief: '/api/brief', three: stamp(THREE_FILE) })
     .replace(/(src|poster)="(media\/[^"?]+)"/g, (_, attr, rel) => `${attr}="${stamp(rel)}"`);
   if (/"media\/[^"?]+"/.test(out)) fail(`a media URL in ${dir} has no content fingerprint (?v=)`);
   const own = refsOf(page);
   mkdirSync(P(dir, 'media'), { recursive: true });
   writeFileSync(P(dir, 'index.html'), out);
-  for (const f of ['tokens.css', 'styles.css', 'boot.js', 'main.js']) copyFileSync(P('site', f), P(dir, f));
+  for (const f of ['tokens.css', 'styles.css', 'boot.js', 'explore.js', 'main.js']) copyFileSync(P('site', f), P(dir, f));
+  mkdirSync(P(dir, dirname(THREE_FILE)), { recursive: true });
+  copyFileSync(P('site', THREE_FILE), P(dir, THREE_FILE));
   for (const r of [...own, ...loopFiles, ...coverFiles]) { mkdirSync(dirname(P(dir, r)), { recursive: true }); copyFileSync(P('site', r), P(dir, r)); }
   return own.length;
 }
@@ -124,7 +133,7 @@ const artLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => 
 // A film with an "asset" URL (uploaded to the Artifact's asset store) plays in the Artifact's own popup.
 const artFilms = Object.fromEntries(Object.entries(media.films).map(([k, f]) => [k, f && f.asset ? { ...f, src: f.asset } : f]));
 const artCovers = Object.fromEntries(Object.entries(covers).map(([k, v]) => [k, v && v.mp4 ? { mp4: inline(v.mp4) } : {}]));
-html = withManifest(html, { loops: artLoops, covers: artCovers, films: artFilms, embed: false });
+html = withManifest(html, { loops: artLoops, covers: artCovers, films: artFilms, embed: false, three: THREE_CDN, threeIntegrity: THREE_SRI });
 const scriptSafe = (s) => s.replace(/<\/script/gi, '<\\/script');
 const dataUri = (rel) => 'data:image/jpeg;base64,' + readFileSync(P('site', rel)).toString('base64');
 let head = html.slice(html.indexOf('<head>') + 6, html.indexOf('</head>'));
@@ -133,6 +142,7 @@ head = head.replace(/<meta charset="[^"]*">\s*/, '').replace(/<meta name="viewpo
 head = once(head, /(<title>[^<]*<\/title>)/, (t) => t + '\n<meta name="claude:viewport-fit-sides" content="cover">');
 head = once(head, /<link rel="stylesheet" href="tokens\.css">\s*<link rel="stylesheet" href="styles\.css">/, () => `<style>\n${read('site/tokens.css')}\n${read('site/styles.css')}</style>`);
 head = once(head, /<script src="boot\.js"><\/script>/, () => `<script>${scriptSafe(read('site/boot.js'))}</script>`);
+body = once(body, /<script src="explore\.js"><\/script>/, () => `<script>\n${scriptSafe(read('site/explore.js'))}</script>`);
 body = once(body, /<script src="main\.js"><\/script>/, () => `<script>\n${scriptSafe(read('site/main.js'))}</script>`);
 body = body.replace(/(src|poster)="(media\/[^"]+\.jpg)"/g, (_, attr, rel) => `${attr}="${dataUri(rel)}"`);
 const fragment = head.trim() + '\n' + body.trim() + '\n';

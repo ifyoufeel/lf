@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Interaction smoke test, desktop 1440x900, dark scheme: routes and curtain,
-// case links, film player, brief form, copy, theme switch, focus rings, and
-// console errors throughout. Writes out/qa/smoke.json.
+// case links, film player, the walk (#/explore), brief form, copy, theme switch,
+// focus rings, and console errors throughout. Writes out/qa/smoke.json.
 //
 //   node tools/qa/smoke.mjs                      # dist/web/index.html
 //   node tools/qa/smoke.mjs --html page.html     # one self-contained page
@@ -361,14 +361,81 @@ await step('case: the cover footage loops; Pause footage holds it', async () => 
   return `${file} (${playable}), looped (t ${looped} s at 11.5 s), pauses and plays, rests off screen`;
 });
 
-await step('nav: See the work lands on a wing', async () => {
+// The walk (site/explore.js): the hero's Explore opens it at the house, a case cover opens its own wing. While it is open
+// the header keeps its trail (Home / Explore / wing), trades Start a project for the settings, and the page is dark.
+const crumbTrail = () => page.evaluate(() => { const n = document.querySelector('#crumbs'); return n && !n.hidden ? [...n.querySelectorAll('li')].map((li) => li.textContent.trim()).join(' / ') : ''; });
+let themeBeforeWalk = null;
+await step('explore: Explore opens the walk at the house', async () => {
   await go('#/', homeView);
+  themeBeforeWalk = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
   await page.evaluate(() => { const v = document.querySelector('main.view:not([hidden])'); v.style.scrollBehavior = 'auto'; v.scrollTop = 0; });
-  await page.locator(`main.view[data-view="${homeView}"] a[data-go]`, { hasText: /see the work/i }).first().click();
-  await page.waitForTimeout(1600);
-  const at = await page.evaluate(() => { const v = document.querySelector('main.view:not([hidden])'); const s = [...v.querySelectorAll('section.screen')].find((x) => Math.abs(x.offsetTop - v.scrollTop) < 4); return s ? (s.dataset.wing || s.id || '') : 'between screens'; });
-  check(at === 'machina', `"See the work" stopped at ${at || 'no screen'}`);
-  return 'Machina';
+  const cta = page.locator(`main.view[data-view="${homeView}"] .hero a[href="#/explore"]`);
+  check(await cta.count(), 'no Explore link in the hero');
+  await cta.first().click();
+  await waitView('explore');
+  const st = await page.evaluate(() => {
+    const shown = (s) => { const e = document.querySelector(s); return !!e && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0; };
+    return { hash: location.hash, menu: shown('#xp-menu'), cta: shown('header .links a.btn'), theme: document.documentElement.getAttribute('data-theme') };
+  });
+  const trail = await crumbTrail();
+  check(st.hash === '#/explore', `hash is ${st.hash}`);
+  check(/^home \/ explore$/i.test(trail), `the trail reads "${trail || 'nothing'}"`);
+  check(st.menu && !st.cta, `the header shows ${st.menu ? 'the settings' : 'no settings'} and ${st.cta ? 'still Start a project' : 'no Start a project'}`);
+  check(st.theme === 'dark', `the walk is not dark (data-theme ${st.theme})`);
+  await page.waitForFunction(() => !document.querySelector('#xp-go-quiet').disabled || !document.querySelector('#xp-home').hidden, null, { timeout: 30000 })
+    .catch(() => { throw new Error('the walk did not finish loading in 30 s'); });
+  const failed = await page.evaluate(() => (!document.querySelector('#xp-home').hidden ? document.querySelector('#xp-note').textContent : ''));
+  check(!failed, `the walk could not start: ${failed}`);
+  await page.locator('#xp-go-quiet').click();
+  await page.waitForTimeout(800);
+  const p = await page.evaluate(() => window.lfExplore.peek());
+  check(p.started && p.world === 'hub', `after Enter in silence: started ${p.started}, world ${p.world || 'none'}`);
+  return `the house, trail ${trail}, settings in the header, dark`;
+});
+
+await step('explore: a case cover opens its wing in the walk', async () => {
+  await go('#/arca', 'arca');
+  const link = page.locator('#view-arca .case-cover a[href="#/explore/arca"]');
+  check(await link.count(), 'no Explore link on the Arca cover');
+  await link.click();
+  await waitView('explore');
+  await page.waitForFunction(() => window.lfExplore.peek().world === 'arca', null, { timeout: 15000 }).catch(() => { throw new Error('the walk did not open Arca'); });
+  const trail = await crumbTrail(), title = await page.title();
+  check(/^home \/ explore \/ arca$/i.test(trail), `the trail reads "${trail}"`);
+  check(/arca/i.test(title), `the title is "${title}"`);
+  return `${trail}, "${title}"`;
+});
+
+await step('explore: the settings open from the header and close on Escape', async () => {
+  await page.locator('#xp-menu').click();
+  await page.waitForFunction(() => document.querySelector('#xp-set').open, null, { timeout: 2000 }).catch(() => { throw new Error('the settings did not open'); });
+  const sw = page.locator('#xp-set [data-opt="auto"]');
+  const before = await sw.getAttribute('aria-checked');
+  await sw.click();
+  const after = await sw.getAttribute('aria-checked'), auto = await page.evaluate(() => window.lfExplore.peek().auto);
+  check(before !== after, `Auto walk stayed ${after}`);
+  check(String(auto) === after, `the switch reads ${after} but the walk says ${auto}`);
+  await sw.click(); // back as it was
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('#xp-set').open, null, { timeout: 2000 }).catch(() => { throw new Error('Escape did not close the settings'); });
+  const expanded = await page.locator('#xp-menu').getAttribute('aria-expanded');
+  check(expanded === 'false', `the menu still says aria-expanded ${expanded}`);
+  return 'opens, Auto walk switches both ways, Escape closes';
+});
+
+await step('explore: leaving gives the header and the theme back', async () => {
+  await page.locator('#crumbs a', { hasText: /^home$/i }).click();
+  await waitView(homeView);
+  const st = await page.evaluate(() => ({
+    cta: getComputedStyle(document.querySelector('header .links a.btn')).display !== 'none',
+    menu: getComputedStyle(document.querySelector('#xp-menu')).display,
+    walking: window.lfExplore.peek().active,
+    theme: document.documentElement.getAttribute('data-theme'),
+  }));
+  check(st.cta && st.menu === 'none', `the header shows Start a project ${st.cta ? 'yes' : 'no'}, the settings ${st.menu}`);
+  check(!st.walking, 'the walk still runs behind the house');
+  check(st.theme === themeBeforeWalk, `data-theme is ${st.theme}, was ${themeBeforeWalk} before the walk`);
+  return 'Start a project back, the walk at rest, the theme as it was';
 });
 
 await step('nav: Skip to content moves focus into the view', async () => {

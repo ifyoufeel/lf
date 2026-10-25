@@ -194,6 +194,8 @@ canvas.plate{image-rendering:pixelated;image-rendering:crisp-edges}
 .footage{position:absolute;right:var(--gr);bottom:clamp(28px,6vh,72px);display:inline-flex;align-items:center;min-height:44px;padding:0;border:0;background:none;cursor:pointer;font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);transition:color .2s}
 .footage:hover{color:var(--fg)}
 .footage:focus-visible{outline:2px solid var(--wing-t);outline-offset:4px}
+/* On phones the cover’s two buttons fill the row, so the footage control sits just below it, in the corner. */
+@media (max-width:620px){.case-cover{padding-bottom:calc(clamp(28px,6vh,72px) + 48px)}}
 .case-cover .stack{gap:clamp(16px,2.4vh,22px);max-width:1056px}
 .case-cover .title{display:grid;gap:0}
 .case-cover .word{font-size:clamp(70px,9.6vw,176px);line-height:.9}
@@ -361,6 +363,116 @@ dialog.basket::backdrop{background:transparent}
 .basket .fields{grid-template-columns:1fr}
 .basket .brief-out{max-height:40svh}
 
+/* ---------- explore: walk the house (site/explore.js) ---------- */
+/* While the walk is open the header keeps its trail (Home / Explore / wing) and trades Start a project for a menu. */
+.menu{display:none;position:relative;width:44px;height:44px;margin-right:-12px;padding:0;border:0;background:none;color:var(--fg);cursor:pointer}
+.menu i{position:absolute;left:12px;right:12px;top:50%;height:1px;background:currentColor;transition:transform var(--glide) var(--ease)}
+.menu i:first-child{transform:translateY(-4px)}
+.menu i:last-child{transform:translateY(4px)}
+.menu[aria-expanded="true"] i:first-child{transform:rotate(45deg)}
+.menu[aria-expanded="true"] i:last-child{transform:rotate(-45deg)}
+.menu:focus-visible{outline:2px solid var(--wing-t);outline-offset:2px}
+.xp-on .menu{display:block}
+.xp-on .links .btn,.xp-on .basket-link,.xp-on .progress,.xp-on .dots{display:none}
+.xp-on .bar-l{gap:clamp(14px,2.4vw,32px)}
+.crumbs svg{display:block;width:14px;height:14px}
+@media (max-width:760px){.xp-on .crumbs{display:block}}
+/* The stage: the canvas fills the view under the glass header, with a light grade per world and a little film grain. */
+.view.xp{scroll-snap-type:none;overflow:hidden;overscroll-behavior:none;background:var(--void);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.xp-c{position:absolute;inset:0;width:100%;height:100%;display:block;outline:none;cursor:grab;touch-action:none}
+.xp-c:active{cursor:grabbing}
+body[data-wing="hortus"] .xp-c{filter:contrast(1.14) saturate(1.3)}
+body[data-wing="machina"] .xp-c{filter:contrast(1.06) saturate(1.12)}
+body[data-wing="arca"] .xp-c{filter:contrast(1.12) saturate(1.28)}
+.xp-grain{position:absolute;left:-40px;top:-40px;width:calc(100% + 80px);height:calc(100% + 80px);max-width:none;z-index:2;pointer-events:none;opacity:.07;image-rendering:pixelated;animation:xp-grain .9s steps(5) infinite}
+@keyframes xp-grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-14px,8px)}40%{transform:translate(9px,-12px)}60%{transform:translate(-6px,-4px)}80%{transform:translate(12px,10px)}}
+.xp-hud{position:absolute;z-index:10;top:calc(var(--bar) + 12px);left:var(--gl);display:inline-flex;align-items:center;gap:10px;min-height:34px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);pointer-events:none}
+.xp-dots{display:flex;gap:5px}
+.xp-dots b{width:7px;height:7px;border-radius:50%;border:1px solid var(--fg2)}
+.xp-dots b.on{background:var(--wing);border-color:var(--wing)}
+.xp-toast{position:absolute;z-index:12;left:50%;top:calc(var(--bar) + 58px);width:max-content;max-width:min(calc(100% - 40px),560px);padding:12px 18px;border:1px solid var(--line);border-radius:14px;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:var(--fg);font:400 15px/1.45 var(--sans);text-align:center;opacity:0;transform:translate(-50%,-8px);transition:opacity .3s,transform .4s var(--ease);pointer-events:none}
+.xp-toast.on{opacity:1;transform:translate(-50%,0)}
+.xp-prompt{position:absolute;z-index:11;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);display:inline-flex;align-items:center;gap:10px;min-height:44px;max-width:calc(100% - 40px);padding:8px 18px;border:1px solid var(--line);border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:var(--fg);font:500 12px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;text-align:left;cursor:pointer;opacity:0;transform:translate(-50%,10px);pointer-events:none;transition:opacity .25s,transform .35s var(--ease)}
+.xp-prompt.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.xp-prompt kbd{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px}
+.xp-prompt i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--wing)}
+.xp-prompt:focus-visible{outline:2px solid var(--wing-t);outline-offset:3px}
+/* The round button: hold to walk where you look. With the auto walk leading it reads Auto, and a press takes over. */
+.xp-walk{position:absolute;z-index:12;right:var(--gr);bottom:calc(env(safe-area-inset-bottom,0px) + 22px);width:72px;height:72px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:var(--fg);cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:background var(--snap) var(--ease),color var(--snap) var(--ease),border-color var(--snap) var(--ease),transform var(--snap) var(--ease)}
+.xp-walk svg{width:24px;height:24px;transform:rotate(180deg)}
+.xp-walk span{display:none;font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.xp-walk.auto{border-color:var(--wing);animation:xp-breathe 2.4s var(--ease) infinite}
+.xp-walk.auto svg{display:none}
+.xp-walk.auto span{display:block}
+.xp-walk.on{background:var(--wing);border-color:var(--wing);color:var(--on-wing);transform:scale(.96);animation:none}
+.xp-walk:focus-visible{outline:2px solid var(--wing-t);outline-offset:3px}
+@keyframes xp-breathe{50%{box-shadow:0 0 0 7px var(--line)}}
+@media (pointer:coarse){
+  .xp-prompt{left:var(--gl);bottom:calc(env(safe-area-inset-bottom,0px) + 36px);max-width:calc(100% - var(--gl) - var(--gr) - 88px);transform:translateY(10px)}
+  .xp-prompt.on{transform:none}
+  .xp-prompt kbd,.xp-panel kbd{display:none}
+}
+/* A signal's panel: a side sheet on desktop, a bottom sheet on phones. Objects stand whole in the arch holder and
+   sweep from grey to colour behind a line in the wing colour (sealed until you look). */
+.xp-panel{position:absolute;z-index:20;top:calc(var(--bar) + 14px);right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:min(420px,calc(100% - 28px));display:flex;flex-direction:column;gap:14px;padding:22px;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:18px;background:var(--glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);color:var(--fg);-webkit-user-select:text;user-select:text;transform:translateX(calc(100% + 30px));visibility:hidden;transition:transform .45s var(--ease),visibility 0s .45s}
+.xp-panel.on{transform:none;visibility:visible;transition:transform .45s var(--ease),visibility 0s}
+.xp-panel .h2{font-size:clamp(26px,3vw,34px)}
+.xp-body{margin:0;font-size:15px;line-height:1.55;color:var(--fg2)}
+.xp-pic{flex:none;align-self:center;width:min(100%,240px);aspect-ratio:3/4}
+.xp-pic img{object-fit:contain;padding:20% 7% 7%}
+.xp-pic .seal{position:absolute;inset:0;z-index:2;pointer-events:none;-webkit-backdrop-filter:grayscale(1);backdrop-filter:grayscale(1);transition:transform 1.2s var(--ease) .45s}
+.xp-pic .seal::before{content:"";position:absolute;top:0;bottom:0;left:0;width:2px;background:var(--wing)}
+.xp-panel.on .xp-pic .seal{transform:translateX(101%)}
+.xp-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.xp-stats div{display:grid;gap:4px;align-content:start;min-width:0;border-top:1px solid var(--fg);padding-top:10px}
+.xp-stats b{font:300 clamp(22px,2.4vw,30px)/1.05 var(--sans);letter-spacing:-.03em}
+.xp-stats span{font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.xp-panel .row{margin-top:auto}
+.xp-panel kbd{font:inherit;opacity:.6}
+.xp-timer{flex:none;height:2px;margin:-8px 0 -4px;background:var(--line);overflow:hidden}
+.xp-timer i{display:block;height:100%;background:var(--wing);transform-origin:left center}
+.xp-timer.held i{opacity:.35}
+@media (max-width:700px){
+  .xp-panel{top:auto;left:max(8px,env(safe-area-inset-left,0px));right:max(8px,env(safe-area-inset-right,0px));width:auto;max-height:64%;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);padding:18px;transform:translateY(calc(100% + 30px))}
+  .xp-pic{width:min(100%,150px)}
+}
+/* The start screen and the end: one message each, over the scene. */
+.xp-over{position:absolute;inset:0;z-index:26;display:grid;place-items:center;overflow-y:auto;padding:calc(var(--bar) + 24px) var(--gr) calc(env(safe-area-inset-bottom,0px) + 24px) var(--gl);background:var(--scrim);text-align:center;transition:opacity .7s var(--ease)}
+.xp-over.fade{opacity:0;pointer-events:none}
+.xp-in{display:grid;justify-items:center;gap:14px;max-width:640px;min-width:0}
+.xp-over .word{font-size:clamp(66px,13vw,176px)}
+.xp-lines{list-style:none;margin:6px 0 0;padding:0;font:500 12px/2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fg2)}
+.xp-row{justify-content:center;margin-top:10px}
+.xp-note{margin:6px 0 0;max-width:46ch;font-size:15px;line-height:1.55;color:var(--fg2)}
+.xp-d{width:8px;height:8px;border-radius:50%;background:var(--wing)}
+body[data-wing=""] .xp-d{display:none}
+/* The settings: a sheet from the right, like the basket. */
+dialog.xp-set{padding:0;border:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;background:var(--scrim);color:var(--fg)}
+dialog.xp-set::backdrop{background:transparent}
+.xp-set-in{position:absolute;top:0;right:0;bottom:0;width:min(440px,100%);overflow-y:auto;overscroll-behavior:contain;display:grid;align-content:start;gap:clamp(20px,3vh,30px);padding:calc(env(safe-area-inset-top,0px) + 10px) max(clamp(20px,3vw,40px),env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 32px) clamp(20px,3vw,40px);background:var(--bg);border-left:1px solid var(--line)}
+.xp-set-head{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:54px}
+.xp-set .h2{font-size:clamp(28px,3vw,40px)}
+.xp-sec h3{margin:0 0 10px;font:500 12px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.xp-opts,.xp-wings{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--line)}
+.xp-opt{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;padding:15px 0;border-top:1px solid var(--line)}
+.xp-opt b{display:block;font:500 12px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.xp-opt span span{display:block;margin-top:6px;font-size:15px;line-height:1.45;color:var(--fg2)}
+.xp-opt i{position:relative;width:46px;height:26px;border:1px solid var(--line);border-radius:999px;transition:background var(--glide) var(--ease),border-color var(--glide) var(--ease)}
+.xp-opt i::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--fg2);transition:transform var(--glide) var(--ease),background var(--glide) var(--ease)}
+.xp-opt[aria-checked="true"] i{background:var(--fg);border-color:var(--fg)}
+.xp-opt[aria-checked="true"] i::after{transform:translateX(20px);background:var(--bg)}
+.xp-opt:focus-visible{outline:2px solid var(--wing-t);outline-offset:2px}
+.xp-wings a{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;min-height:52px;border-top:1px solid var(--line);color:var(--fg);text-decoration:none}
+.xp-wings a::before{content:"";width:8px;height:8px;border-radius:50%;border:1px solid var(--wing);background:var(--wing)}
+.xp-wings li:not([data-wing]) a::before{background:none;border-color:var(--fg2)}
+.xp-wings b{font:300 22px/1.1 var(--sans);letter-spacing:-.02em}
+.xp-wings span{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.xp-wings a[aria-current] b{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+.xp-wings a:focus-visible{outline:2px solid var(--wing-t);outline-offset:2px}
+.xp-keys{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 18px;margin:0;font-size:15px;line-height:1.45;color:var(--fg2)}
+.xp-keys dt{font:500 11px/1.9 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg)}
+.xp-keys dd{margin:0}
+
 /* ---------- reduced motion: instant, no shimmer, no bob ---------- */
 @media (prefers-reduced-motion:reduce){
   .view{scroll-behavior:auto}
@@ -369,4 +481,5 @@ dialog.basket::backdrop{background:transparent}
   .js .screen [data-pix]{clip-path:none;animation:none}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .cur{display:none}
+  .xp-grain,.xp-walk.auto{animation:none}
 }

@@ -210,7 +210,13 @@
       "Built so far. Far from finished.",
       "Three wings are open. The house is still growing.",
       "Then walk the house.",
-      "Walk the house."
+      "Walk the house.",
+      "Move to look around.",
+      "Follow the signal.",
+      "Wear headphones.",
+      "Inspect what you find.",
+      "Seventeen signals. Three wings.",
+      "You walked the whole house."
     ],
     "machina": [
       "What thinks.",
@@ -246,7 +252,11 @@
       "Send the brief",
       "Back to the house",
       "All work",
-      "Next case"
+      "Next case",
+      "Explore",
+      "Enter with sound",
+      "Enter in silence",
+      "Keep walking"
     ]
   },
   "banned": [
@@ -325,7 +335,8 @@
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
     "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief.",
     "The Hortus hardware shop (site/shop.json) is a demonstration for the owner, shown in the Artifact only ('live': false). Its English copy is translated from the maker's Russian pages and is suggested wording: product lines, the hardware screen, 'How ordering works', the basket and order wording ('Nothing is charged here', 'We confirm stock, delivery and payment by email').",
-    "Shop prices are E-MODE's list prices in roubles on 25 October 2026 (shop/source/emode.json). The owner sets the selling price and currency before the shop goes live."
+    "Shop prices are E-MODE's list prices in roubles on 25 October 2026 (shop/source/emode.json). The owner sets the selling price and currency before the shop goes live.",
+    "Explore (#/explore, site/explore.js) is suggested interface wording: the settings ('Auto walk', 'Visits every signal for you, wing by wing.', 'Music', 'The score of each wing.', 'Sounds', 'Steps, signals and arches.', 'Look with your phone', 'Walk to', 'How to walk'), the toasts ('Auto walk is on. Press the round button to walk yourself.', 'Your phone did not share its motion here. Drag to look around.') and the round button's 'Auto' and 'Hold to walk'. The signal panels carry the walking experience's copy; the San Gennaro panel now says 'over about 250 years', as the ledger does."
   ],
   "conflicts": [
     {
@@ -445,6 +456,16 @@
     "arca-helmet.jpg": {
       "alt": "The Sutton Hoo helmet on display",
       "role": "still",
+      "rights": "own"
+    },
+    "arca-gauntlet.jpg": {
+      "alt": "A Renaissance parade gauntlet in embossed and gilt steel",
+      "role": "object in the walk (an Arca vitrine and its panel), from the owner's walking experience",
+      "rights": "own"
+    },
+    "arca-frazetta.jpg": {
+      "alt": "Frank Frazetta’s Man Ape, the 1966 cover painting",
+      "role": "object in the walk (the painting in Arca and its panel), from the owner's walking experience, resized to 481×600",
       "rights": "own"
     },
     "arca-loop.mp4": {

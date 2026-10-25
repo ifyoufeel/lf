@@ -35,6 +35,8 @@ Game layer: 17 signals with a counter in the HUD; panels with a code label, titl
 
 Controls: WASD or arrows, Shift to hurry, drag to look, E to inspect, M for sound, H for help. On touch: a left-thumb joystick, right-thumb look, tap a signal or the Inspect button. Sound is generated live with Web Audio and is off until the visitor chooses it on the start screen.
 
+On the landing page (`#/explore`, `site/explore.js`) the walk is part of the site. The hero’s Explore opens the house and each case cover’s Explore opens its wing; the header keeps its directory trail with the Lux as the walk’s crumb (Home / Lux / Hortus) and swaps Start a project for a settings menu: auto walk, music, sounds, and look with your phone. Auto walk visits every signal of a wing in turn, reads each panel for a few seconds, walks back through the arch and on to the next wing in house order, then loops the house; any step of the visitor’s own takes over. On phones auto walk leads by default, a round button at the bottom right walks while held (where you look), and the phone’s motion turns the view, calibrated to the way it faced when the world opened; drag still looks. Every colour is a token or a wing colour shaded toward void; Wing 04’s label is set in mono, since Jacquard sets only the brand names. claude.ai Artifacts refuse motion sensors (there is no capability for them), so in an Artifact the walk says so and keeps drag-to-look.
+
 Budgets: grass 3,800 instances on desktop and about 2,100 on phones; at most three point lights per world; all instanced meshes with `frustumCulled = false`; pixel ratio capped at 2 (1.5 on touch).
 
 ## Publishing artifacts
