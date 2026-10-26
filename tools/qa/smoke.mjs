@@ -671,55 +671,36 @@ await step('shop: the basket survives a reload and composes the order', async ()
   return `${orderText.split('\n').length} lines, subtotal ${money(a.price + b.price)}`;
 });
 
-// The Machina compute: the calculator follows its answers and puts a build in the basket, priced by email.
-await step('compute: the calculator sizes a build and adds it to the basket', async () => {
-  if (!SHOP || !SHOP.compute) throw noShop();
-  await page.evaluate(() => { try { localStorage.removeItem('lf-basket'); localStorage.removeItem('lf-asks'); } catch (_) { /* nothing to clear */ } });
-  await page.goto('about:blank');
-  await page.goto(base + '#/compute', { waitUntil: 'load', timeout: 60000 });
-  await waitView('compute');
-  const read = () => page.evaluate(() => {
-    const out = document.querySelector('#calc-out');
-    const need = out.querySelector('.calc-need b');
-    return { gb: need ? Number((need.textContent.match(/\d+/) || [0])[0]) : 0, sols: out.querySelectorAll('.sol').length, picks: out.querySelectorAll('.sol.pick').length, first: (out.querySelector('.sol h4') || {}).textContent || '' };
-  });
-  const a = await read();
-  check(a.gb > 0 && a.sols > 0 && a.picks === 1, `the calculator shows ${JSON.stringify(a)}`);
-  const calc = page.locator('#calc');
-  await bringIntoView(calc);
-  await calc.locator('input[name="team"][value="250"]').check({ force: true });
-  await calc.locator('input[name="depth"][value="thorough"]').check({ force: true });
-  const b = await read();
-  check(b.gb > a.gb, `250 people and thorough answers asked for ${b.gb} GB, not more than ${a.gb} GB`);
-  await page.locator('#calc-out .sol.pick button[data-quote]').first().click();
-  await page.locator('dialog#basket[open]').waitFor({ timeout: 3000 }).catch(() => { throw new Error('the basket did not open'); });
-  const s = await basketState();
-  const line = await page.evaluate(() => { const li = document.querySelector('#basket-lines li'); return li ? { name: li.querySelector('.ln').textContent, price: li.querySelector('.lt').textContent, note: (li.querySelector('.ln-note') || {}).textContent || '' } : null; });
-  check(s.lines === 1 && line && /^Local AI build: /.test(line.name) && line.price === 'By email' && /GB/.test(line.note), `basket after the build: ${JSON.stringify({ s, line })}`);
-  const sumHidden = await page.evaluate(() => document.getElementById('basket-sum').hidden);
-  check(sumHidden, 'a basket of requests alone still shows a subtotal');
-  await page.keyboard.press('Escape');
-  return `${a.gb} GB → ${b.gb} GB; ${line.name}`;
-});
-
-// The Arca market: a coin goes in the basket priced by email, and the gold chart reads out a month.
-await step('market: a coin goes in the basket; the gold chart reads out a month', async () => {
-  if (!SHOP || !SHOP.products.some((p) => p.slug.startsWith('coin-'))) throw noShop();
-  await go('#/market', 'market');
-  const plot = page.locator('#view-market .gl-plot');
-  await bringIntoView(plot);
+// The Machina and Arca previews: a machine chosen in the price study tells its story, the Arca tabs swap gold for art,
+// and the gold chart reads out a month under the pointer.
+await step('previews: the Machina study and the Arca tabs answer in words', async () => {
+  if (!(await page.locator('#machina-build').count())) throw new Skip('no previews in this page (they ride the shop; run with --dir dist/preview)');
+  await go('#/machina', 'machina');
+  const study = page.locator('#machina-build');
+  await bringIntoView(study);
+  const live = () => study.locator('.live').textContent();
+  const outlook = await live();
+  const row = study.locator('li .db-r').nth(2);
+  await row.click();
+  const told = await live();
+  check(told !== outlook && told === (await row.getAttribute('data-story')) && (await row.getAttribute('aria-pressed')) === 'true', `the chosen machine said "${told}"`);
+  await row.click();
+  check((await live()) === outlook, 'choosing the machine again did not bring the outlook back');
+  await go('#/arca', 'arca');
+  const vault = page.locator('#arca-vault');
+  await bringIntoView(vault);
+  const plot = vault.locator('.gl-plot');
   const box = await plot.boundingBox();
   await page.mouse.move(box.x + box.width * 0.12, box.y + box.height / 2);
-  const tip = await page.evaluate(() => { const t = document.querySelector('#view-market .gl-tip'); return t && !t.hidden ? t.textContent : ''; });
+  const tip = await vault.locator('.gl-tip').evaluate((t) => (t.hidden ? '' : t.textContent));
   check(/\$\d/.test(tip), `the gold chart's tooltip reads "${tip}"`);
-  const add = page.locator('#view-market button[data-add^="coin-"]').first();
-  await bringIntoView(add);
-  await add.click();
-  await page.locator('dialog#basket[open]').waitFor({ timeout: 3000 }).catch(() => { throw new Error('the basket did not open'); });
-  const names = await page.evaluate(() => [...document.querySelectorAll('#basket-lines li')].map((li) => li.querySelector('.ln').textContent + ' · ' + li.querySelector('.lt').textContent));
-  check(names.some((n) => /Gold Eagle · By email/.test(n)), `basket lines: ${names.join('; ')}`);
-  await page.keyboard.press('Escape');
-  return `tooltip "${tip}"; ${names.join('; ')}`;
+  await vault.locator('[role="tab"]').nth(1).click();
+  const st = await vault.evaluate((v) => ({ gold: v.querySelector('#arca-gold').hidden, art: v.querySelector('#arca-art').hidden, live: v.querySelector('.live').textContent, sel: v.querySelector('[role="tab"][aria-selected="true"]').textContent }));
+  check(st.gold && !st.art && /billion/.test(st.live), `after the Art tab: ${JSON.stringify(st)}`);
+  await page.keyboard.press('ArrowLeft');
+  const back = await vault.evaluate((v) => !v.querySelector('#arca-gold').hidden && document.activeElement.getAttribute('role') === 'tab');
+  check(back, 'the left arrow did not bring the Gold tab back');
+  return `story "${told.slice(0, 40)}…", tooltip "${tip}", tabs swap`;
 });
 
 await step('theme: button#theme cycles dark, light, auto', async () => {

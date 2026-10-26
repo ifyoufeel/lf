@@ -272,14 +272,15 @@ function describe(node) {
 }
 
 /* Visible text: script, style, svg, template and comments removed, tags stripped, entities decoded,
-   plus alt, aria-label, title and placeholder values and the <title> element. One string with a
+   plus alt, aria-label, title and placeholder values, the words a control shows when chosen (data-story,
+   data-text) and the <title> element. One string with a
    per-character source line so every finding can say file:line. Block elements end a run with "\n";
    span, a, button and friends add a space; b, i, em and other phrasing tags join without a gap. */
 const VIS_SKIP = new Set(['script', 'style', 'svg', 'template', 'noembed', 'noframes', 'xmp']);
 const VIS_NOSEP = new Set('b i em strong u s small mark abbr sup sub q cite dfn kbd var time data wbr code bdi bdo ins del samp ruby rt rp'.split(' '));
 const VIS_SPACE = new Set('span a label button img input select textarea svg canvas video audio picture output meter progress iframe object embed math'.split(' '));
 const VIS_CODE = new Set(['code', 'kbd', 'samp', 'pre']);
-const VIS_ATTRS = ['alt', 'aria-label', 'title', 'placeholder'];
+const VIS_ATTRS = ['alt', 'aria-label', 'title', 'placeholder', 'data-story', 'data-text'];
 
 function visibleText(root, lineOfOffset) {
   const chars = [];

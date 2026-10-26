@@ -352,9 +352,6 @@
     // "#/hardware" and "#/hardware/<product>" open the Hortus hardware; a page built without it opens the Hortus case.
     const hw = location.hash.match(/^#\/?hardware(?:\/([a-z0-9-]+))?\/?$/);
     if (hw) { show(views['hw-' + hw[1]] ? 'hw-' + hw[1] : views.hardware ? 'hardware' : 'hortus'); return; }
-    // "#/compute" is the Machina compute and "#/market" the Arca market; a page built without them opens the wing.
-    const mk = location.hash.match(/^#\/?(compute|market)\/?$/);
-    if (mk) { show(views[mk[1]] ? mk[1] : mk[1] === 'compute' ? 'machina' : 'arca'); return; }
     // "#/explore" walks the house; "#/explore/<wing>" (or "#explore-hortus", from an Artifact link) opens a wing.
     const xp = views.explore && location.hash.match(/^#\/?explore(?:[\/-](hortus|machina|arca))?\/?$/);
     if (xp) {
@@ -510,9 +507,7 @@
     $('#brief-again').addEventListener('click', () => { sent.hidden = true; form.hidden = false; form.querySelector('input[name="name"]').focus(); });
   }
 
-  /* ---------------- the basket and the order (site/shop.json, rendered by the build) ---------------- */
-  // Hortus hardware at its prices, and the lines the other wings price by email: Arca coins and art, Machina builds and
-  // sourcing. Nothing is charged on the page: the order goes to the house inbox as an email.
+  /* ---------------- Hortus hardware: the basket and the order (site/shop.json, rendered by the build) ---------------- */
   let SHOP = null;
   try { SHOP = JSON.parse(($('#lf-shop') || {}).textContent || 'null'); } catch (_) { SHOP = null; }
   const bk = $('#basket');
@@ -523,54 +518,40 @@
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
     const lines = $('#basket-lines'), badge = $('#basket-count'), main = $('#basket-main'), order = $('#order'), done = $('#order-sent');
     const title = $('#basket-title'), status = $('#basket-status'), copyOrder = $('#copy-order');
-    // A line is a product the page lists, or a request a page composed (a Machina build or sourcing), kept with its words.
-    // Both stay in this browser, so a visitor can come back to them; with storage blocked they last the visit.
-    let items = {}, asks = {};
-    const WINGS = ['hortus', 'machina', 'arca'];
-    const askOk = (k, a) => /^[a-z0-9-]{1,80}$/.test(k) && !BY[k] && a && typeof a.name === 'string' && typeof a.kind === 'string' && WINGS.includes(a.wing)
-      && (a.href == null || /^#\/[a-z0-9/-]*$/.test(a.href)) && (a.note == null || typeof a.note === 'string');
-    const tidy = (a) => ({ name: a.name.slice(0, 140), kind: a.kind.slice(0, 140), wing: a.wing, href: a.href || '', note: (a.note || '').slice(0, 500), price: null });
-    const info = (k) => BY[k] || asks[k];
+    // The basket stays in this browser, so a visitor can come back to it; with storage blocked it lasts the visit.
+    let items = {};
     try {
-      const saved = JSON.parse(localStorage.getItem('lf-asks') || '{}');
-      for (const [k, a] of Object.entries(saved || {})) if (askOk(k, a)) asks[k] = tidy(a);
-      const got = JSON.parse(localStorage.getItem('lf-basket') || '{}');
-      for (const [k, q] of Object.entries(got || {})) if (info(k) && Number.isInteger(q) && q > 0) items[k] = Math.min(q, MAX);
-    } catch (_) { items = {}; asks = {}; }
-    const save = () => {
-      for (const k of Object.keys(asks)) if (!items[k]) delete asks[k];
-      try { localStorage.setItem('lf-basket', JSON.stringify(items)); localStorage.setItem('lf-asks', JSON.stringify(asks)); } catch (_) { /* per-viewer convenience only */ }
-    };
-    const priced = (k) => typeof info(k).price === 'number';
+      const saved = JSON.parse(localStorage.getItem('lf-basket') || '{}');
+      for (const [s, q] of Object.entries(saved || {})) if (BY[s] && Number.isInteger(q) && q > 0) items[s] = Math.min(q, MAX);
+    } catch (_) { items = {}; }
+    const save = () => { try { localStorage.setItem('lf-basket', JSON.stringify(items)); } catch (_) { /* per-viewer convenience only */ } };
     const count = () => Object.values(items).reduce((a, q) => a + q, 0);
-    const total = () => Object.entries(items).reduce((a, [k, q]) => a + (priced(k) ? info(k).price * q : 0), 0);
-    const line = (k, q) => {
-      const p = info(k), li = el('li', 'line');
-      const box = el('div', 'li');
-      const name = el('a', 'ln', p.name); name.href = p.href || '#/';
-      box.append(name, el('span', 'lk', p.kind + (priced(k) ? ' · ' + money(p.price) : '')));
-      if (p.note) box.append(el('span', 'lk ln-note', p.note));
+    const total = () => Object.entries(items).reduce((a, [s, q]) => a + BY[s].price * q, 0);
+    const line = (p, q) => {
+      const li = el('li', 'line');
+      const info = el('div', 'li');
+      const name = el('a', 'ln', p.name); name.href = '#/hardware/' + p.slug;
+      info.append(name, el('span', 'lk', p.kind + ' · ' + money(p.price)));
       const step = el('div', 'qty');
-      const btn = (d, label, text) => { const b = el('button', 'q', text); b.type = 'button'; b.dataset.slug = k; b.dataset.q = d; b.setAttribute('aria-label', label + p.name); return b; };
+      const btn = (d, label, text) => { const b = el('button', 'q', text); b.type = 'button'; b.dataset.slug = p.slug; b.dataset.q = d; b.setAttribute('aria-label', label + p.name); return b; };
       const less = btn('-1', 'One fewer ', '−'), more = btn('1', 'One more ', '+');
       less.disabled = q <= 1; more.disabled = q >= MAX;
       const val = el('span', 'qv', String(q)); val.setAttribute('aria-label', 'Quantity ' + q);
       step.append(less, val, more);
-      const rm = el('button', 'rm', 'Remove'); rm.type = 'button'; rm.dataset.rm = k; rm.setAttribute('aria-label', 'Remove ' + p.name);
-      li.append(box, step, el('b', 'lt', priced(k) ? money(p.price * q) : 'By email'), rm);
+      const rm = el('button', 'rm', 'Remove'); rm.type = 'button'; rm.dataset.rm = p.slug; rm.setAttribute('aria-label', 'Remove ' + p.name);
+      li.append(info, step, el('b', 'lt', money(p.price * q)), rm);
       return li;
     };
     const render = () => {
-      const n = count(), anyPriced = Object.keys(items).some(priced);
+      const n = count();
       badge.hidden = n === 0; badge.textContent = String(n);
       $$('.basket-link').forEach((b) => { b.classList.toggle('empty', !n); b.setAttribute('aria-label', n ? 'Basket, ' + n + (n === 1 ? ' item' : ' items') : 'Basket, empty'); });
-      lines.replaceChildren(...Object.entries(items).map(([k, q]) => line(k, q)));
+      lines.replaceChildren(...Object.entries(items).map(([s, q]) => line(BY[s], q)));
       $('#basket-empty').hidden = n > 0;
-      $('#basket-sum').hidden = !anyPriced;
-      $('#basket-note').hidden = order.hidden = n === 0;
+      $('#basket-sum').hidden = $('#basket-note').hidden = order.hidden = n === 0;
       $('#basket-total').textContent = money(total());
     };
-    const set = (k, q) => { if (q > 0) items[k] = Math.min(q, MAX); else delete items[k]; save(); render(); };
+    const set = (s, q) => { if (q > 0) items[s] = Math.min(q, MAX); else delete items[s]; save(); render(); };
     let opener = null;
     const open = (said) => {
       if (!bk.open) {
@@ -593,17 +574,6 @@
     document.addEventListener('click', (e) => {
       const add = e.target.closest('[data-add]');
       if (add && BY[add.dataset.add]) { const s = add.dataset.add; set(s, (items[s] || 0) + 1); open(BY[s].name + ' added to the basket.'); return; }
-      // A request a page composed: its words ride in data-quote. A build replaces its earlier self; the rest add up.
-      const ask = e.target.closest('[data-quote]');
-      if (ask) {
-        let a = null;
-        try { a = JSON.parse(ask.dataset.quote); } catch (_) { a = null; }
-        if (!a || !askOk(a.key, a)) return;
-        asks[a.key] = tidy(a);
-        set(a.key, a.one ? 1 : (items[a.key] || 0) + 1);
-        open(a.name + ' added to the basket.');
-        return;
-      }
       if (e.target.closest('[data-basket]')) { open(); return; }
       // A link inside the basket leaves it: close first, then follow the link.
       if (bk.contains(e.target) && e.target.closest('a[href^="#"]')) close();
@@ -611,40 +581,27 @@
     lines.addEventListener('click', (e) => {
       const b = e.target.closest('button');
       if (!b) return;
-      if (b.dataset.rm) { const p = info(b.dataset.rm); set(b.dataset.rm, 0); title.focus(); status.textContent = p.name + ' removed.'; return; }
+      if (b.dataset.rm) { const p = BY[b.dataset.rm]; set(p.slug, 0); title.focus(); status.textContent = p.name + ' removed.'; return; }
       const s = b.dataset.slug;
       set(s, (items[s] || 0) + Number(b.dataset.q));
       // Rendering replaced the buttons: keep focus on the same control, or its twin when this one is now disabled.
       const same = lines.querySelector('button[data-slug="' + s + '"][data-q="' + b.dataset.q + '"]');
       (same && !same.disabled ? same : lines.querySelector('button.q[data-slug="' + s + '"]:not([disabled])') || title).focus();
-      status.textContent = info(s).name + ', quantity ' + items[s] + (Object.keys(items).some(priced) ? '. Subtotal ' + money(total()) + '.' : '.');
+      status.textContent = BY[s].name + ', quantity ' + items[s] + '. Subtotal ' + money(total()) + '.';
     });
-    // The order goes to the house inbox as an email, grouped by wing: no payment is taken on the page.
+    // The order goes to the house inbox as an email: no payment is taken on the page.
     order.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!count() || !order.reportValidity()) return;
       const f = new FormData(order);
       const v = (k) => String(f.get(k) || '').trim();
-      const rows = [];
-      for (const w of WINGS) {
-        const mine = Object.entries(items).filter(([k]) => info(k).wing === w);
-        if (!mine.length) continue;
-        rows.push((SHOP.wings && SHOP.wings[w]) || w);
-        for (const [k, q] of mine) {
-          const p = info(k);
-          rows.push(q + ' × ' + p.name + ', ' + (priced(k) ? money(p.price) + (q > 1 ? ' each, ' + money(p.price * q) : '') : 'priced by email'));
-          if (p.note) rows.push('    ' + p.note);
-        }
-        rows.push('');
-      }
-      const quotes = Object.keys(items).filter((k) => !priced(k)).length;
-      const sums = [...(Object.keys(items).some(priced) ? ['Subtotal: ' + money(total()) + ' (' + SHOP.code + ')'] : []), ...(quotes ? ['Priced by email: ' + quotes + (quotes === 1 ? ' line' : ' lines')] : [])];
-      const text = ['Order for lastfomo', '', ...rows, ...sums, '',
+      const rows = Object.entries(items).map(([s, q]) => q + ' × ' + BY[s].name + ', ' + money(BY[s].price) + (q > 1 ? ' each, ' + money(BY[s].price * q) : ''));
+      const text = ['Order: Hortus hardware by ' + SHOP.maker, '', ...rows, '', 'Subtotal: ' + money(total()) + ' (' + SHOP.code + ')', '',
         'Name: ' + v('name'), 'Email: ' + v('email'), 'Organisation: ' + (v('org') || 'not given'), 'Deliver to: ' + v('place'), ...(v('note') ? ['', v('note')] : [])].join('\n');
       $('#order-text').textContent = text;
       copyOrder.textContent = 'Copy the order';
       main.hidden = true; done.hidden = false; done.focus({ preventScroll: true });
-      location.href = 'mailto:' + SHOP.contact + '?subject=' + encodeURIComponent('Order: lastfomo, ' + v('name')) + '&body=' + encodeURIComponent(text);
+      location.href = 'mailto:' + SHOP.contact + '?subject=' + encodeURIComponent('Order: Hortus hardware, ' + v('name')) + '&body=' + encodeURIComponent(text);
     });
     copyOrder.addEventListener('click', async () => {
       const pre = $('#order-text');
@@ -653,84 +610,42 @@
     });
     $('#order-again').addEventListener('click', () => { done.hidden = true; main.hidden = false; title.focus(); });
     render();
-
-    /* ---- Machina: the calculator. An estimate; its method is in site/shop.json → machina.calc. ---- */
-    const CMP = SHOP.compute, calc = $('#calc'), calcOut = $('#calc-out');
-    if (CMP && calc && calcOut) {
-      const C = CMP.calc, IT = CMP.items;
-      const pick = (name) => { const b = calc.querySelector('input[name="' + name + '"]:checked'); return b ? b.value : ''; };
-      const dollars = (n) => '$' + n.toLocaleString('en-GB');
-      const span = (lo, hi) => (lo === hi ? dollars(lo) : dollars(lo) + '–' + hi.toLocaleString('en-GB'));
-      const need = () => {
-        const use = C.uses.find((u) => u.id === calc.elements.use.value) || C.uses[0];
-        const tasks = $$('input[name="task"]:checked', calc).map((b) => C.tasks.find((t) => t.id === b.value)).filter(Boolean);
-        const team = C.teams.find((t) => t.id === pick('team')) || C.teams[0];
-        const depth = C.depth.find((d) => d.id === pick('depth')) || C.depth[0];
-        // The tasks set a floor under the model: agents want a large one, answers from documents a middling one.
-        const model = Math.max(depth.model, ...tasks.map((t) => t.min || 0));
-        const M = C.models[String(model)];
-        const extra = tasks.reduce((a, t) => a + (t.extra || 0), 0);
-        return { use, tasks, team, depth, model, gb: Math.ceil((M.weights + M.kv * team.active + extra) * C.overhead) };
-      };
-      const size = () => {
-        const n = need();
-        // In each tier, the cheapest build that holds the model and serves the people at once.
-        const sols = ['home', 'business', 'top'].map((tier) => {
-          let best = null;
-          for (const b of C.builds.filter((x) => x.tier === tier)) {
-            const it = IT[b.item], k = Math.ceil(n.gb / it.mem);
-            if (k > b.max || n.team.active > b.serves) continue;
-            const cost = [it.price[0] * k, it.price[1] * k];
-            if (!best || cost[0] < best.cost[0]) best = { tier, b, it, k, cost };
-          }
-          return best;
-        }).filter(Boolean);
-        const want = n.use.tier || 'business';
-        const order3 = ['home', 'business', 'top'];
-        const pickSol = sols.find((x) => x.tier === want) || sols.find((x) => order3.indexOf(x.tier) > order3.indexOf(want)) || sols[0];
-        const tasks = n.tasks.map((t) => t.label.toLowerCase()).join(', ') || 'no tasks chosen';
-        const sum = n.use.label + ' · ' + tasks + ' · ' + n.team.label.toLowerCase() + ' · ' + n.depth.label.toLowerCase() + ' · about ' + n.gb + ' GB';
-        const head = el('p', 'calc-need');
-        head.append(el('b', null, 'About ' + n.gb + ' GB'), document.createTextNode('of fast memory: a ' + n.model + 'B-class model, answering about ' + n.team.active + (n.team.active === 1 ? ' person' : ' people') + ' at once' + (n.tasks.some((t) => t.extra) ? ', with the speech and image models beside it.' : '.')));
-        const list = el('ul', 'sols');
-        for (const x of sols) {
-          const li = el('li', 'sol' + (x === pickSol ? ' pick' : ''));
-          const what = x.k + ' × ' + x.it.name;
-          li.append(el('p', 'gk', CMP.tiers[x.tier] + (x === pickSol ? ' · suggested' : '')), el('h4', null, what),
-            el('p', 'sol-m', x.k * x.it.mem + ' GB · ' + x.it.supply), el('p', 'gp', span(x.cost[0], x.cost[1])));
-          const row = el('div', 'row');
-          const b1 = el('button', 'btn solid sm', 'Add to basket'); b1.type = 'button';
-          b1.dataset.quote = JSON.stringify({ key: 'mch-build-' + x.b.item + '-' + x.k, name: 'Local AI build: ' + what, kind: 'Machina · local AI build', wing: 'machina', href: '#/compute', note: sum + ' · cards ' + span(x.cost[0], x.cost[1]), one: true });
-          b1.setAttribute('aria-label', 'Add a local AI build with ' + what + ' to the basket');
-          const b2 = el('button', 'btn sm', 'Sourcing only'); b2.type = 'button';
-          b2.dataset.quote = JSON.stringify({ key: 'mch-src-' + x.b.item + '-' + x.k, name: 'Sourcing: ' + what, kind: 'Machina · hardware sourcing', wing: 'machina', href: '#/compute', note: sum + ' · cards ' + span(x.cost[0], x.cost[1]), one: true });
-          b2.setAttribute('aria-label', 'Ask us to source ' + what);
-          row.append(b1, b2); li.append(row); list.append(li);
-        }
-        if (!sols.length) {
-          const li = el('li', 'sol pick');
-          li.append(el('h4', null, 'Larger than these builds'), el('p', 'sol-x', 'A cluster sized with you, from the top tier up.'));
-          const b = el('button', 'btn solid sm', 'Ask us to size it'); b.type = 'button';
-          b.dataset.quote = JSON.stringify({ key: 'mch-build-custom', name: 'Local AI build, sized with us', kind: 'Machina · local AI build', wing: 'machina', href: '#/compute', note: sum, one: true });
-          li.append(b); list.append(li);
-        }
-        calcOut.replaceChildren(head, list, el('p', 'sol-x', 'The cards only, at today’s market prices. The machine, install and support are quoted.'));
-      };
-      // Who it is for ticks the tasks such a place usually starts with; the visitor can change them after.
-      calc.elements.use.addEventListener('change', () => {
-        const u = C.uses.find((x) => x.id === calc.elements.use.value);
-        if (u) $$('input[name="task"]', calc).forEach((b) => { b.checked = u.tasks.includes(b.value); });
-        size();
-      });
-      calc.addEventListener('change', (e) => { if (e.target.name !== 'use') size(); });
-      calc.addEventListener('submit', (e) => e.preventDefault());
-      size();
-    }
   }
 
-  /* ---------------- Arca: the gold chart's crosshair ---------------- */
-  // The pointer finds the nearest month and the tooltip reads it out; with the keyboard, focus the chart and step with
-  // the arrow keys. The same values sit in a table beside it for screen readers.
+  /* ---------------- the Machina and Arca previews: charts that answer in words ---------------- */
+  // Each preview has a line beside its chart (.live) that rewrites itself as the visitor points at or chooses something.
+  // Machina: a machine in the price study tells its story; choosing it again, or choosing nothing, brings the outlook back.
+  $$('.db').forEach((db) => {
+    const live = $('.live', db.closest('.screen'));
+    if (!live) return;
+    const outlook = live.textContent, rows = $$('li .db-r', db);
+    let picked = null;
+    const say = (r) => { live.textContent = r ? r.dataset.story : outlook; db.classList.toggle('dim', !!r); };
+    rows.forEach((r) => {
+      r.addEventListener('click', () => { picked = picked === r ? null : r; rows.forEach((x) => x.setAttribute('aria-pressed', String(x === picked))); say(picked); });
+      if (FINE) { r.addEventListener('pointerenter', () => say(r)); r.addEventListener('pointerleave', () => say(picked)); }
+    });
+  });
+  // Arca: two tabs, gold this year and art by year; the arrow keys move between them, and the line beside follows.
+  $$('.pv .tabs[role="tablist"]').forEach((list) => {
+    const live = $('.live', list.closest('.screen')), tabs = $$('[role="tab"]', list);
+    const pick = (t, focus) => {
+      tabs.forEach((x) => { const on = x === t; x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1; document.getElementById(x.getAttribute('aria-controls')).hidden = !on; });
+      if (live && t.dataset.text) live.textContent = t.dataset.text;
+      if (focus) t.focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => pick(t));
+      t.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        pick(tabs[(i + d + tabs.length) % tabs.length], true);
+      });
+    });
+  });
+  // The gold chart: the pointer finds the nearest month and the tooltip reads it out; with the keyboard, focus the chart
+  // and step with the arrow keys. The same values sit in a table beside it for screen readers.
   $$('.gl-plot[data-points]').forEach((plot) => {
     let pts = [];
     try { pts = JSON.parse(plot.dataset.points); } catch (_) { return; }
@@ -744,15 +659,19 @@
       tip.style.setProperty('--x', x + '%'); tip.style.setProperty('--y', y + '%');
       tip.dataset.side = x < 14 ? 'start' : x > 86 ? 'end' : '';
       tip.querySelector('b').textContent = value; tip.querySelector('span').textContent = label;
-      cross.hidden = tip.hidden = false;
+      cross.hidden = tip.hidden = false; plot.classList.add('on');
     };
-    const hide = () => { cross.hidden = tip.hidden = true; };
-    plot.addEventListener('pointermove', (e) => {
+    const hide = () => { cross.hidden = tip.hidden = true; plot.classList.remove('on'); };
+    // A tap reads the nearest month; on a phone a sideways drag scrubs through them (touch-action: pan-y keeps the
+    // vertical swipe for the page).
+    const near = (e) => {
       const r = plot.getBoundingClientRect(), px = ((e.clientX - r.left) / r.width) * 100;
       let best = 0;
       pts.forEach((p, i) => { if (Math.abs(p[0] - px) < Math.abs(pts[best][0] - px)) best = i; });
       showAt(best);
-    });
+    };
+    plot.addEventListener('pointerdown', near);
+    plot.addEventListener('pointermove', near);
     plot.addEventListener('pointerleave', () => { if (document.activeElement !== plot) hide(); });
     plot.addEventListener('focus', () => showAt(at));
     plot.addEventListener('blur', hide);

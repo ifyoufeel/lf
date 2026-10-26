@@ -369,76 +369,61 @@ dialog.reel::backdrop{background:transparent}
 .buy .stack{gap:10px}
 .buy .h2{font-size:clamp(26px,2.8vw,44px)}
 @media (max-width:900px){.pdp-in{grid-template-columns:1fr;gap:20px}.pdp-pic .tile{width:min(100%,46svh)}}
-/* ---------- the markets: Machina compute (#/compute) and the Arca market (#/market), from site/shop.json ---------- */
-/* Tiles that stand where a photo would: the memory a card holds, a coin with the gold in it, an empty frame. */
-.tile.mem,.tile.coin,.tile.frame{background:var(--plate);color:var(--paper)}
-.tile.mem{display:grid;place-content:center;justify-items:center;gap:4px}
-.tile.mem b{font:300 clamp(30px,3vw,46px)/1 var(--sans);letter-spacing:-.03em}
-.mini .tile.mem b{font-size:clamp(26px,2.2vw,38px)}
-.tile.mem i{font:500 11px/1 var(--mono);letter-spacing:.14em;font-style:normal;color:var(--ash)}
-.tile.mem::after{content:"";position:absolute;left:14%;right:14%;bottom:13%;height:2px;background:var(--wing)}
-.tile.coin{display:grid;place-items:center}
-.tile.coin::before{content:"";position:absolute;inset:15%;border-radius:50%;box-shadow:inset 0 0 0 1px var(--paper-line),inset 0 0 0 7px var(--plate),inset 0 0 0 8px var(--wing)}
-.tile.coin b{position:relative;font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
-.tile.frame::before{content:"";position:absolute;inset:16%;box-shadow:inset 0 0 0 1px var(--paper-line)}
-.btn.sm{justify-self:start;margin-top:6px;padding:0 16px;font-size:11px}
-.src{margin:0;font-size:13px;line-height:1.5;color:var(--fg2);max-width:120ch}
-/* Price and supply by tier: one row per accelerator, its price range on a log axis, its supply in words. Solid bars are
-   on the market now, outlined ones are ordered or allocated; every value is also written out in the row. */
-.rg{margin:0;display:grid;gap:clamp(8px,1.4vh,14px)}
-.rg ul{list-style:none;margin:0;padding:0}
-.rg-g{display:grid;gap:0}
-.rg-t{margin:0;padding-top:8px;border-top:1px solid var(--line);font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
-.rg-r{display:grid;grid-template-columns:minmax(0,16em) minmax(0,1fr) 9.5em 8.5em;gap:16px;align-items:center;min-height:30px;padding:2px 0}
-.rg li.rg-r:hover{background:var(--line2)}
-.rg-n{font-size:14px;line-height:1.3;min-width:0}
-.rg-n b{font-weight:400}
-.rg-n i{font:500 11px/1 var(--mono);letter-spacing:.08em;font-style:normal;color:var(--fg2);white-space:nowrap}
-.rg-p{position:relative;height:12px;background:linear-gradient(var(--line),var(--line)) 0 50%/100% 1px no-repeat}
-.rg-b{position:absolute;top:1px;bottom:1px;left:var(--a);width:max(10px,calc(var(--b) - var(--a)));border-radius:999px;background:var(--wing-t)}
-.rg-b.hold{background:none;box-shadow:inset 0 0 0 2px var(--wing-t)}
-.rg-v{font:400 13px/1.3 var(--mono);letter-spacing:.02em;text-align:right;white-space:nowrap}
-.rg-s{font:500 11px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg2)}
-.rg-axis{min-height:18px}
-.rg-axis .rg-p{background:none;height:14px}
-.rg-axis i{position:absolute;left:var(--x);top:0;transform:translateX(-50%);font:500 11px/1 var(--mono);letter-spacing:.08em;font-style:normal;color:var(--fg2)}
-.rg-axis i:first-child{transform:none}
-.rg-axis i:last-child{transform:translateX(-100%)}
-.rg-cap{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;font-size:13px;line-height:1.45;color:var(--fg2)}
-.rg-k{display:inline-flex;align-items:center;gap:8px}
-.rg-k .rg-b{position:static;display:inline-block;width:22px;height:10px}
+/* ---------- the Machina and Arca previews: one screen each, the words beside a study (site/shop.json) ---------- */
+.pv .wrap{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(24px,5vw,88px);align-items:center}
+.pv-t{display:grid;gap:clamp(12px,2vh,18px);align-content:center;min-width:0}
+/* The line a chart answers into: it rewrites itself as a row or a tab is chosen. */
+.pv .live{margin:0;max-width:52ch;min-height:4.7em;padding-left:14px;border-left:2px solid var(--wing-t);font-size:15px;line-height:1.55;color:var(--fg)}
+.pv-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px;margin:0}
+.pv-notes div{border-top:1px solid var(--line);padding-top:8px}
+.pv-notes dt{font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.pv-notes dd{margin:4px 0 0;font-size:13px;line-height:1.45}
+.pv-fig{margin:0;display:grid;gap:10px;min-width:0}
+.pv-cap{display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center;margin:0;font-size:13px;line-height:1.45;color:var(--fg2)}
+/* Stacked, the study comes straight after the lead and the line answers under it, so a wing still fits one screen;
+   the vault and artist notes stay with the wider layouts, since the lead and the tab lines already say both. */
 @media (max-width:900px){
-  .rg-r{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n v" "p p" "s s";gap:4px 12px;padding:6px 0}
-  .rg-n{grid-area:n}.rg-v{grid-area:v}.rg-p{grid-area:p}.rg-s{grid-area:s}
-  .rg-axis>span:not(.rg-p){display:none}
+  .pv .wrap{grid-template-columns:1fr;gap:12px}
+  .pv-t{display:contents}
+  .pv-t>.code{order:1}.pv-t>.h2{order:2}.pv-t>.lead{order:3}.pv .wrap>figure{order:4}.pv .live{order:5;min-height:0}.pv-notes{order:6}.pv-t>.row{order:7}
+  .pv-notes{display:none}
 }
-/* The calculator: the brief's form on the left, the estimate on the right, and it follows every answer. */
-.calc-w{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:start}
-.calc-in{display:grid;gap:clamp(12px,2vh,18px)}
-.form.calc{gap:clamp(14px,2.2vh,22px)}
-.calc .pills{gap:8px}
-.calc .pill span{min-height:40px;padding:0 14px;font-size:11px}
-.calc .pill span i{font-style:normal;color:var(--fg2)}
-.calc .pill input:checked+span i{color:inherit}
-.calc-out{display:grid;gap:14px;align-content:start}
-.calc-need{margin:0;font-size:15px;line-height:1.5;color:var(--fg2)}
-.calc-need b{display:block;margin-bottom:6px;font:300 clamp(28px,2.8vw,44px)/1.05 var(--sans);letter-spacing:-.02em;color:var(--fg)}
-.sols{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.sol{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:center;padding:clamp(12px,1.2vw,16px) clamp(14px,1.4vw,20px);border:1px solid var(--line)}
-.sol.pick{border-color:var(--wing-t)}
-.sol>:not(.row){grid-column:1}
-.sol>.row{grid-column:2;grid-row:1 / span 4;flex-direction:column;align-items:stretch;gap:8px}
-.sol .btn.sm{margin-top:0;justify-content:center}
-.sol .gk,.sol .gp{margin:0}
-.sol h4{margin:0;font:300 clamp(19px,1.6vw,24px)/1.15 var(--sans);letter-spacing:-.02em}
-.sol-m{margin:0;font-size:13px;line-height:1.4;color:var(--fg2)}
-.sol-x{margin:0;font-size:13px;line-height:1.45;color:var(--fg2)}
-@media (max-width:900px){.calc-w{grid-template-columns:1fr}}
-@media (max-width:620px){.sol{grid-template-columns:1fr}.sol>.row{grid-column:1;grid-row:auto;flex-direction:row}}
+/* Two tabs over a chart, in the brief's pill. */
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tabs [role="tab"]{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:none;color:var(--fg);font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.tabs [role="tab"][aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tabs [role="tab"]:focus-visible{outline:2px solid var(--wing-t);outline-offset:3px}
+/* Launch price to latest: a hollow dot at launch, a solid one now, steps between, on a log axis so the length of the
+   line is how many times dearer the machine got. A row is a button: chosen, it tells its story in the line beside. */
+.db{margin:0;display:grid;gap:6px;min-width:0}
+.db ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.db-r{display:grid;grid-template-columns:minmax(0,11.5em) minmax(0,1fr) 10.5em;gap:14px;align-items:center;width:100%;min-height:52px;padding:4px 8px;border:0;border-radius:2px;background:none;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.db li .db-r:hover,.db-r[aria-pressed="true"]{background:var(--line2)}
+.db-r:focus-visible{outline:2px solid var(--wing-t);outline-offset:2px}
+.db-n{display:grid;gap:3px;min-width:0;font-size:14px;line-height:1.25}
+.db-n b{font-weight:400}
+.db-n i,.db-axis i{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;font-style:normal;color:var(--fg2)}
+.db-p{position:relative;height:14px;background:linear-gradient(var(--line),var(--line)) 0 50%/100% 1px no-repeat}
+.db-b{position:absolute;top:5px;height:4px;left:var(--a);width:calc(var(--b) - var(--a));border-radius:2px;background:var(--wing-t);opacity:.45}
+.db-d{position:absolute;top:50%;left:var(--x);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--wing-t);box-shadow:0 0 0 2px var(--bg)}
+.db-d.from{background:var(--bg);box-shadow:inset 0 0 0 2px var(--wing-t),0 0 0 2px var(--bg)}
+.db-d.mid{width:6px;height:6px;margin:-3px 0 0 -3px}
+.db-v{font:400 13px/1.3 var(--mono);letter-spacing:.02em;white-space:nowrap;text-align:right}
+.db.dim li .db-r:not([aria-pressed="true"]):not(:hover):not(:focus-visible) .db-p{opacity:.35}
+.db-axis{min-height:20px;cursor:default}
+.db-axis .db-p{background:none}
+.db-axis i{position:absolute;left:var(--x);top:0;transform:translateX(-50%)}
+.db-k{display:inline-flex;align-items:center;gap:8px}
+.db-k .db-d{position:relative;top:auto;left:auto;margin:0}
+@media (max-width:620px){
+  .db-r{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n v" "p p";gap:6px 12px;min-height:0;padding:6px 4px}
+  .db-n{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+  .db-n{grid-area:n}.db-v{grid-area:v}.db-p{grid-area:p}
+  .db-axis{grid-template-areas:"p p"}.db-axis>span:not(.db-p){display:none}
+}
 /* Gold in 2026: a line over a soft wash, ticks in dollars, the latest close and the high labelled; a crosshair finds the
    month under the pointer, and the values also sit in a table for screen readers. */
-.gl{margin:0;display:grid;gap:8px}
-.gl-plot{position:relative;height:clamp(190px,32svh,330px);margin:14px 0 26px 64px;border-bottom:1px solid var(--line);outline:none}
+.gl-plot{position:relative;height:clamp(170px,30svh,300px);margin:16px 0 26px 64px;border-bottom:1px solid var(--line);outline:none;touch-action:pan-y}
 .gl-plot:focus-visible{outline:2px solid var(--wing-t);outline-offset:8px}
 .gl-plot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .gl-line{fill:none;stroke:var(--wing-t);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
@@ -449,24 +434,30 @@ dialog.reel::backdrop{background:transparent}
 .gl-x i:first-child{transform:none}
 .gl-x i.now{transform:translateX(-100%);color:var(--fg)}
 .gl-dot{position:absolute;left:var(--x);top:var(--y);width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--wing-t);box-shadow:0 0 0 2px var(--bg)}
-.gl-lab{position:absolute;left:var(--x);top:var(--y);transform:translate(-100%,-160%);padding:2px 4px;background:var(--bg);font:400 13px/1 var(--mono);white-space:nowrap}
+.gl-lab{position:absolute;left:var(--x);top:var(--y);transform:translate(-100%,-160%);padding:2px 4px;background:var(--bg);font:400 13px/1 var(--mono);white-space:nowrap;transition:opacity .15s}
 .gl-lab.pk{transform:translate(-40%,-170%)}
+.gl-plot.on .gl-lab{opacity:0}
 .gl-cross{position:absolute;top:0;bottom:0;left:var(--x);width:1px;background:var(--fg2);pointer-events:none}
 .gl-tip{position:absolute;left:var(--x);top:var(--y);z-index:2;transform:translate(-50%,calc(-100% - 14px));display:grid;gap:3px;padding:8px 10px;border:1px solid var(--line);background:var(--bg);font-size:12px;line-height:1.3;white-space:nowrap;pointer-events:none}
 .gl-tip[data-side="start"]{transform:translate(0,calc(-100% - 14px))}
 .gl-tip[data-side="end"]{transform:translate(-100%,calc(-100% - 14px))}
 .gl-tip b{font:400 15px/1.1 var(--mono)}
 .gl-tip span{color:var(--fg2)}
-.gold-s{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:clamp(10px,2vh,20px)}
-.gold-s .v{font-size:clamp(26px,3vw,44px)}
-@media (max-width:900px){.gold-s{grid-template-columns:1fr}.gl-plot{margin-left:56px}}
-@media (max-width:620px){.gl-x i:not(:nth-child(3n+1)){display:none}}
-/* What a coin sells for against the gold inside it, on one scale for every coin. */
-.prem{position:relative;height:12px;margin:4px 0;background:linear-gradient(var(--line),var(--line)) 0 50%/100% 1px no-repeat}
-.prem-g{position:absolute;left:0;top:1px;bottom:1px;width:var(--b);border-radius:999px;background:var(--wing-t)}
-.prem-p{position:absolute;top:1px;bottom:1px;left:var(--a);width:max(10px,calc(var(--b) - var(--a)));border-radius:999px;box-shadow:inset 0 0 0 2px var(--wing-t)}
-.prem-k{display:inline-flex;align-items:center;gap:8px;margin-right:18px}
-.prem-k i{position:static;display:inline-block;width:22px;height:10px}
+@media (max-width:900px){.gl-plot{height:clamp(150px,24svh,240px);margin-left:56px}}
+@media (max-width:620px){.gl-x i:not(:nth-child(3n+1)):not(.now){display:none}}
+/* Art by year: thin columns from zero, the latest in the wing colour and the rest in grey; the latest and the peak carry
+   their value, every column shows its own on hover or focus. */
+.ac{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:end;height:clamp(170px,30svh,300px);margin:16px 0 26px 64px;border-bottom:1px solid var(--line)}
+.ac .gl-y{position:absolute;inset:0;pointer-events:none}
+.ac-c{position:relative;justify-self:center;width:min(24px,60%);height:var(--h);outline:none}
+.ac-c::before{content:"";position:absolute;inset:0;border-radius:4px 4px 0 0;background:var(--fg2);opacity:.5;transition:opacity .2s}
+.ac-c.on::before{background:var(--wing-t);opacity:1}
+.ac-c:hover::before,.ac-c:focus::before{opacity:1}
+.ac-c:focus-visible{outline:2px solid var(--wing-t);outline-offset:3px}
+.ac-c b{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);font:400 12px/1 var(--mono);white-space:nowrap;color:var(--fg);opacity:0;transition:opacity .2s}
+.ac-c.lab b,.ac-c:hover b,.ac-c:focus b{opacity:1}
+.ac-c i{position:absolute;top:calc(100% + 9px);left:50%;transform:translateX(-50%);font:500 11px/1 var(--mono);letter-spacing:.08em;font-style:normal;color:var(--fg2)}
+@media (max-width:900px){.ac{height:clamp(150px,24svh,240px);margin-left:56px}}
 .lead.gap{margin-top:14px}
 .spec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(20px,4vw,64px);margin:clamp(18px,3.6vh,36px) 0 0;border-bottom:1px solid var(--line)}
 .spec div{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:12px;align-items:baseline;border-top:1px solid var(--line);padding:clamp(9px,1.6vh,14px) 0}

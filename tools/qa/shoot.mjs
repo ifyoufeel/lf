@@ -115,6 +115,8 @@ const MEASURE_FN = ({ i, vw }) => {
   };
   const round = (n) => Math.round(n);
   const hiddenish = (cs) => cs.display === 'none' || cs.visibility === 'hidden' || (cs.clip && cs.clip !== 'auto');
+  // Text inside a visually hidden box (.sr: clipped to nothing, for screen readers) is hidden too, however deep it sits.
+  const insideHidden = (el) => { for (let a = el.parentElement; a && a !== screen; a = a.parentElement) if (hiddenish(getComputedStyle(a))) return true; return false; };
 
   // 1. Elements past the right (or left) edge of the viewport.
   const elements = [];
@@ -204,7 +206,7 @@ const MEASURE_FN = ({ i, vw }) => {
     if (!el || el.closest('svg,script,style,noscript,template,option,select,textarea')) continue;
     if (seen.has(el)) continue;
     const cs = getComputedStyle(el);
-    if (hiddenish(cs)) continue;
+    if (hiddenish(cs) || insideHidden(el)) continue;
     range.selectNodeContents(t);
     const rects = [...range.getClientRects()].filter((r) => r.width > 0 && r.height > 0);
     if (!rects.length) continue;

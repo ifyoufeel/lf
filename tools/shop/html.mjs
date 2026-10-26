@@ -1,4 +1,4 @@
-// Small markup helpers the shop renderers share (tools/shop/render.mjs, tools/shop/markets.mjs).
+// Small markup helpers the shop renderers share (tools/shop/render.mjs, tools/shop/previews.mjs).
 
 export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 

@@ -40,14 +40,14 @@ site/
   vendor/three.min.js    three.js r128 for the walk, loaded only when it opens; never edited
   media.json             video manifest: wing loops, case cover footage, films; null means not uploaded yet
   media/*.jpg            posters and stills, each listed in brand/ledger.json under media
-  shop.json              the shop: Hortus hardware, the Machina compute, the Arca market; "live" says whether it ships to the web
+  shop.json              the shop: Hortus hardware, the Machina and Arca previews; "live" says whether it ships to the web
 shop/
   emode-products.json    the maker's product pages the importer reads
   source/                what the importer brought back: the maker's Russian text, prices and photos (not shipped)
 tools/
   build.mjs              tokens, brand check, both publish targets
   shop/render.mjs        renders site/shop.json into the page (used by the build and the brand check)
-  shop/markets.mjs       the Machina compute and the Arca market, for render.mjs
+  shop/previews.mjs      the Machina and Arca previews, for render.mjs
   shop/import-emode.mjs  imports the maker's products into shop/source/ (run by the shop-import workflow)
   brandcheck.mjs         the brand check, rules R0 to R17
   brandcheck.test.mjs    fixture tests for the brand check
@@ -125,7 +125,7 @@ git config core.hooksPath .githooks
 1. **The email key for the brief.** “Send the brief” posts to `api/brief.mjs`, which emails the brief to lastfomo@gmail.com through Resend. It needs one key: create a free account at resend.com with lastfomo@gmail.com, create an API key, and add it in Vercel (project `lastfomo` → Settings → Environment Variables) as `RESEND_API_KEY` for Production, then redeploy. Until then the form falls back to the composed brief with copy and the mail link, as before.
 2. **Films inside the Artifact.** The web build plays the YouTube films in a popup. An Artifact cannot embed YouTube, so there the popup needs the film files: upload the three MP4s and they go to the Artifact’s asset store (`site/media.json` → `films.<wing>.asset`). Until then the Artifact opens YouTube in a new tab.
 3. **The Hortus hardware shop (a demonstration).** Six E-MODE controllers with English copy, a basket and an order sent by email, in the Artifact only: `site/shop.json` says `"live": false`, so lastfomo.vercel.app does not show it. Prices show in US dollars by the owner’s rule of 26 October 2026: the maker’s rouble list price from 25 October 2026, divided by 100 and rounded to the dollar. Before it goes live, decide: the rights to the maker’s photos and texts (ledger rights “check”); how the Hortus case and the shop describe who makes the hardware (the case says in-house; the shop names E-MODE); and how an order is taken on the web (an email to the house, a payment, or a hand-off to the maker’s own basket). Then set `"live": true`. Prices and photos refresh from the maker with the `shop-import` workflow (Actions → shop-import → Run workflow); a new price only reaches the page through `site/shop.json` and a ledger fact.
-4. **The Machina compute and the Arca market (demonstrations, with the shop).** `#/compute`: accelerators in three tiers with market prices and supply, and a calculator that sizes a private AI and puts a build or a sourcing request in the basket. `#/market`: gold in 2026, gold coins against the gold inside them, and art. Before they go live: refresh the market figures (a snapshot from 26 October 2026; `brand/ledger.json` → `machina.market.*`, `arca.market.*`), confirm the calculator’s method and wording, and list real works of art in place of the three placeholders (`[ARTIST]`, `[ARTWORK TITLE]`, `[MEDIUM AND YEAR]`), each with a photo, its rights and a price or “Price on request”.
+4. **The Machina and Arca previews (with the shop).** One screen on each case. Machina: we build private AI on the premises and source the cards and machines for it, beside what four machines cost now against their launch price (GeForce RTX 5080 and 5090, NVIDIA DGX Spark, NVIDIA RTX PRO 6000) and what TrendForce expects of AI memory in 2027. Arca: the vault and the artists open later; until then, gold in 2026 and global art sales by year. Before they go live, refresh the figures (a snapshot from 26 October 2026; `brand/ledger.json` → `machina.study.*`, `arca.study.*`) and confirm the wording.
 5. **Unconfirmed wording.** The roadmap’s “Next” items (more private builds; pilot beds to full farms; a private catalogue by invitation), the “What happens next” steps on Start a project (we read the brief; a short call; a written plan) and the brief’s sending states (“Sending…”, “Brief sent.”, “It is on its way to lastfomo@gmail.com.”) were written as suggestions. Confirm or rewrite them.
 
 The contact address is lastfomo@gmail.com (`brand/ledger.json` → `contact`). Every image and film is the owner’s, except the shop’s product photos, which are E-MODE’s.

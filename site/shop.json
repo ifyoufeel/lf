@@ -211,444 +211,85 @@
     }
   ],
   "machina": {
-    "$note": "The Machina compute market: accelerators for a private AI in three tiers, with market prices and supply as dealers, integrators and trackers reported them in July to October 2026 (each a fact in brand/ledger.json, machina.market.*). Ranges, not quotes: requests are confirmed by email. The calculator's method is in \"calc\" and is an estimate.",
+    "$note": "The Machina preview on its case: what Machina does (builds private AI on site, sources the hardware when the market is tight), and a study of what the same hardware costs now against its launch price. Every number is a dated, sourced fact in brand/ledger.json (machina.study.*).",
     "screen": {
-      "code": "MCH — Machina · Compute",
-      "title": "Local AI hardware, sized to the work.",
-      "lead": "From GeForce cards to data-centre GPUs: what each costs today, how easy it is to get, and a calculator that sizes a private AI for your team.",
-      "cta": "See the compute"
+      "code": "MCH — Machina · Build and source",
+      "title": "The hardware is getting dearer.",
+      "lead": "We build private AI on your premises, and source the cards and machines for it when the market is tight. What the same hardware costs now, against its launch price:",
+      "outlook": "Memory is behind it, and it is not over: TrendForce expects the price of AI memory to more than double again in 2027, with supply short all year. Choose a machine to see its prices.",
+      "note": "US dollars, log scale. Reports to 26 October 2026.",
+      "cta": "Start a project"
     },
-    "view": {
-      "title": "Compute for a private AI.",
-      "lead": "The accelerators a local AI runs on, in three tiers, with market prices and supply as dealers and integrators report them. Ranges, not quotes: we confirm price and stock by email.",
-      "asOf": "26 October 2026",
-      "sources": "Dealer, integrator and tracker reports, July to October 2026: IntuitionLabs, GPU Smith, GPU Battle, CloudZero, Jarvislabs, NVIDIA Marketplace, Tech Insider, BuySellRam and GPU price trackers.",
-      "steps": [
-        {
-          "t": "Size it",
-          "s": "Tell the calculator who uses it and what it should do."
-        },
-        {
-          "t": "Send the request",
-          "s": "A local AI build, or sourcing for the hardware alone. Nothing is charged here."
-        },
-        {
-          "t": "We confirm by email",
-          "s": "Price, stock and the machine around the cards, before anything is ordered."
-        }
-      ]
-    },
-    "supply": {
-      "allocation": "On allocation",
-      "order": "To order",
-      "stock": "In stock",
-      "short": "Short",
-      "used": "Used market"
-    },
-    "tiers": [
+    "study": [
       {
-        "id": "top",
-        "label": "Top tier",
-        "title": "Data-centre accelerators",
-        "items": [
-          {
-            "slug": "nvidia-b300",
-            "name": "NVIDIA B300",
-            "kind": "Blackwell Ultra · HBM3e",
-            "mem": 288,
-            "price": [
-              37500,
-              53000
-            ],
-            "supply": "allocation"
-          },
-          {
-            "slug": "nvidia-b200",
-            "name": "NVIDIA B200",
-            "kind": "Blackwell · HBM3e",
-            "mem": 180,
-            "price": [
-              30000,
-              50000
-            ],
-            "supply": "allocation"
-          },
-          {
-            "slug": "amd-mi355x",
-            "name": "AMD Instinct MI355X",
-            "kind": "CDNA 4 · HBM3e",
-            "mem": 288,
-            "price": [
-              25000,
-              34500
-            ],
-            "supply": "order"
-          },
-          {
-            "slug": "nvidia-h200",
-            "name": "NVIDIA H200",
-            "kind": "Hopper · HBM3e",
-            "mem": 141,
-            "price": [
-              31000,
-              32000
-            ],
-            "supply": "stock"
-          },
-          {
-            "slug": "nvidia-h100",
-            "name": "NVIDIA H100",
-            "kind": "Hopper · HBM3",
-            "mem": 80,
-            "price": [
-              25000,
-              40000
-            ],
-            "supply": "stock"
-          },
-          {
-            "slug": "amd-mi300x",
-            "name": "AMD Instinct MI300X",
-            "kind": "CDNA 3 · HBM3",
-            "mem": 192,
-            "price": [
-              15000,
-              20600
-            ],
-            "supply": "order"
-          },
-          {
-            "slug": "nvidia-a100",
-            "name": "NVIDIA A100",
-            "kind": "Ampere · HBM2e",
-            "mem": 80,
-            "price": [
-              7000,
-              15000
-            ],
-            "supply": "stock"
-          }
-        ]
+        "name": "GeForce RTX 5080",
+        "kind": "Home",
+        "points": [
+          999,
+          1450
+        ],
+        "story": "GeForce RTX 5080: $999 at launch in January 2025; new cards asked at least $1,450 in October 2026."
       },
       {
-        "id": "business",
-        "label": "Business",
-        "title": "Desk-side and workstation",
-        "items": [
-          {
-            "slug": "dgx-station",
-            "name": "NVIDIA DGX Station",
-            "kind": "GB300 · coherent memory",
-            "mem": 784,
-            "price": [
-              92887,
-              92887
-            ],
-            "from": true,
-            "supply": "order"
-          },
-          {
-            "slug": "rtx-pro-6000",
-            "name": "NVIDIA RTX PRO 6000",
-            "kind": "Blackwell · GDDR7",
-            "mem": 96,
-            "price": [
-              16000,
-              17999
-            ],
-            "supply": "stock"
-          },
-          {
-            "slug": "dgx-spark",
-            "name": "NVIDIA DGX Spark",
-            "kind": "GB10 · unified memory",
-            "mem": 128,
-            "price": [
-              6950,
-              6950
-            ],
-            "supply": "stock"
-          }
-        ]
+        "name": "GeForce RTX 5090",
+        "kind": "Home",
+        "points": [
+          1999,
+          4299
+        ],
+        "story": "GeForce RTX 5090: $1,999 at launch in January 2025; from $4,299 at the cheapest retailers in October 2026, and gone from several shelves."
       },
       {
-        "id": "home",
-        "label": "Home",
-        "title": "GeForce cards",
-        "items": [
-          {
-            "slug": "rtx-5090",
-            "name": "GeForce RTX 5090",
-            "kind": "Blackwell · GDDR7",
-            "mem": 32,
-            "price": [
-              4299,
-              5229
-            ],
-            "supply": "short"
-          },
-          {
-            "slug": "rtx-4090",
-            "name": "GeForce RTX 4090",
-            "kind": "Ada · GDDR6X · used",
-            "mem": 24,
-            "price": [
-              2271,
-              2999
-            ],
-            "supply": "used"
-          },
-          {
-            "slug": "rtx-3090",
-            "name": "GeForce RTX 3090",
-            "kind": "Ampere · GDDR6X · used",
-            "mem": 24,
-            "price": [
-              1400,
-              1550
-            ],
-            "supply": "used"
-          },
-          {
-            "slug": "rtx-5080",
-            "name": "GeForce RTX 5080",
-            "kind": "Blackwell · GDDR7",
-            "mem": 16,
-            "price": [
-              1450,
-              1623
-            ],
-            "supply": "stock"
-          }
-        ]
+        "name": "NVIDIA DGX Spark",
+        "kind": "Desk-side",
+        "points": [
+          3999,
+          4699,
+          6950
+        ],
+        "story": "NVIDIA DGX Spark: $3,999 at launch in October 2025; $4,699 from February 2026, when NVIDIA pointed to memory supply; $6,950 from 23 October 2026."
+      },
+      {
+        "name": "NVIDIA RTX PRO 6000",
+        "kind": "Workstation",
+        "points": [
+          8565,
+          16000
+        ],
+        "story": "NVIDIA RTX PRO 6000: $8,565 when it reached shops in April 2025; $16,000 in NVIDIA’s own store from August 2026. It carries 96 GB of memory."
       }
-    ],
-    "shelf": [
-      "nvidia-b300",
-      "nvidia-h200",
-      "rtx-pro-6000",
-      "dgx-spark",
-      "rtx-5090",
-      "rtx-3090"
-    ],
-    "calc": {
-      "$method": "An estimate. Memory needed = (model weights at 4-bit + working memory per person answered at once + speech and image models) x overhead; each build takes the fewest cards of one kind that hold it, within the cards its machine takes and the people it serves at once. Cost covers the cards only.",
-      "uses": [
-        {
-          "id": "clinic",
-          "label": "A clinic or medical practice",
-          "tasks": [
-            "docs",
-            "notes"
-          ]
-        },
-        {
-          "id": "law",
-          "label": "A law, finance or accounting firm",
-          "tasks": [
-            "docs",
-            "drafts"
-          ]
-        },
-        {
-          "id": "studio",
-          "label": "A studio or agency",
-          "tasks": [
-            "drafts",
-            "images"
-          ]
-        },
-        {
-          "id": "industry",
-          "label": "Manufacturing or engineering",
-          "tasks": [
-            "docs",
-            "agents"
-          ]
-        },
-        {
-          "id": "retail",
-          "label": "Retail or e-commerce",
-          "tasks": [
-            "drafts",
-            "agents"
-          ]
-        },
-        {
-          "id": "lab",
-          "label": "A research lab",
-          "tasks": [
-            "docs",
-            "code"
-          ]
-        },
-        {
-          "id": "home",
-          "label": "Home or personal use",
-          "tasks": [
-            "drafts"
-          ],
-          "tier": "home"
-        }
-      ],
-      "tasks": [
-        {
-          "id": "docs",
-          "label": "Answers from your own documents",
-          "min": 32
-        },
-        {
-          "id": "drafts",
-          "label": "Drafts, letters and summaries",
-          "min": 8
-        },
-        {
-          "id": "notes",
-          "label": "Notes from meetings and calls",
-          "min": 8,
-          "extra": 6
-        },
-        {
-          "id": "code",
-          "label": "Help with code",
-          "min": 32
-        },
-        {
-          "id": "images",
-          "label": "Images",
-          "min": 8,
-          "extra": 16
-        },
-        {
-          "id": "agents",
-          "label": "Agents that carry out tasks",
-          "min": 70
-        }
-      ],
-      "teams": [
-        {
-          "id": "1",
-          "label": "Just me",
-          "active": 1
-        },
-        {
-          "id": "10",
-          "label": "A team of up to 10",
-          "active": 3
-        },
-        {
-          "id": "50",
-          "label": "Up to 50 people",
-          "active": 8
-        },
-        {
-          "id": "250",
-          "label": "Up to 250 people",
-          "active": 25
-        }
-      ],
-      "depth": [
-        {
-          "id": "quick",
-          "label": "Quick",
-          "hint": "8B-class model",
-          "model": 8
-        },
-        {
-          "id": "balanced",
-          "label": "Balanced",
-          "hint": "32B-class model",
-          "model": 32
-        },
-        {
-          "id": "thorough",
-          "label": "Thorough",
-          "hint": "70B-class model",
-          "model": 70
-        }
-      ],
-      "models": {
-        "8": {
-          "weights": 5,
-          "kv": 1
-        },
-        "32": {
-          "weights": 20,
-          "kv": 2
-        },
-        "70": {
-          "weights": 40,
-          "kv": 2.5
-        }
-      },
-      "overhead": 1.2,
-      "builds": [
-        {
-          "tier": "home",
-          "item": "rtx-5090",
-          "max": 2,
-          "serves": 3
-        },
-        {
-          "tier": "home",
-          "item": "rtx-3090",
-          "max": 2,
-          "serves": 3
-        },
-        {
-          "tier": "business",
-          "item": "dgx-spark",
-          "max": 2,
-          "serves": 4
-        },
-        {
-          "tier": "business",
-          "item": "rtx-pro-6000",
-          "max": 4,
-          "serves": 32
-        },
-        {
-          "tier": "top",
-          "item": "nvidia-h200",
-          "max": 8,
-          "serves": 400
-        },
-        {
-          "tier": "top",
-          "item": "nvidia-b300",
-          "max": 8,
-          "serves": 800
-        }
-      ]
-    }
+    ]
   },
   "arca": {
-    "$note": "The Arca market: gold coins valued against the day's gold, and art. Gold prices and coin facts are in brand/ledger.json (arca.market.*); the art is a placeholder until the owner lists real works. Auctions and more artists come later.",
+    "$note": "The Arca preview on its case: the vault and the artists open later; until then, two markets Arca watches, gold this year and art by year. Every number is a dated, sourced fact in brand/ledger.json (arca.study.*).",
     "screen": {
-      "code": "ARC — Arca · Market",
-      "title": "Gold coins and art, to keep.",
-      "lead": "Bank-grade gold coins, valued against today’s gold, and works from artists we follow. Auctions and more artists are on the way.",
-      "cta": "See the market"
-    },
-    "view": {
-      "title": "The Arca market.",
-      "lead": "Gold coins priced against the metal inside them, and art by invitation. Coins are priced on the day of sale: we confirm by email before anything changes hands.",
-      "asOf": "26 October 2026",
-      "steps": [
+      "code": "ARC — Arca · Vault and artists",
+      "title": "Gold and art, as the markets price them.",
+      "lead": "The Arca vault and our artists open later. Until then, the two markets we watch for the people we work for.",
+      "notes": [
         {
-          "t": "Choose",
-          "s": "Coins by the piece, or ask about a work."
+          "t": "Vault",
+          "s": "Custody for metal and objects. Opening later."
         },
         {
-          "t": "Send the request",
-          "s": "Your name, email and where it should go. Nothing is charged here."
-        },
-        {
-          "t": "We confirm by email",
-          "s": "The day’s price, custody or delivery, and payment."
+          "t": "Artists",
+          "s": "Direct lines to artists and estates, and their auctions. Opening later."
         }
-      ]
+      ],
+      "cta": "Start a project"
     },
+    "tabs": [
+      {
+        "id": "gold",
+        "label": "Gold, 2026",
+        "text": "Gold set a record of $5,501.70 an ounce on 29 January and stood at $3,994.90 on 25 October. The vault will keep metal and objects for the people we work for."
+      },
+      {
+        "id": "art",
+        "label": "Art, 2019 to 2025",
+        "text": "Art sales fell for two years, then rose again in 2025 to $59.6 billion worldwide, led by works above $10 million. Our artists, and their auctions, come later."
+      }
+    ],
     "gold": {
       "unit": "US dollars per troy ounce",
       "closes": [
@@ -691,91 +332,42 @@
       ],
       "now": {
         "label": "25 Oct",
-        "price": 3994.9,
-        "source": "Kitco, 25 October 2026, 3:07 pm ET"
-      },
-      "high": {
-        "label": "29 January",
-        "price": 5501.7,
-        "source": "LBMA PM price"
-      },
-      "rub": {
-        "price": 10482.37,
-        "label": "24 October",
-        "source": "Bank of Russia"
-      },
-      "sources": "Month-end closes: GoldTickers. Today: Kitco. Record: LBMA. Rouble price: Bank of Russia. Coin values are the gold inside at those prices."
+        "price": 3994.9
+      }
     },
-    "coins": [
-      {
-        "slug": "gold-eagle",
-        "name": "American Gold Eagle",
-        "kind": "1 oz · 22 carat · United States Mint",
-        "gold": "1 oz of fine gold",
-        "melt": {
-          "cur": "$",
-          "v": 3994.9,
-          "t": "$3,994.90"
-        },
-        "price": {
-          "lo": 4115,
-          "hi": 4314,
-          "t": "about $4,115 to $4,314",
-          "k": "Dealers"
-        }
-      },
-      {
-        "slug": "st-george",
-        "name": "St George the Victorious",
-        "kind": "50 roubles · 999 gold · Bank of Russia",
-        "gold": "7.78 g of fine gold",
-        "melt": {
-          "cur": "₽",
-          "v": 81553,
-          "t": "about 81,553 ₽"
-        },
-        "price": {
-          "t": "Priced by the bank on the day",
-          "k": "Bank and dealers"
-        }
-      },
-      {
-        "slug": "chervonets",
-        "name": "Chervonets, the Sower",
-        "kind": "10 roubles · 900 gold · USSR and Goznak",
-        "gold": "7.742 g of fine gold",
-        "melt": {
-          "cur": "₽",
-          "v": 81155,
-          "t": "about 81,155 ₽"
-        },
-        "price": {
-          "lo": 105000,
-          "hi": 143600,
-          "t": "1976, uncirculated: about 105,000 ₽ at auction; rare varieties to 143,600 ₽",
-          "k": "Collectors"
-        }
-      }
-    ],
-    "art": [
-      {
-        "slug": "art-1",
-        "artist": "[ARTIST]",
-        "title": "[ARTWORK TITLE]",
-        "medium": "[MEDIUM AND YEAR]"
-      },
-      {
-        "slug": "art-2",
-        "artist": "[ARTIST]",
-        "title": "[ARTWORK TITLE]",
-        "medium": "[MEDIUM AND YEAR]"
-      },
-      {
-        "slug": "art-3",
-        "artist": "[ARTIST]",
-        "title": "[ARTWORK TITLE]",
-        "medium": "[MEDIUM AND YEAR]"
-      }
-    ]
+    "art": {
+      "unit": "billions of US dollars",
+      "years": [
+        [
+          "2019",
+          64.1
+        ],
+        [
+          "2020",
+          50.1
+        ],
+        [
+          "2021",
+          65.1
+        ],
+        [
+          "2022",
+          67.8
+        ],
+        [
+          "2023",
+          65.0
+        ],
+        [
+          "2024",
+          57.5
+        ],
+        [
+          "2025",
+          59.6
+        ]
+      ],
+      "note": "Global art sales, billions of US dollars, as each year’s Art Basel and UBS report gave them."
+    }
   }
 }
