@@ -172,33 +172,33 @@
     },
     {
       "id": "hortus.shop.ponics-pilot",
-      "claim": "E-MODE PonicsPilot, as the maker lists it (e-mode.pro/catalog/controllers/ponics_pilot/, imported 25 October 2026): list price ₽140,120; 555×412×205 mm; 7.5 kg net; tank 10 to 2,000 L; pumps 85 ml/min; dosing pause 1 min to 12 h; EC 0.1 to 5.0 mS; pH 3.0 to 14.0; two 120 cm hoses; 1-year warranty",
-      "numbers": ["140,120", "555", "412", "205", "7.5", "10", "2,000", "85", "1", "12", "0.1", "5.0", "3.0", "14.0", "120"]
+      "claim": "E-MODE PonicsPilot, as the maker lists it (e-mode.pro/catalog/controllers/ponics_pilot/, imported 25 October 2026): list price ₽140,120 (shown as $1,401: the owner's rule of 26 October 2026, roubles ÷ 100 rounded to the dollar); 555×412×205 mm; 7.5 kg net; tank 10 to 2,000 L; pumps 85 ml/min; dosing pause 1 min to 12 h; EC 0.1 to 5.0 mS; pH 3.0 to 14.0; two 120 cm hoses; 1-year warranty",
+      "numbers": ["1,401", "555", "412", "205", "7.5", "10", "2,000", "85", "1", "12", "0.1", "5.0", "3.0", "14.0", "120"]
     },
     {
       "id": "hortus.shop.ponics-pilot-32",
-      "claim": "E-MODE PonicsPilot 32, as the maker lists it (imported 25 October 2026): list price ₽185,116; 490×550×200 mm; 10 kg; tank 60 to 2,000 L; pumps 140 ml/min; 15 sensors; EC 0.2 to 5.50 mS/cm; pH 3.0 to 12.0; solution 10 to 20 °C; RS-485; 220 V; 26 alarms; outside equipment up to 100 W; two 120 cm hoses; 1-year warranty",
-      "numbers": ["185,116", "32", "490", "550", "200", "10", "60", "2,000", "140", "15", "0.2", "5.50", "3.0", "12.0", "20", "485", "220", "26", "100", "120", "1"]
+      "claim": "E-MODE PonicsPilot 32, as the maker lists it (imported 25 October 2026): list price ₽185,116 (shown as $1,851: the owner's rule of 26 October 2026, roubles ÷ 100 rounded to the dollar); 490×550×200 mm; 10 kg; tank 60 to 2,000 L; pumps 140 ml/min; 15 sensors; EC 0.2 to 5.50 mS/cm; pH 3.0 to 12.0; solution 10 to 20 °C; RS-485; 220 V; 26 alarms; outside equipment up to 100 W; two 120 cm hoses; 1-year warranty",
+      "numbers": ["1,851", "32", "490", "550", "200", "10", "60", "2,000", "140", "15", "0.2", "5.50", "3.0", "12.0", "20", "485", "220", "26", "100", "120", "1"]
     },
     {
       "id": "hortus.shop.ph-wifi",
-      "claim": "E-MODE pH controller with Wi-Fi, as the maker lists it (imported 25 October 2026): list price ₽34,077; pH 3.0 to 12.0, 5.0 to 8.0 with protection on; tank 20 to 2,000 L; pumps 60 ml/min; dosing pause 0.5 to 48 h; manual dose 1 to 50 ml; Wi-Fi 2.4 GHz; 10 W, 220–240 V; 100×200×150 mm; IP64; 1.8 kg; calibration solutions pH 4.01 and 7.01; 1-year warranty",
-      "numbers": ["34,077", "3.0", "12.0", "5.0", "8.0", "20", "2,000", "60", "0.5", "48", "1", "50", "2.4", "10", "220", "240", "100", "200", "150", "64", "1.8", "4.01", "7.01"]
+      "claim": "E-MODE pH controller with Wi-Fi, as the maker lists it (imported 25 October 2026): list price ₽34,077 (shown as $341: the owner's rule of 26 October 2026, roubles ÷ 100 rounded to the dollar); pH 3.0 to 12.0, 5.0 to 8.0 with protection on; tank 20 to 2,000 L; pumps 60 ml/min; dosing pause 0.5 to 48 h; manual dose 1 to 50 ml; Wi-Fi 2.4 GHz; 10 W, 220–240 V; 100×200×150 mm; IP64; 1.8 kg; calibration solutions pH 4.01 and 7.01; 1-year warranty",
+      "numbers": ["341", "3.0", "12.0", "5.0", "8.0", "20", "2,000", "60", "0.5", "48", "1", "50", "2.4", "10", "220", "240", "100", "200", "150", "64", "1.8", "4.01", "7.01"]
     },
     {
       "id": "hortus.shop.microclimate",
-      "claim": "E-MODE Microclimate controller, as the maker lists it (imported 25 October 2026): list price ₽25,886; 240×80×60 mm; 900 g; −40 to +80 °C; timer 1 second to 50 days; up to 1,500 W per channel; IP44; 1-year warranty",
-      "numbers": ["25,886", "240", "80", "60", "900", "40", "1", "50", "1,500", "44"]
+      "claim": "E-MODE Microclimate controller, as the maker lists it (imported 25 October 2026): list price ₽25,886 (shown as $259: the owner's rule of 26 October 2026, roubles ÷ 100 rounded to the dollar); 240×80×60 mm; 900 g; −40 to +80 °C; timer 1 second to 50 days; up to 1,500 W per channel; IP44; 1-year warranty",
+      "numbers": ["259", "240", "80", "60", "900", "40", "1", "50", "1,500", "44"]
     },
     {
       "id": "hortus.shop.sensiroom-co2-wifi",
-      "claim": "E-MODE SensiRoom CO2 Wi-Fi, as the maker lists it (imported 25 October 2026): list price ₽30,454; CO2 300 to 5,000 ppm; threshold 400 to 2,000 ppm; dosing 1 second to 59 minutes; pause 1 min to 23 h 59 min; socket up to 100 W; 5 W, 220–240 V; 120×80×55 mm; IP44; 800 g net; 1-year warranty",
-      "numbers": ["30,454", "300", "5,000", "400", "2,000", "1", "59", "23", "100", "5", "220", "240", "120", "80", "55", "44", "800"]
+      "claim": "E-MODE SensiRoom CO2 Wi-Fi, as the maker lists it (imported 25 October 2026): list price ₽30,454 (shown as $305: the owner's rule of 26 October 2026, roubles ÷ 100 rounded to the dollar); CO2 300 to 5,000 ppm; threshold 400 to 2,000 ppm; dosing 1 second to 59 minutes; pause 1 min to 23 h 59 min; socket up to 100 W; 5 W, 220–240 V; 120×80×55 mm; IP44; 800 g net; 1-year warranty",
+      "numbers": ["305", "300", "5,000", "400", "2,000", "1", "59", "23", "100", "5", "220", "240", "120", "80", "55", "44", "800"]
     },
     {
       "id": "hortus.shop.sensiroom-h",
-      "claim": "E-MODE SensiRoom H irrigation controller, as the maker lists it (imported 25 October 2026): list price ₽16,239; watering 10 seconds to 60 minutes; pause 1 minute to 10 hours; pump up to 1,500 W; 3.2 W draw; 220–240 V, 50 Hz; 80×55×120 mm; IP64; 1 kg; 1-year warranty",
-      "numbers": ["16,239", "10", "60", "1", "1,500", "3.2", "220", "240", "50", "80", "55", "120", "64"]
+      "claim": "E-MODE SensiRoom H irrigation controller, as the maker lists it (imported 25 October 2026): list price ₽16,239 (shown as $162: the owner's rule of 26 October 2026, roubles ÷ 100 rounded to the dollar); watering 10 seconds to 60 minutes; pause 1 minute to 10 hours; pump up to 1,500 W; 3.2 W draw; 220–240 V, 50 Hz; 80×55×120 mm; IP64; 1 kg; 1-year warranty",
+      "numbers": ["162", "10", "60", "1", "1,500", "3.2", "220", "240", "50", "80", "55", "120", "64"]
     }
   ],
   "approvedLines": {
@@ -335,7 +335,6 @@
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
     "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief.",
     "The Hortus hardware shop (site/shop.json) is a demonstration for the owner, shown in the Artifact only ('live': false). Its English copy is translated from the maker's Russian pages and is suggested wording: product lines, the hardware screen, 'How ordering works', the basket and order wording ('Nothing is charged here', 'We confirm stock, delivery and payment by email').",
-    "Shop prices are E-MODE's list prices in roubles on 25 October 2026 (shop/source/emode.json). The owner sets the selling price and currency before the shop goes live.",
     "Explore (#/explore, site/explore.js) is suggested interface wording: the settings ('Auto walk', 'Visits every signal for you, wing by wing.', 'Music', 'The score of each wing.', 'Sounds', 'Steps, signals and arches.', 'Look with your phone', 'Walk to', 'How to walk'), the toasts ('Auto walk is on. Press the round button to walk yourself.', 'Your phone did not share its motion here. Drag to look around.') and the round button's 'Auto' and 'Hold to walk'. The signal panels carry the walking experience's copy; the San Gennaro panel now says 'over about 250 years', as the ledger does."
   ],
   "conflicts": [
@@ -380,6 +379,12 @@
       "site": "the maker's product photos carry blue sockets and red logos once they open from grey",
       "figma": "Rule 3: the wing colour is the only saturated colour; rule 9: sealed grey sweeps open to full colour",
       "decision": "Pending: shown sealed in grey, sweeping open to the maker's colour, until the owner decides."
+    },
+    {
+      "topic": "Hardware list holders",
+      "site": "the hardware list (#/hardware) packs all six products on one screen, each photo in a plain square tile with kind, line, two specs and the price",
+      "figma": "Rule 8: every wing uses the arch holder (.arch, fully rounded top), never a rectangle; rule 7: one message per screen",
+      "decision": "Owner: the hardware list is packed, without round tops, so it shows more (26 October 2026). The Hardware screen on the Hortus case and each product's page keep the arch."
     }
   ],
   "media": {

@@ -1,9 +1,10 @@
 {
-  "$note": "The Hortus hardware shop: what the page shows and in what words. Hand-written in English from the maker's own pages (shop/source/emode.json, imported by tools/shop/import-emode.mjs). tools/shop/render.mjs turns this into markup. Every number here is a fact in brand/ledger.json (hortus.shop.*); every photo is in ledger → media.",
+  "$note": "The Hortus hardware shop: what the page shows and in what words. Hand-written in English from the maker's own pages (shop/source/emode.json, imported by tools/shop/import-emode.mjs). tools/shop/render.mjs turns this into markup. Every number here is a fact in brand/ledger.json (hortus.shop.*); every photo is in ledger → media. \"keys\" names the two specs a product's card shows on the packed hardware list.",
   "live": false,
   "$live": "false: the shop renders in the claude.ai Artifact and in dist/preview only, never on the live site. Set true once the owner approves the shop for lastfomo.vercel.app.",
   "maker": { "name": "E-MODE", "country": "Russia", "url": "https://e-mode.pro/" },
-  "currency": { "code": "RUB", "symbol": "₽" },
+  "currency": { "code": "USD", "symbol": "$", "name": "US dollars" },
+  "$prices": "Prices in US dollars by the owner's rule of 26 October 2026: the maker's rouble list price of 25 October 2026 (shop/source/emode.json) divided by 100 and rounded to the dollar. Each is a fact in brand/ledger.json (hortus.shop.*).",
   "contact": "lastfomo@gmail.com",
   "hardware": {
     "code": "HRT — Hortus · Hardware",
@@ -15,7 +16,6 @@
   "index": {
     "title": "Control hardware for growers.",
     "lead": "Dosing, pH, climate, CO₂ and irrigation controllers by E-MODE. Add what you need to the basket and send the order. We confirm stock, delivery and payment by email.",
-    "image": "shop-ponics-pilot-32.jpg",
     "groups": [
       { "id": "feeding", "title": "Feeding, held to the recipe.", "label": "Feeding", "products": ["ponics-pilot", "ponics-pilot-32", "ph-wifi"] },
       { "id": "climate", "title": "Air and water, on schedule.", "label": "Climate", "products": ["microclimate", "sensiroom-co2-wifi", "sensiroom-h"] }
@@ -34,7 +34,8 @@
       "kind": "Nutrient dosing",
       "line": "Nutrient solution, held to the recipe.",
       "lead": "Keeps the EC and pH of the feed in a hydroponic system or a water-preparation line. It doses up to three nutrients, tops up water from a level sensor and watches the temperature of the solution and the air.",
-      "price": 140120,
+      "price": 1401,
+      "keys": ["Tank", "EC range"],
       "image": "shop-ponics-pilot.jpg",
       "alt": "The PonicsPilot dosing controller: five peristaltic pumps above five labelled bottles",
       "does": [
@@ -64,7 +65,8 @@
       "kind": "Nutrient dosing · Wi-Fi",
       "line": "The whole feed line, on one panel.",
       "lead": "The larger PonicsPilot. EC, pH, level and solution temperature for tanks of 60 to 2,000 litres, with a colour touch screen, Wi-Fi, and RS-485 to join a wider control system.",
-      "price": 185116,
+      "price": 1851,
+      "keys": ["Tank", "Sensors"],
       "image": "shop-ponics-pilot-32.jpg",
       "alt": "The PonicsPilot 32 panel: five pumps above five bottles, pH− and pH+ on the left",
       "does": [
@@ -95,7 +97,8 @@
       "kind": "pH dosing · Wi-Fi",
       "line": "pH, corrected as it drifts.",
       "lead": "Measures and corrects the pH of a nutrient solution between 3.0 and 12.0, in reservoirs of 20 to 2,000 litres. Two pumps, pH+ and pH−, run under an adaptive controller.",
-      "price": 34077,
+      "price": 341,
+      "keys": ["Tank", "pH range"],
       "image": "shop-ph-wifi.jpg",
       "alt": "The pH controller: two peristaltic pumps marked pH− and pH+, with its electrode on a cable",
       "does": [
@@ -126,7 +129,8 @@
       "kind": "Climate",
       "line": "Heat and humidity, on two channels.",
       "lead": "Holds air temperature and humidity on two independent channels: a heater on one, a cooler on the other, each up to 1,500 W.",
-      "price": 25886,
+      "price": 259,
+      "keys": ["Load", "Temperature"],
       "image": "shop-microclimate.jpg",
       "alt": "The Microclimate controller: two sockets beside a small screen, with its sensor on a cable",
       "does": [
@@ -154,7 +158,8 @@
       "kind": "CO₂ · Wi-Fi",
       "line": "CO₂, raised while the light is on.",
       "lead": "Measures carbon dioxide and holds it in a greenhouse, grow room or tent, switching a regulator, fan or damper from one controlled socket. In a public room it ventilates when CO₂ climbs.",
-      "price": 30454,
+      "price": 305,
+      "keys": ["Range", "Threshold"],
       "image": "shop-sensiroom-co2-wifi.jpg",
       "alt": "The SensiRoom CO₂ controller: a white case with a screen and three buttons, cables below",
       "does": [
@@ -184,7 +189,8 @@
       "kind": "Irrigation",
       "line": "Water when the roots ask.",
       "lead": "Reads moisture in the root zone and waters on time, in soil or substrate, with nobody in the room. One sensor can run a group of like plants.",
-      "price": 16239,
+      "price": 162,
+      "keys": ["Watering", "Load"],
       "image": "shop-sensiroom-h.jpg",
       "alt": "The SensiRoom H controller: a socket below a small screen, its moisture probe on a cable",
       "does": [

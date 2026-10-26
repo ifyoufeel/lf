@@ -230,33 +230,17 @@
     v.addEventListener('timeupdate', check);
   });
   // Case cover footage loops for as long as its cover is the active screen of the open page, the tab is in view and no
-  // film is open; anywhere else it pauses, and it loads only once its cover is first active. "Pause footage" holds every
-  // cover (WCAG 2.2.2) and this browser remembers the choice. Reduced motion keeps the poster and hides the control.
-  let footageOff = false;
-  try { footageOff = localStorage.getItem('lf-footage') === 'off'; } catch (_) { /* storage blocked: the footage plays */ }
+  // film is open; anywhere else it pauses, and it loads only once its cover is first active. It has no pause control, by
+  // the owner's choice; reduced motion keeps the poster.
   function runCover(v) {
     const view = v.closest('main.view'), src = coverSrc(v.dataset.cover);
-    const on = src && !RM && !footageOff && !document.hidden && !$('#reel[open]') && view && !view.hidden && view._active === v.closest('.screen');
+    const on = src && !RM && !document.hidden && !$('#reel[open]') && view && !view.hidden && view._active === v.closest('.screen');
     if (on) {
       if (!v.src) { v.loop = true; v.src = src; }
       v.play().catch(() => {});
     } else if (!v.paused) v.pause();
   }
   const runCovers = () => $$('video.cover-v').forEach(runCover);
-  const footBtns = $$('[data-footage]');
-  const footLabel = () => footBtns.forEach((b) => { b.textContent = footageOff ? 'Play footage' : 'Pause footage'; });
-  footBtns.forEach((b) => {
-    const v = b.closest('.screen').querySelector('video.cover-v');
-    if (RM || !v || !coverSrc(v.dataset.cover)) return;
-    b.hidden = false;
-    b.addEventListener('click', () => {
-      footageOff = !footageOff;
-      try { if (footageOff) localStorage.setItem('lf-footage', 'off'); else localStorage.removeItem('lf-footage'); } catch (_) { /* per-viewer convenience only */ }
-      footLabel();
-      runCovers();
-    });
-  });
-  footLabel();
   document.addEventListener('visibilitychange', runCovers);
   function activate(view, secs, i) {
     const s = secs[i];
@@ -612,7 +596,7 @@
       const f = new FormData(order);
       const v = (k) => String(f.get(k) || '').trim();
       const rows = Object.entries(items).map(([s, q]) => q + ' × ' + BY[s].name + ', ' + money(BY[s].price) + (q > 1 ? ' each, ' + money(BY[s].price * q) : ''));
-      const text = ['Order: Hortus hardware by ' + SHOP.maker, '', ...rows, '', 'Subtotal: ' + money(total()) + ' (the maker’s list prices, in roubles)', '',
+      const text = ['Order: Hortus hardware by ' + SHOP.maker, '', ...rows, '', 'Subtotal: ' + money(total()) + ' (' + SHOP.code + ')', '',
         'Name: ' + v('name'), 'Email: ' + v('email'), 'Organisation: ' + (v('org') || 'not given'), 'Deliver to: ' + v('place'), ...(v('note') ? ['', v('note')] : [])].join('\n');
       $('#order-text').textContent = text;
       copyOrder.textContent = 'Copy the order';

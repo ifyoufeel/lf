@@ -297,8 +297,9 @@ await step('header: the trail names the page', async () => {
   return seen.join(' · ');
 });
 
-// The case cover footage (site/media.json → covers) loops for as long as the cover is on screen; "Pause footage" holds it.
-await step('case: the cover footage loops; Pause footage holds it', async () => {
+// The case cover footage (site/media.json → covers) loops for as long as the cover is on screen. It has no pause control,
+// by the owner's choice.
+await step('case: the cover footage loops, with no pause control', async () => {
   await go('#/machina', 'machina');
   const playable = await page.evaluate(() => {
     let c = {};
@@ -306,16 +307,14 @@ await step('case: the cover footage loops; Pause footage holds it', async () => 
     const v = document.createElement('video');
     return (c.av1 && v.canPlayType('video/mp4; codecs="av01.0.12M.10"')) || (c.mp4 && v.canPlayType('video/mp4; codecs="avc1.640028"')) ? Object.keys(c).join(' + ') : '';
   });
+  check(!(await page.locator('[data-footage]').count()), 'a footage control is back on the page');
   if (!playable) {
-    const btnHidden = await page.evaluate(() => document.querySelector('#view-machina [data-footage]').hidden);
-    check(btnHidden, '"Pause footage" shows although this browser cannot play the footage');
     throw new Skip('this browser decodes neither copy of the footage (the Artifact carries H.264 only); the poster stands');
   }
   const read = () => page.evaluate(() => {
     const v = document.querySelector('#view-machina .case-cover video.cover-v');
-    const b = document.querySelector('#view-machina [data-footage]');
     return v ? { src: (v.currentSrc || '').split('/').pop().split('?')[0], t: +v.currentTime.toFixed(2), paused: v.paused, loop: v.loop,
-      backdrop: v.closest('.cover-bg').getAttribute('aria-hidden'), label: b && !b.hidden ? b.textContent.trim() : '' } : null;
+      backdrop: v.closest('.cover-bg').getAttribute('aria-hidden') } : null;
   });
   await page.waitForTimeout(1500);
   let st = await read();
@@ -329,15 +328,6 @@ await step('case: the cover footage loops; Pause footage holds it', async () => 
   st = await read();
   check(!st.paused, `the footage stopped at ${st.t} s instead of looping`);
   const looped = st.t;
-  check(st.label === 'Pause footage', `the cover's control reads "${st.label || 'nothing'}"`);
-  await page.locator('#view-machina [data-footage]').click();
-  await page.waitForTimeout(300);
-  st = await read();
-  check(st.paused && st.label === 'Play footage', `"Pause footage" left it ${st.paused ? 'paused' : 'playing'}, reading "${st.label}"`);
-  await page.locator('#view-machina [data-footage]').click();
-  await page.waitForTimeout(300);
-  st = await read();
-  check(!st.paused && st.label === 'Pause footage', `"Play footage" left it ${st.paused ? 'paused' : 'playing'}, reading "${st.label}"`);
   // While a film plays over the cover, the footage rests; closing the film brings it back.
   if (embeds) {
     await page.locator('#view-machina .case-cover [data-play]').click();
@@ -358,7 +348,7 @@ await step('case: the cover footage loops; Pause footage holds it', async () => 
   st = await read();
   check(st.paused, 'the footage kept playing after its cover scrolled away');
   await page.evaluate(() => { const v = document.querySelector('#view-machina'); v.scrollTop = 0; });
-  return `${file} (${playable}), looped (t ${looped} s at 11.5 s), pauses and plays, rests off screen`;
+  return `${file} (${playable}), looped (t ${looped} s at 11.5 s), rests off screen`;
 });
 
 // The walk (site/explore.js): the hero's Explore opens it at the house, a case cover opens its own wing. While it is open
@@ -418,6 +408,8 @@ await step('explore: the settings open from the header and close on Escape', asy
   await sw.click(); // back as it was
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => !document.querySelector('#xp-set').open, null, { timeout: 2000 }).catch(() => { throw new Error('Escape did not close the settings'); });
+  // The dialog's close event, which resets the menu, arrives a task after the dialog shuts.
+  await page.waitForFunction(() => document.querySelector('#xp-menu').getAttribute('aria-expanded') === 'false', null, { timeout: 1000 }).catch(() => {});
   const expanded = await page.locator('#xp-menu').getAttribute('aria-expanded');
   check(expanded === 'false', `the menu still says aria-expanded ${expanded}`);
   return 'opens, Auto walk switches both ways, Escape closes';
@@ -603,7 +595,7 @@ await step('shop: Hortus case to the hardware to a product', async () => {
   await bringIntoView(link);
   await link.click();
   await waitView('hardware');
-  const card = page.locator('main.view[data-view="hardware"] a.good').first();
+  const card = page.locator('main.view[data-view="hardware"] .good .gn a').first();
   check(await card.count(), 'no product cards on #/hardware');
   const href = await card.getAttribute('href');
   await bringIntoView(card);

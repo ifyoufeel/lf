@@ -190,12 +190,6 @@ canvas.plate{image-rendering:pixelated;image-rendering:crisp-edges}
 .cover-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:var(--void)}
 .cover-v{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:.82}
 .cover-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--void) 0%,var(--void) 10%,transparent 88%)}
-/* Pause or play the footage (WCAG 2.2.2): a quiet line of type in the cover’s corner, level with the button. */
-.footage{position:absolute;right:var(--gr);bottom:clamp(28px,6vh,72px);display:inline-flex;align-items:center;min-height:44px;padding:0;border:0;background:none;cursor:pointer;font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);transition:color .2s}
-.footage:hover{color:var(--fg)}
-.footage:focus-visible{outline:2px solid var(--wing-t);outline-offset:4px}
-/* On phones the cover’s two buttons fill the row, so the footage control sits just below it, in the corner. */
-@media (max-width:620px){.case-cover{padding-bottom:calc(clamp(28px,6vh,72px) + 48px)}}
 .case-cover .stack{gap:clamp(16px,2.4vh,22px);max-width:1056px}
 .case-cover .title{display:grid;gap:0}
 .case-cover .word{font-size:clamp(70px,9.6vw,176px);line-height:.9}
@@ -309,15 +303,41 @@ dialog.reel::backdrop{background:transparent}
 .shop-cover .h1{font-size:clamp(40px,5.4vw,88px)}
 .h2.sub{font-size:clamp(22px,2.4vw,36px)}
 .strip .price{font:400 clamp(18px,1.6vw,24px)/1 var(--mono);letter-spacing:.02em;color:var(--fg)}
-.goods-row{list-style:none;margin:clamp(20px,4vh,40px) 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.4vw,36px)}
-.good{display:grid;gap:12px;align-content:start;color:var(--fg);text-decoration:none}
-.good .arch{width:min(100%,calc(46svh * .75),330px);aspect-ratio:3/4;transition:transform .5s var(--ease)}
-.good:hover .arch{transform:translateY(-6px)}
-.good:hover .gl b{color:var(--wing-t)}
-.good:focus-visible{outline:2px solid var(--wing-t);outline-offset:4px}
-.gl{display:grid;gap:4px;font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
-.gl b{font:300 clamp(20px,1.8vw,28px)/1.1 var(--sans);letter-spacing:-.02em;text-transform:none;color:var(--fg);transition:color .3s}
-.gp{font:400 15px/1 var(--mono);letter-spacing:.04em}
+/* The hardware list (#/hardware) is packed: every product on one screen, each photo whole on paper in a plain tile with no
+   round top (the owner's choice for this list, 26 October 2026). A card's name is its link, and its hit area covers the card. */
+#view-hardware{scroll-snap-type:y proximity}
+.screen.cat{align-items:center}
+.cat .wrap{display:grid;gap:clamp(14px,2.6vh,28px)}
+.cat-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(16px,4vw,64px);align-items:end}
+.cat-head .h1{font-size:clamp(32px,3.6vw,56px)}
+.cat-head .lead{margin:0}
+.cat-g{display:grid;gap:clamp(10px,1.6vh,14px);border-top:1px solid var(--line);padding-top:clamp(10px,1.6vh,14px)}
+.cat-t{margin:0;font:500 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.goods-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.4vw,20px)}
+.good{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(12px,1.2vw,18px);align-items:start;align-content:start;padding:clamp(10px,1vw,14px);border:1px solid var(--line);transition:border-color .3s}
+.good:hover{border-color:var(--wing-t)}
+.tile{position:relative;display:block;overflow:hidden;width:clamp(88px,17svh,160px);aspect-ratio:1;isolation:isolate}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:8%;display:block;transition:transform .5s var(--ease)}
+.good:hover .tile img{transform:scale(1.04)}
+.gt{display:grid;gap:6px;align-content:start;min-width:0}
+.gt p,.gn{margin:0}
+.gk{font:500 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.gn{font:300 clamp(19px,1.5vw,24px)/1.15 var(--sans);letter-spacing:-.02em}
+.gn a{color:var(--fg);text-decoration:none;transition:color .3s}
+.gn a::after{content:"";position:absolute;inset:0}
+.gn a:focus-visible{outline:none}
+.gn a:focus-visible::after{outline:2px solid var(--wing-t);outline-offset:3px}
+.good:hover .gn a{color:var(--wing-t)}
+.gs{font-size:14px;line-height:1.45;color:var(--fg2)}
+.gd{display:grid;gap:3px;margin:2px 0 0}
+.gd div{display:flex;flex-wrap:wrap;column-gap:8px;align-items:baseline}
+.gd dt{font:500 11px/1.5 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.gd dd{margin:0;font-size:13px;line-height:1.5}
+.gp{margin-top:4px;font:400 15px/1 var(--mono);letter-spacing:.04em}
+/* Between phone and wide desktop the three cards of a group stand upright, the photo above the words. */
+@media (min-width:621px) and (max-width:1180px){.good{grid-template-columns:minmax(0,1fr)}.tile{width:100%;aspect-ratio:16/10}}
+@media (max-width:900px){.cat-head{grid-template-columns:1fr;gap:12px}}
+@media (max-width:620px){.goods-grid{grid-template-columns:1fr}.tile{width:96px}}
 .lead.gap{margin-top:14px}
 .spec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(20px,4vw,64px);margin:clamp(18px,3.6vh,36px) 0 0;border-bottom:1px solid var(--line)}
 .spec div{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:12px;align-items:baseline;border-top:1px solid var(--line);padding:clamp(9px,1.6vh,14px) 0}
@@ -328,10 +348,6 @@ dialog.reel::backdrop{background:transparent}
 .order{max-width:760px}
 @media (max-width:900px){
   .shop-cover .arch{height:min(30svh,280px)}
-  .goods-row{grid-template-columns:1fr;gap:12px;margin-top:18px}
-  .good{grid-template-columns:96px minmax(0,1fr);align-items:center;column-gap:16px;row-gap:6px}
-  .good .arch{width:96px;grid-row:span 2}
-  .good .gp{align-self:start}
   .spec{grid-template-columns:1fr}
 }
 dialog.basket{padding:0;border:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;background:var(--scrim);color:var(--fg)}
@@ -384,7 +400,8 @@ dialog.basket::backdrop{background:transparent}
 body[data-wing="hortus"] .xp-c{filter:contrast(1.14) saturate(1.3)}
 body[data-wing="machina"] .xp-c{filter:contrast(1.06) saturate(1.12)}
 body[data-wing="arca"] .xp-c{filter:contrast(1.12) saturate(1.28)}
-.xp-grain{position:absolute;left:-40px;top:-40px;width:calc(100% + 80px);height:calc(100% + 80px);max-width:none;z-index:2;pointer-events:none;opacity:.07;image-rendering:pixelated;animation:xp-grain .9s steps(5) infinite}
+/* A little grain, one screen pixel fine and faint enough that the void stays dark: no haze. */
+.xp-grain{position:absolute;left:-40px;top:-40px;width:calc(100% + 80px);height:calc(100% + 80px);max-width:none;z-index:2;pointer-events:none;opacity:.05;animation:xp-grain .9s steps(5) infinite}
 @keyframes xp-grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-14px,8px)}40%{transform:translate(9px,-12px)}60%{transform:translate(-6px,-4px)}80%{transform:translate(12px,10px)}}
 .xp-hud{position:absolute;z-index:10;top:calc(var(--bar) + 12px);left:var(--gl);display:inline-flex;align-items:center;gap:10px;min-height:34px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);pointer-events:none}
 .xp-dots{display:flex;gap:5px}

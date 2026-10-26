@@ -16,11 +16,13 @@ export function loadShop(siteDir) {
   const file = join(siteDir, 'shop.json');
   if (!existsSync(file)) return null;
   const shop = JSON.parse(readFileSync(file, 'utf8'));
+  for (const k of ['code', 'symbol', 'name']) if (!shop.currency?.[k]) throw new Error(`site/shop.json: currency has no ${k}`);
   const slugs = new Set();
   for (const p of shop.products || []) {
     for (const k of ['slug', 'name', 'kind', 'line', 'lead', 'price', 'image', 'alt']) if (p[k] == null || p[k] === '') throw new Error(`site/shop.json: product ${p.slug || '?'} has no ${k}`);
     if (!/^[a-z0-9-]+$/.test(p.slug)) throw new Error(`site/shop.json: slug "${p.slug}" must be lowercase letters, digits and hyphens`);
     if (!Number.isInteger(p.price) || p.price <= 0) throw new Error(`site/shop.json: ${p.slug} price must be a whole number of ${shop.currency?.code || 'units'}`);
+    for (const k of p.keys || []) if (!(p.specs || []).some(([n]) => n === k)) throw new Error(`site/shop.json: ${p.slug} keys name "${k}", which is not in its specs`);
     if (slugs.has(p.slug)) throw new Error(`site/shop.json: slug "${p.slug}" appears twice`);
     slugs.add(p.slug);
   }
@@ -47,29 +49,34 @@ function hardwareScreen(shop) {
     + `</div><div class="media" data-fade style="--d:.2s">${goods(h.image, cover ? cover.alt : '')}</div></div></section>`;
 }
 
-// The link is named by its product, kind and price; the photo keeps the ledger's alt text for anyone who meets it alone.
+// The hardware list is packed: each photo stands whole on paper in a plain tile, no round top (the owner's choice for this
+// list, 26 October 2026), and keeps the same grey-to-colour sweep.
+const tile = (file, alt) => `<span class="tile goods"><img loading="lazy" decoding="async" src="media/${esc(file)}" alt="${esc(alt)}"><i class="seal" aria-hidden="true"></i></span>`;
+
+// One card per product: kind, name, line, the two specs it names in "keys", and the price. The name is the link, and its
+// hit area covers the card, so the rest reads as plain text. A hyphenated word stays whole on its line ("Wi-Fi").
+const keep = (s) => esc(s).replace(/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)+/gu, (w) => `<span class="nw">${w}</span>`);
 function card(shop, p) {
-  return `<li><a class="good" href="#/hardware/${p.slug}" aria-label="${esc(p.name)}, ${esc(p.kind)}, ${money(shop, p.price)}">${goods(p.image, p.alt)}`
-    + `<span class="gl"><b>${esc(p.name)}</b><span>${esc(p.kind)}</span></span><span class="gp">${money(shop, p.price)}</span></a></li>`;
+  const keys = (p.keys || []).map((k) => `<div><dt>${esc(k)}</dt><dd>${esc(p.specs.find(([n]) => n === k)[1])}</dd></div>`).join('');
+  return `<li class="good">${tile(p.image, p.alt)}<div class="gt"><p class="gk">${keep(p.kind)}</p>`
+    + `<h3 class="gn"><a href="#/hardware/${p.slug}">${keep(p.name)}</a></h3><p class="gs">${esc(p.line)}</p>`
+    + (keys ? `<dl class="gd">${keys}</dl>` : '') + `<p class="gp">${money(shop, p.price)}</p></div></li>`;
 }
 
 function indexView(shop) {
   const x = shop.index;
   const bySlug = Object.fromEntries(shop.products.map((p) => [p.slug, p]));
-  const cover = shop.products.find((p) => p.image === x.image);
   let out = `<main class="view" id="view-hardware" data-view="hardware" data-wing="hortus" data-crumb="Hardware" data-crumb-parent="hortus" data-page-title="Hardware, Hortus — lastfomo" tabindex="-1" hidden>`
-    + `<section class="screen shop-cover" data-title="Hardware" data-wing="hortus"><div class="wrap split"><div class="stack">`
-    + `<p class="code" data-fade style="--d:.1s">${esc(shop.hardware.code)}</p>`
-    + `<h1 class="h1" data-rise style="--d:.2s"><span>${esc(x.title)}</span></h1>`
-    + `<p class="lead" data-fade style="--d:.5s">${esc(x.lead)}</p>`
-    + `<div class="row" data-fade style="--d:.7s"><a class="btn solid" href="#/hardware" data-scroll="hw-${x.groups[0].id}">See the range</a><a class="btn" href="#/hortus">Back to Hortus</a></div>`
-    + `</div><div class="media" data-fade style="--d:.2s">${goods(x.image, cover ? cover.alt : '', false)}</div></div></section>`;
-  for (const g of x.groups) {
-    out += `<section class="screen" id="hw-${g.id}" data-title="${esc(g.label)}" data-wing="hortus"><div class="wrap">`
-      + `<h2 class="h2" data-rise><span>${esc(g.title)}</span></h2>`
-      + `<ul class="goods-row" data-fade style="--d:.3s">${g.products.map((s) => card(shop, bySlug[s])).join('')}</ul></div></section>`;
-  }
-  out += `<section class="screen" data-title="Order" data-wing="hortus"><div class="wrap">`
+    + `<section class="screen tall cat" data-title="Hardware" data-wing="hortus"><div class="wrap">`
+    + `<div class="cat-head"><div class="stack"><p class="code" data-fade style="--d:.1s">${esc(shop.hardware.code)}</p>`
+    + `<h1 class="h1" data-rise style="--d:.2s"><span>${esc(x.title)}</span></h1></div>`
+    + `<p class="lead" data-fade style="--d:.4s">${esc(x.lead)}</p></div>`;
+  x.groups.forEach((g, i) => {
+    out += `<div class="cat-g" id="hw-${g.id}" data-fade style="--d:${(0.5 + i * 0.15).toFixed(2)}s"><h2 class="cat-t">${esc(g.title)}</h2>`
+      + `<ul class="goods-grid">${g.products.map((s) => card(shop, bySlug[s])).join('')}</ul></div>`;
+  });
+  out += `</div></section>`
+    + `<section class="screen" data-title="Order" data-wing="hortus"><div class="wrap">`
     + `<h2 class="h2" data-rise><span>How ordering works.</span></h2>`
     + `<ol class="steps" data-fade style="--d:.3s">${x.steps.map((s, i) => `<li><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="t">${esc(s.t)}</span><span class="s">${esc(s.s)}</span></li>`).join('')}</ol>`
     + `<div class="next" data-fade style="--d:.5s"><button class="btn solid" type="button" data-basket>Open the basket</button><a class="big" href="#/hortus">Hortus${ne}</a></div>`
@@ -101,7 +108,7 @@ function productView(shop, p, next) {
     + `<section class="screen" data-title="Order" data-wing="hortus"><div class="wrap"><div class="stack order">`
     + `<p class="code" data-fade style="--d:.1s">${CODE}Order</p>`
     + `<h2 class="h2" data-rise style="--d:.2s"><span>${esc(p.name)}, ${money(shop, p.price)}.</span></h2>`
-    + `<p class="lead" data-fade style="--d:.4s">Price in roubles, as listed by the maker, with the maker’s 1-year warranty. We confirm stock, delivery and payment by email before anything ships.</p>`
+    + `<p class="lead" data-fade style="--d:.4s">Price in ${esc(shop.currency.name)}, with the maker’s 1-year warranty. We confirm stock, delivery and payment by email before anything ships.</p>`
     + `<div class="row" data-fade style="--d:.6s"><button class="btn solid" type="button" data-add="${p.slug}">Add to basket</button><button class="btn" type="button" data-basket>Open the basket</button></div></div>`
     + `<div class="next" data-fade style="--d:.7s"><span class="code" style="color:var(--fg2)">Next in hardware</span><a class="big" href="#/hardware/${next.slug}">${esc(next.name)}${ne}</a></div>`
     + `</div></section></main>`;
@@ -117,7 +124,7 @@ function basket(shop) {
     + `<p class="lead" id="basket-empty">Nothing in it yet. <a href="#/hardware">See the hardware</a>.</p>`
     + `<ul class="lines" id="basket-lines" aria-label="In the basket"></ul>`
     + `<div class="total" id="basket-sum" hidden><span>Subtotal</span><b id="basket-total"></b></div>`
-    + `<p class="note" id="basket-note" hidden>Prices in roubles, as listed by the maker. Nothing is charged here: we reply by email with stock, delivery and payment.</p>`
+    + `<p class="note" id="basket-note" hidden>Prices in ${esc(shop.currency.name)}. Nothing is charged here: we reply by email with stock, delivery and payment.</p>`
     + `<form class="form" id="order" hidden><div class="fields">`
     + `<label><span>Your name</span><input name="name" autocomplete="name" maxlength="120" required></label>`
     + `<label><span>Email</span><input name="email" type="email" autocomplete="email" maxlength="200" required></label>`

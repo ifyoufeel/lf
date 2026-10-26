@@ -1277,14 +1277,22 @@
     if (!renderer || !w || !h) return;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
   }
-  // Film grain over the stage: drawn once per size into a canvas, so no image URL is needed (the site's CSP has none).
+  // Film grain over the stage: a tile of fine specks, mostly clear and a few faintly light, laid once per size into a canvas
+  // at the scene's own pixel ratio, so no image URL is needed (the site's CSP has none). A little grain, not a haze.
+  let tile = null;
   function grain() {
-    const cv = el.grain, w = Math.ceil((view.clientWidth + 80) / 2), h = Math.ceil((view.clientHeight + 80) / 2);
+    const cv = el.grain, r = Math.min(devicePixelRatio || 1, COARSE ? 1.5 : 2);
+    const w = Math.ceil((view.clientWidth + 80) * r), h = Math.ceil((view.clientHeight + 80) * r);
     if (!w || !h || (cv.width === w && cv.height === h)) return;
+    if (!tile) {
+      tile = document.createElement('canvas'); tile.width = tile.height = 256;
+      const t = tile.getContext('2d'), img = t.createImageData(256, 256), d = img.data;
+      for (let i = 0; i < d.length; i += 4) { d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = (Math.random() ** 3 * 255) | 0; }
+      t.putImageData(img, 0, 0);
+    }
     cv.width = w; cv.height = h;
-    const x = cv.getContext('2d'), img = x.createImageData(w, h), d = img.data;
-    for (let i = 0; i < d.length; i += 4) { const v = (Math.random() * 255) | 0; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
-    x.putImageData(img, 0, 0);
+    const x = cv.getContext('2d');
+    x.fillStyle = x.createPattern(tile, 'repeat'); x.fillRect(0, 0, w, h);
   }
   let rz = 0;
   addEventListener('resize', () => { if (!active) return; clearTimeout(rz); rz = setTimeout(() => { size(); grain(); }, 120); size(); });
