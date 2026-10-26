@@ -142,9 +142,18 @@ head = head.replace(/<meta charset="[^"]*">\s*/, '').replace(/<meta name="viewpo
 head = once(head, /(<title>[^<]*<\/title>)/, (t) => t + '\n<meta name="claude:viewport-fit-sides" content="cover">');
 head = once(head, /<link rel="stylesheet" href="tokens\.css">\s*<link rel="stylesheet" href="styles\.css">/, () => `<style>\n${read('site/tokens.css')}\n${read('site/styles.css')}</style>`);
 head = once(head, /<script src="boot\.js"><\/script>/, () => `<script>${scriptSafe(read('site/boot.js'))}</script>`);
-body = once(body, /<script src="explore\.js"><\/script>/, () => `<script>\n${scriptSafe(read('site/explore.js'))}</script>`);
-body = once(body, /<script src="main\.js"><\/script>/, () => `<script>\n${scriptSafe(read('site/main.js'))}</script>`);
+// Each still travels once. A photo the page shows more than once (the shop's sit on several cards and shelves) goes into
+// one map, its images name it in data-pic, and a small script fills them in, templates included, before the page's own
+// scripts run. A photo shown once is inlined where it stands.
+const seen = new Map();
+for (const [, rel] of body.matchAll(/ src="(media\/[^"]+\.jpg)"/g)) seen.set(rel, (seen.get(rel) || 0) + 1);
+const shared = [...seen].filter(([, n]) => n > 1).map(([rel]) => rel);
+body = body.replace(/ src="(media\/[^"]+\.jpg)"/g, (m, rel) => (shared.includes(rel) ? ` data-pic="${rel}"` : m));
 body = body.replace(/(src|poster)="(media\/[^"]+\.jpg)"/g, (_, attr, rel) => `${attr}="${dataUri(rel)}"`);
+const pics = shared.length ? `<script type="application/json" id="lf-pics">${JSON.stringify(Object.fromEntries(shared.map((rel) => [rel, dataUri(rel)])))}</script>\n`
+  + `<script>(() => { const m = JSON.parse(document.getElementById('lf-pics').textContent), fill = (r) => r.querySelectorAll('img[data-pic]').forEach((i) => { i.src = m[i.dataset.pic]; }); fill(document); document.querySelectorAll('template').forEach((t) => fill(t.content)); })();</script>\n` : '';
+body = once(body, /<script src="explore\.js"><\/script>/, () => `${pics}<script>\n${scriptSafe(read('site/explore.js'))}</script>`);
+body = once(body, /<script src="main\.js"><\/script>/, () => `<script>\n${scriptSafe(read('site/main.js'))}</script>`);
 const fragment = head.trim() + '\n' + body.trim() + '\n';
 mkdirSync(P('dist/artifact'), { recursive: true });
 writeFileSync(P('dist/artifact/lastfomo.html'), fragment);

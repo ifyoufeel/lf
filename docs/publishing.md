@@ -36,7 +36,7 @@ The page and the build already handle this:
 
 ### Steps
 
-1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 5.8 MB: 1.2 MB of page and stills, 4.7 MB of inlined loops; the limit is 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
+1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 10.9 MB on 26 October 2026: the page and its stills, each shared photo once, 4.7 MB of inlined loops and the cover footage’s H.264 copies; the limit is 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
 2. Publish with the Artifact tool: `file_path` `dist/artifact/lastfomo.html` and a one-word icon. Keep the returned URL.
 3. For every later change, rebuild and republish with the same `file_path`, which keeps the same URL. A new path creates a new link.
 4. Share the link. Name the open items in the message: any loop still missing (the build names them; their posters stand in), the unconfirmed wording.
