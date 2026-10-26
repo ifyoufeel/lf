@@ -13,24 +13,20 @@
   // The web build plays films in place; an Artifact cannot embed other sites, so there the links open YouTube.
   const EMBED = MEDIA.embed !== false;
   const BRIEF_URL = typeof MEDIA.brief === 'string' ? MEDIA.brief : ''; // the web build posts the brief here; the Artifact has none
-  // A loop is { mp4, webm } (or one path); pick what this browser decodes. Some builds ship without H.264.
+  // The wing loops (960×1280) and the case cover footage (2560×1440) are { av1, mp4 }: the AV1 file where there is one
+  // and it decodes, else the H.264 file. Phones take the H.264 file first, since every phone decodes it in hardware.
+  // The Artifact carries only the H.264 files.
   const probe = document.createElement('video');
-  const loopSrc = (k) => {
-    const l = LOOPS[k];
-    if (!l) return '';
-    if (typeof l === 'string') return l;
-    return (l.mp4 && probe.canPlayType('video/mp4; codecs="avc1.640028"')) ? l.mp4 : (l.webm && probe.canPlayType('video/webm; codecs="vp9"')) ? l.webm : (l.mp4 || '');
-  };
-  // Case cover footage is { av1, mp4 }: the owner's 2560×1440 AV1 file where it decodes, else the 1280×720 H.264 copy.
-  // Phones take the H.264 copy first, since every phone decodes it in hardware. The Artifact carries only the copy.
   const narrow = matchMedia('(max-width: 900px)');
-  const coverSrc = (k) => {
-    const c = COVERS[k];
+  const videoSrc = (c) => {
     if (!c) return '';
+    if (typeof c === 'string') return c;
     const av1 = c.av1 && probe.canPlayType('video/mp4; codecs="av01.0.12M.10"') ? c.av1 : '';
     const avc = c.mp4 && probe.canPlayType('video/mp4; codecs="avc1.640028"') ? c.mp4 : '';
     return narrow.matches ? avc || av1 : av1 || avc; // neither: the poster stands
   };
+  const loopSrc = (k) => videoSrc(LOOPS[k]);
+  const coverSrc = (k) => videoSrc(COVERS[k]);
   const filmId = (k) => (FILMS[k] && /^[\w-]{11}$/.test(FILMS[k].youtube || '') ? FILMS[k].youtube : '');
   // Inside an Artifact a film plays from the page's own asset store (set by the build); otherwise from YouTube.
   const filmSrc = (k) => (FILMS[k] && typeof FILMS[k].src === 'string' ? FILMS[k].src : '');
@@ -220,44 +216,31 @@
     };
     requestAnimationFrame(step);
   }
-  // A loop plays once each time its screen becomes active and holds on media.json's "hold" frame (or its last).
-  $$('video.lp').forEach((v) => {
-    v.loop = false;
-    const hold = Number((LOOPS[v.dataset.loop] || {}).hold) || 0;
-    if (!hold) return;
-    const check = () => { if (v.currentTime >= hold) v.pause(); else if (!v.paused && v.requestVideoFrameCallback) v.requestVideoFrameCallback(check); };
-    v.addEventListener('play', check);
-    v.addEventListener('timeupdate', check);
-  });
-  // Case cover footage loops for as long as its cover is the active screen of the open page, the tab is in view and no
-  // film is open; anywhere else it pauses, and it loads only once its cover is first active. It has no pause control, by
-  // the owner's choice; reduced motion keeps the poster.
-  function runCover(v) {
-    const view = v.closest('main.view'), src = coverSrc(v.dataset.cover);
+  // A wing loop and a case cover's footage play round for as long as their screen is the active one of the open page,
+  // the tab is in view and no film is open; anywhere else they pause, and each loads only once its screen is first
+  // active. Neither has a pause control, by the owner's choice (26 October 2026); reduced motion keeps the poster.
+  function runVideo(v) {
+    const view = v.closest('main.view'), src = v.dataset.loop ? loopSrc(v.dataset.loop) : coverSrc(v.dataset.cover);
     const on = src && !RM && !document.hidden && !$('#reel[open]') && view && !view.hidden && view._active === v.closest('.screen');
     if (on) {
       if (!v.src) { v.loop = true; v.src = src; }
       v.play().catch(() => {});
     } else if (!v.paused) v.pause();
   }
-  const runCovers = () => $$('video.cover-v').forEach(runCover);
-  document.addEventListener('visibilitychange', runCovers);
+  const runVideos = () => $$('video.lp, video.cover-v').forEach(runVideo);
+  document.addEventListener('visibilitychange', runVideos);
   function activate(view, secs, i) {
     const s = secs[i];
     if (!s) return;
     const fresh = view._active !== s;
     view._active = s;
-    runCovers();
+    // A wing loop starts over each time its screen comes back, so it opens on its first frame (Arca's, sealed).
+    if (fresh) $$('video.lp', s).forEach((v) => { if (v.src) v.currentTime = 0; });
+    runVideos();
     s.classList.add('in');
     document.body.dataset.wing = s.dataset.wing || view.dataset.wing || '';
     $$('button', dotsNav).forEach((b, j) => b.setAttribute('aria-current', j === i ? 'true' : 'false'));
     prog.style.width = (secs.length > 1 ? (i / (secs.length - 1)) * 100 : 100) + '%';
-    $$('video.lp', view).forEach((v) => {
-      if (s.contains(v) && !RM && loopSrc(v.dataset.loop)) {
-        if (!v.src) v.src = loopSrc(v.dataset.loop);
-        if (fresh) { v.currentTime = 0; v.play().catch(() => {}); }
-      } else { v.pause(); }
-    });
     $$('[data-count]', s).forEach(count);
   }
   function setup(view) {
@@ -389,7 +372,7 @@
     if (dlg.open) return;
     opener = document.activeElement;
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
-    runCovers();
+    runVideos();
   };
   // Watch the films: the three films to choose from, in the same dialog that plays them.
   function openPicker() {
@@ -412,7 +395,7 @@
   $('#reel-x').addEventListener('click', closeReel);
   dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.classList.contains('reel-in')) closeReel(); });
   // Closing removes the player, which stops the film; focus returns to the control that opened it.
-  dlg.addEventListener('close', () => { slot.replaceChildren(); pick.hidden = true; if (opener && opener.focus) opener.focus({ preventScroll: true }); opener = null; runCovers(); });
+  dlg.addEventListener('close', () => { slot.replaceChildren(); pick.hidden = true; if (opener && opener.focus) opener.focus({ preventScroll: true }); opener = null; runVideos(); });
 
   /* ---------------- the plus cursor ---------------- */
   if (FINE && !RM) {

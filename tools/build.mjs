@@ -124,12 +124,12 @@ const webImages = writeWeb('dist/web', webSource);
 if (!shopLive) writeWeb('dist/preview', html);
 
 // dist/artifact: a fragment (the Artifact skeleton supplies doctype, charset and viewport), everything inlined.
-// Loops travel inside the page as data URIs, both formats of each (about 4.7 MB of the 16 MB limit). The cover footage
-// travels as its H.264 copy only (about 4.4 MB more): the AV1 files would take the page past the limit. Films stay links,
-// since an Artifact cannot embed YouTube.
+// The wing loops and the cover footage travel inside the page as data URIs, each as its H.264 copy only (about 4.5 MB
+// and 4.4 MB of the 16 MB limit): the AV1 files would take the page past the limit. Films stay links, since an Artifact
+// cannot embed YouTube.
 const loopUri = (rel) => `data:video/${rel.endsWith('.webm') ? 'webm' : 'mp4'};base64,` + readFileSync(P('site', rel)).toString('base64');
 const inline = (v) => (local(v) ? loopUri(v) : v);
-const artLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([t, f]) => [t, inline(f)])) : inline(v)]));
+const artLoops = Object.fromEntries(Object.entries(media.loops).map(([k, v]) => [k, v && typeof v === 'object' ? (v.mp4 ? { mp4: inline(v.mp4) } : {}) : inline(v)]));
 // A film with an "asset" URL (uploaded to the Artifact's asset store) plays in the Artifact's own popup.
 const artFilms = Object.fromEntries(Object.entries(media.films).map(([k, f]) => [k, f && f.asset ? { ...f, src: f.asset } : f]));
 const artCovers = Object.fromEntries(Object.entries(covers).map(([k, v]) => [k, v && v.mp4 ? { mp4: inline(v.mp4) } : {}]));

@@ -30,13 +30,13 @@ Research date: 17 October 2026. Every price below is as seen on that date. `verc
 The page and the build already handle this:
 
 - Routing uses hash routes, and plain anchors (`#machina`) also work, because an Artifact link passes only plain anchors (`site/main.js`, `route()`).
-- The build inlines the loops into the Artifact as data URIs, both formats of each (MP4 and WebM, so they play in browsers built without H.264). No upload. With all three loops that is about 4.7 MB of the page (Arca 153 + 44 KB, Machina 886 + 740 KB, Hortus 1,110 + 691 KB, a third more as base64), and it arrives with the page, where the web build loads each loop only when its screen is active. If the Artifact must get lighter, move the loops to its asset store (as for the films) and reference them by URL.
+- The build inlines the loops into the Artifact as data URIs, the H.264 file of each, which every browser that opens claude.ai decodes. No upload. With all three loops that is about 4.5 MB of the page (Arca 1,077 KB, Machina 1,150 KB, Hortus 1,068 KB, a third more as base64), and it arrives with the page, where the web build loads each loop only when its screen is active. If the Artifact must get lighter, move the loops to its asset store (as for the films) and reference them by URL.
 - The films are on YouTube. In the Artifact every play control is a plain link that opens YouTube in a new tab; the web build plays the same film in place (`site/media.json` → `films`, `embed: false` for the Artifact).
 - The brief composer shows the brief with a copy button whenever there is no address, and opens the mail app only when one is set.
 
 ### Steps
 
-1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 10.9 MB on 26 October 2026: the page and its stills, each shared photo once, 4.7 MB of inlined loops and the cover footage’s H.264 copies; the limit is 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
+1. Build and check: `node tools/build.mjs`. It fails on brand errors and prints the size of `dist/artifact/lastfomo.html` (about 10.6 MB on 26 October 2026: the page and its stills, each shared photo once, 4.5 MB of inlined loops and the cover footage’s H.264 copies; the limit is 16 MB). Then `node tools/qa/shoot.mjs` and, after behaviour changes, `node tools/qa/smoke.mjs`.
 2. Publish with the Artifact tool: `file_path` `dist/artifact/lastfomo.html` and a one-word icon. Keep the returned URL.
 3. For every later change, rebuild and republish with the same `file_path`, which keeps the same URL. A new path creates a new link.
 4. Share the link. Name the open items in the message: any loop still missing (the build names them; their posters stand in), the unconfirmed wording.
@@ -276,7 +276,7 @@ In order, adding the next layer only when the last one is not enough:
 ### Content gates
 
 - [x] Contact address set: lastfomo@gmail.com.
-- [x] Rights: every image and film is the owner’s.
+- [ ] Rights: every image and film is the owner’s, except the shop’s product photos, which are E-MODE’s (ledger rights “check” until the maker agrees).
 - [ ] Unconfirmed wording (`ledger.json` → `unconfirmed`) approved or replaced.
 - [ ] `node tools/build.mjs` passes; `node tools/qa/shoot.mjs` and `node tools/qa/smoke.mjs` are clean on the preview build.
 
@@ -348,8 +348,8 @@ Vercel Web Analytics uses no cookies. It identifies a visitor by a hash of the i
 | Item | Budget | Today |
 |---|---|---|
 | HTML + CSS + JS, uncompressed | 150 KB | about 93 KB (`index.html` 39.7, `main.js` 27.7, `styles.css` 22.9, `tokens.css` 2.0, `boot.js` 0.4) |
-| A still or poster | 80 KB | largest 59 KB (`hortus-plants.jpg`) |
-| A loop | 1.2 MB | 44 KB to 1.1 MB (largest: `hortus-loop.mp4`, 1,110 KB) |
+| A still or poster | 80 KB | the loop posters 71 to 76 KB; over it, the Hortus cover poster (`hortus-cover.jpg`, 111 KB) |
+| A loop | 1.2 MB | 899 KB to 1,203 KB (largest: `hortus-loop-av1.mp4`) |
 | Video loaded on first paint | none | web: none (`preload="none"`, source set on the active screen); the Artifact carries its loops inline |
 | Fonts | `display=swap`; preconnect to both Google origins | both in place |
 | Core Web Vitals at the 75th percentile | LCP 2.5 s or less, INP 200 ms or less, CLS 0.1 or less ([Web Vitals](https://web.dev/articles/vitals)) | measure on the preview |

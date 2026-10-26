@@ -1,7 +1,7 @@
 {
   "$note": "The Hortus hardware shop: what the page shows and in what words. Hand-written in English from the maker's own pages (shop/source/emode.json, imported by tools/shop/import-emode.mjs). tools/shop/render.mjs turns this into markup. Every number here is a fact in brand/ledger.json (hortus.shop.*); every photo is in ledger → media. \"keys\" names the two specs a product's card shows on the packed hardware list.",
-  "live": false,
-  "$live": "false: the shop renders in the claude.ai Artifact and in dist/preview only, never on the live site. Set true once the owner approves the shop for lastfomo.vercel.app.",
+  "live": true,
+  "$live": "true: the shop and the Machina and Arca previews render everywhere: the claude.ai Artifact and the web build (lastfomo.vercel.app once this reaches the production branch). The owner approved them to go live on 26 October 2026, after a last test on their own devices. Set false to take them off the web build again; the Artifact keeps them.",
   "maker": { "name": "E-MODE", "country": "Russia", "url": "https://e-mode.pro/" },
   "currency": { "code": "USD", "symbol": "$", "name": "US dollars" },
   "$prices": "Prices in US dollars by the owner's rule of 26 October 2026: the maker's rouble list price of 25 October 2026 (shop/source/emode.json) divided by 100 and rounded to the dollar. Each is a fact in brand/ledger.json (hortus.shop.*).",

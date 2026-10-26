@@ -442,7 +442,7 @@ await step('nav: Skip to content moves focus into the view', async () => {
   return 'focus on #view-machina, route kept';
 });
 
-await step('motion: plates and the wing loops come to rest', async () => {
+await step('motion: the plates rest; the wing loops play round on their screen and pause off it', async () => {
   await go('#/', homeView);
   await page.evaluate(() => { const v = document.querySelector('main.view:not([hidden])'); v.style.scrollBehavior = 'auto'; v.scrollTop = 0; });
   await page.mouse.move(5, 5);
@@ -450,21 +450,32 @@ await step('motion: plates and the wing loops come to rest', async () => {
   const hash = () => page.evaluate(() => [...document.querySelectorAll('.hero canvas.plate')].map((c) => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let h = 0; for (let i = 0; i < d.length; i += 97) h = (h * 31 + d[i]) | 0; return h; }).join());
   const a = await hash(); await page.waitForTimeout(600); const b = await hash();
   check(a === b, 'the hero plates still change 6 s after the pointer stopped');
-  // Each wing loop plays once when its screen becomes active, then rests on media.json's hold frame (3.6 s).
-  const rests = [];
+  // Each wing loop plays round for as long as its screen is active (the owner's choice), and pauses once the next
+  // wing's screen takes over. "Round" is seen, not assumed: the clock runs past the end of the loop and back to its start.
+  const runs = [];
+  let prev = null;
   for (const wing of ['hortus', 'machina', 'arca']) {
-    const loop = await page.evaluate(async (w) => {
+    const loop = await page.evaluate(async ({ w, p }) => {
       const v = document.querySelector('#view-home'); const s = document.getElementById(w);
-      if (!s) return null;
-      v.scrollTop = s.offsetTop;
-      await new Promise((r) => setTimeout(r, 6500));
       const el = document.querySelector(`video[data-loop="${w}"]`);
-      return el ? { paused: el.paused, t: +el.currentTime.toFixed(2), src: !!el.currentSrc } : null;
-    }, wing);
-    if (loop && loop.src) check(loop.paused && loop.t > 3 && loop.t < 4.5, `the ${wing} loop did not rest on its hold frame (paused ${loop.paused}, t ${loop.t})`);
-    rests.push(`${wing} ${loop && loop.src ? 'rests at ' + loop.t + ' s' : 'not loaded'}`);
+      if (!s || !el) return null;
+      let last = 0, round = false;
+      const tick = () => { if (last > 4 && el.currentTime < 1) round = true; last = el.currentTime; };
+      el.addEventListener('timeupdate', tick);
+      v.scrollTop = s.offsetTop;
+      await new Promise((r) => setTimeout(r, 7500));
+      el.removeEventListener('timeupdate', tick);
+      const before = p && document.querySelector(`video[data-loop="${p}"]`);
+      return { round, loop: el.loop, paused: el.paused, t: +el.currentTime.toFixed(2), d: +(el.duration || 0).toFixed(2), src: el.currentSrc.startsWith('data:') ? 'inline H.264' : el.currentSrc.split('/').pop().split('?')[0], left: before ? before.paused : null };
+    }, { w: wing, p: prev });
+    if (loop && loop.src) {
+      check(loop.round && loop.loop && !loop.paused, `the ${wing} loop did not play round (loop ${loop.loop}, paused ${loop.paused}, t ${loop.t} of ${loop.d} s)`);
+      if (prev) check(loop.left === true, `the ${prev} loop kept playing after its screen left`);
+    }
+    runs.push(`${wing} ${loop && loop.src ? `plays round (${loop.d} s, ${loop.src})` : 'not loaded'}`);
+    prev = wing;
   }
-  return `plates still; ${rests.join(', ')}`;
+  return `plates still; ${runs.join(', ')}`;
 });
 
 const brief = {

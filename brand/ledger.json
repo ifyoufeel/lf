@@ -376,13 +376,10 @@
   },
   "placeholders": [],
   "unconfirmed": [
-    "The Machina and Arca previews are suggested wording: 'MCH — Machina · Build and source', 'The hardware is getting dearer.', its lead and outlook, the four price stories and 'Choose a machine to see its prices.'; 'ARC — Arca · Vault and artists', 'Gold and art, as the markets price them.', its lead, the Vault and Artists notes ('Opening later.'), the tab names and the two tab lines.",
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
-    "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief.",
-    "The Hortus hardware shop (site/shop.json) is a demonstration for the owner, shown in the Artifact only ('live': false). Its English copy is translated from the maker's Russian pages and is suggested wording: product lines, the hardware screen, 'How ordering works', the basket and order wording ('Nothing is charged here', 'We confirm stock, delivery and payment by email').",
-    "Explore (#/explore, site/explore.js) is suggested interface wording: the settings ('Auto walk', 'Visits every signal for you, wing by wing.', 'Music', 'The score of each wing.', 'Sounds', 'Steps, signals and arches.', 'Look with your phone', 'Walk to', 'How to walk'), the toasts ('Auto walk is on. Press the round button to walk yourself.', 'Your phone did not share its motion here. Drag to look around.') and the round button's 'Auto' and 'Hold to walk'. The signal panels carry the walking experience's copy; the San Gennaro panel now says 'over about 250 years', as the ledger does."
+    "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief."
   ],
   "conflicts": [
     {
@@ -419,13 +416,13 @@
       "topic": "Who makes the Hortus hardware",
       "site": "the Hortus case says the feeding systems and control hardware are designed and built in-house; the shop sells controllers made by E-MODE (Russia) and names the maker on every product",
       "figma": "Hortus: feeding systems and hardware, designed, machined, wired and assembled in-house",
-      "decision": "Pending: the owner to confirm how the case and the shop describe the hardware."
+      "decision": "Owner (26 October 2026): the shop is good to go live as the Artifact shows it, so the case’s ‘in-house’ stands beside the shop’s E-MODE naming until the owner says otherwise."
     },
     {
       "topic": "Shop photo colour",
       "site": "the maker's product photos carry blue sockets and red logos once they open from grey",
       "figma": "Rule 3: the wing colour is the only saturated colour; rule 9: sealed grey sweeps open to full colour",
-      "decision": "Pending: shown sealed in grey, sweeping open to the maker's colour, until the owner decides."
+      "decision": "Owner (26 October 2026): good to go live as the Artifact shows it: sealed in grey, sweeping open to the maker's colour."
     },
     {
       "topic": "Holders on subpages",
@@ -437,7 +434,7 @@
       "topic": "Market studies on the page",
       "site": "the Machina and Arca previews show price studies from dated reports: what the hardware for a private AI costs now against its launch price, the memory outlook, gold in 2026 and art sales by year",
       "figma": "Rule 5: every number traces to the ledger; never estimate a figure",
-      "decision": "Owner (26 October 2026): one elegant screen per wing in place of the markets, with charts and studies of how prices are rising and what is expected. Each figure is a dated, sourced fact (machina.study.*, arca.study.*); refresh them before the shop goes live."
+      "decision": "Owner (26 October 2026): one elegant screen per wing in place of the markets, with charts and studies of how prices are rising and what is expected. Each figure is a dated, sourced fact (machina.study.*, arca.study.*); refresh them as the markets move."
     }
   ],
   "media": {
@@ -528,32 +525,27 @@
     },
     "arca-loop.mp4": {
       "alt": "",
-      "role": "loop: sealed, magenta sweep, open, resealed (5 s, from the owner's GIF preview)",
-      "rights": "own"
-    },
-    "arca-loop.webm": {
-      "alt": "",
-      "role": "VP9 twin of arca-loop.mp4",
+      "role": "loop: the painting sealed in grey, a magenta sweep opens it to colour, then it reseals (5.12 s, 960×1280, plays round); the owner's MP4 preview of 26 October 2026, as supplied",
       "rights": "own"
     },
     "machina-loop.mp4": {
       "alt": "",
-      "role": "loop: the rig, a card slides in, the crosshairs turn chartreuse (5 s, from the owner's GIF preview); rests at 3.6 s",
+      "role": "loop: the rig under crosshairs, a card slides out and back, the crosshairs turn chartreuse (5.12 s, 960×1280, plays round); H.264 from the owner's MP4 preview of 26 October 2026",
       "rights": "own"
     },
-    "machina-loop.webm": {
+    "machina-loop-av1.mp4": {
       "alt": "",
-      "role": "VP9 twin of machina-loop.mp4",
+      "role": "AV1 copy of machina-loop.mp4, for wide screens that decode it",
       "rights": "own"
     },
     "hortus-loop.mp4": {
       "alt": "",
-      "role": "loop: a seed splits and the sprout rises (5 s, from the owner's GIF preview); rests at 3.6 s",
+      "role": "loop: a bean sprouting in soil, its roots lit green as they grow (5.12 s, 960×1280, plays round); H.264 from the owner's MP4 preview of 26 October 2026",
       "rights": "own"
     },
-    "hortus-loop.webm": {
+    "hortus-loop-av1.mp4": {
       "alt": "",
-      "role": "VP9 twin of hortus-loop.mp4",
+      "role": "AV1 copy of hortus-loop.mp4, for wide screens that decode it",
       "rights": "own"
     },
     "machina-cover-av1.mp4": {
