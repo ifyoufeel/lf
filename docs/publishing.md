@@ -10,7 +10,7 @@ Research date: 17 October 2026. Every price below is as seen on that date. `verc
 
 | Question | Recommendation | Cost per month |
 |---|---|---|
-| Where the site lives now | **https://lastfomo.vercel.app**, built by Vercel from this repo on every push (see “The live project”), and the claude.ai Artifact built from `dist/artifact/lastfomo.html` | Hobby today; the Artifact is included in the owner’s claude.ai plan |
+| Where the site lives now | **https://lastfomo.vercel.app**, and **https://lastfomo.com** once its DNS points at Vercel (see “Custom domain”), built by Vercel from this repo on every push (see “The live project”), and the claude.ai Artifact built from `dist/artifact/lastfomo.html` | Hobby, by the owner’s choice; the Artifact is included in the owner’s claude.ai plan |
 | Where it lives at launch | Vercel, plan **Pro** (the site is commercial), on the house domain | $20 per seat (*reported*) |
 | Where the videos live | Loops: small MP4 and WebM files in `site/media/`, as the build already does. Films: YouTube now (links in the Artifact, a privacy-enhanced embed on click in the web build); **Vercel Blob** if the films should leave YouTube | $0 at launch scale; Blob within the Pro allowance |
 | How “Send the brief” works later | A zero-dependency Vercel Function that sends the brief by email through Resend; the copy and mailto fallback stays | $0 on Resend Free |
@@ -60,9 +60,9 @@ If the owner can open that Artifact as an editor, publishing the new build to it
 
 ## 2. `dist/web` on Vercel
 
-### Plan: Pro, not Hobby
+### Plan: Hobby, by the owner’s choice
 
-Vercel’s fair use guidelines restrict Hobby to non-commercial personal use and count advertising a product or service as commercial ([fair use guidelines](https://vercel.com/docs/limits/fair-use-guidelines)). A page that asks for project briefs advertises the house’s services. Use **Pro** from the first deployment of this repo. Pro is $20 per seat per month with 1 TB of Fast Data Transfer included, as reported for spring 2026 ([makerkit summary](https://makerkit.dev/blog/saas/vercel-cost); confirm at [vercel.com/pricing](https://vercel.com/pricing)). Hobby includes 100 GB of Fast Data Transfer and 1 million function invocations ([limits](https://vercel.com/docs/limits)).
+**The owner’s decision (26 October 2026):** lastfomo is a personal site with little traffic, so the account stays on Hobby; switch to Pro if that changes. Vercel’s fair use guidelines restrict Hobby to non-commercial personal use and count advertising a product or service as commercial ([fair use guidelines](https://vercel.com/docs/limits/fair-use-guidelines)), so revisit the plan if the briefs or the shop become business. Pro is $20 per seat per month with 1 TB of Fast Data Transfer included, as reported for spring 2026 ([makerkit summary](https://makerkit.dev/blog/saas/vercel-cost); confirm at [vercel.com/pricing](https://vercel.com/pricing)). Hobby includes 100 GB of Fast Data Transfer and 1 million function invocations ([limits](https://vercel.com/docs/limits)).
 
 ### Project settings
 
@@ -89,7 +89,7 @@ Live since 18 October 2026 at **https://lastfomo.vercel.app**.
 | Repository | `ifyoufeel/lf`, connected through the Vercel GitHub app |
 | Production branch | the repo’s default branch, today `claude/great-hamilton-2sna3z` (its only branch) |
 | Build | `node tools/build.mjs` → `dist/web`, from `vercel.json`; Node 22.x set on the project |
-| Production addresses | `lastfomo.vercel.app` and `lastfomo-aaa-d3d3.vercel.app`, public |
+| Production addresses | `lastfomo.vercel.app` and `lastfomo-aaa-d3d3.vercel.app`, public; `lastfomo.com` (the main address) and `www.lastfomo.com` (308 to `lastfomo.com`), added 26 October 2026, serving once GoDaddy’s DNS points at Vercel (see “Custom domain”) |
 | Deployment Protection | Vercel Authentication on previews and on each deployment’s own URL (`prod_deployment_urls_and_all_previews`); the production addresses stay public |
 | Firewall | no custom rules |
 
@@ -110,7 +110,7 @@ Every push builds. A push to the production branch updates the live address; a p
 - Check the live site with a handful of requests, never a crawl. A burst of requests for paths that do not exist made Vercel’s automatic bot protection answer one sandbox address with its Security Checkpoint (403, `x-vercel-mitigated: challenge`). Browsers pass that checkpoint on their own; scripts do not.
 - The connector reads and writes the project, its deployments and its sandboxes. The Hobby plan includes some sandbox time; stop a sandbox when the check is done.
 
-The account is on Hobby today. Move to Pro before the house domain goes live (see above).
+The account is on Hobby, by the owner’s choice for a personal site (see “Plan” above); switch to Pro if that changes.
 
 ### The proposed `vercel.json`
 
@@ -185,9 +185,18 @@ The Vercel Toolbar on preview deployments needs `vercel.live` in five directives
 
 ### Custom domain
 
-1. Settings → Domains → add `[DOMAIN]` and `www.[DOMAIN]`. Redirect one to the other (apex as the canonical host is the usual choice).
-2. At the registrar: an `A` record for the apex to `76.76.21.21`, and a `CNAME` for `www` to the target Vercel shows (the current docs example is `cname.vercel-dns-0.com`). Or move the nameservers to Vercel. Use the exact values `vercel domains inspect [DOMAIN]` prints ([set up a custom domain](https://vercel.com/docs/domains/set-up-custom-domain)).
-3. Wait for verification. Vercel issues the certificate; `vercel certs ls` shows it.
+`lastfomo.com`, added to the project on 26 October 2026 as its main address; `lastfomo.vercel.app` keeps serving the same site, by the owner’s choice.
+
+1. On Vercel (done): Settings → Domains holds `lastfomo.com` (production, no redirect) and `www.lastfomo.com` (a 308 redirect to `lastfomo.com`). Vercel accepted both without a TXT challenge.
+2. At GoDaddy, which serves the domain’s DNS (`ns33.domaincontrol.com`, `ns34.domaincontrol.com`): on 26 October 2026 the domain still pointed at a Framer site (`A @` to `31.43.160.6` and `31.43.161.6`, `CNAME www` to `sites.framer.app`). The records Vercel asks for, from `get_domain_config`:
+
+   | Type | Name | Value |
+   |---|---|---|
+   | `A` | `@` | `76.76.21.21`, and no other `A` or `AAAA` record for `@` |
+   | `CNAME` | `www` | `cname.vercel-dns.com` |
+
+   Leave the other records (`MX`, `TXT`) as they are, and turn GoDaddy’s domain forwarding off if it is on. Moving the nameservers to Vercel is the alternative ([set up a custom domain](https://vercel.com/docs/domains/set-up-custom-domain)).
+3. Once the records resolve, Vercel’s domain config reads `misconfigured: false` and Vercel issues the certificate on its own. Remove the domain from the Framer project afterwards.
 4. If the brief is sent by email (section 4), add the sending records the email provider lists for its sending subdomain, plus a DMARC record.
 
 ### Alternatives

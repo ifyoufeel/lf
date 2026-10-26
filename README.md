@@ -99,7 +99,7 @@ There are two targets, built from the same source in one run.
 
 **Static host: `dist/web/`.** A full HTML document with `tokens.css`, `styles.css`, `boot.js`, `main.js` and `media/` beside it. Any static host serves the folder as it is. `dist/` is not committed, so a host that builds from Git runs `node tools/build.mjs` itself and serves `dist/web/`.
 
-**Vercel, live: https://lastfomo.vercel.app.** The Vercel project `lastfomo` is connected to this repo and builds `dist/web/` with `vercel.json`. A push to the production branch (today `claude/great-hamilton-2sna3z`, the default) updates the live address; a push to any other branch gets a preview URL behind the Vercel login. A brand error fails the build, so nothing off brand goes live. Details and the checks behind them: `docs/publishing.md` → “The live project”.
+**Vercel, live: https://lastfomo.vercel.app, and https://lastfomo.com once its DNS points at Vercel.** The Vercel project `lastfomo` is connected to this repo and builds `dist/web/` with `vercel.json`. A push to the production branch (today `claude/great-hamilton-2sna3z`, the default) updates the live address; a push to any other branch gets a preview URL behind the Vercel login. A brand error fails the build, so nothing off brand goes live. Details and the checks behind them: `docs/publishing.md` → “The live project”.
 
 Publish only from `dist/`, after a build that passed.
 
