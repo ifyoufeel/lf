@@ -381,10 +381,10 @@
       "decision": "Pending: shown sealed in grey, sweeping open to the maker's colour, until the owner decides."
     },
     {
-      "topic": "Hardware list holders",
-      "site": "the hardware list (#/hardware) packs all six products on one screen, each photo in a plain square tile with kind, line, two specs and the price",
+      "topic": "Holders on subpages",
+      "site": "the home page keeps the arch; subpages hold their pictures in square cards: the Hardware screen on the Hortus case (every product on a shelf), the packed hardware list, and each product's page, laid out like a shop's",
       "figma": "Rule 8: every wing uses the arch holder (.arch, fully rounded top), never a rectangle; rule 7: one message per screen",
-      "decision": "Owner: the hardware list is packed, without round tops, so it shows more (26 October 2026). The Hardware screen on the Hortus case and each product's page keep the arch."
+      "decision": "Owner: arches on the home page, as part of the brand; square cards on subpages, and the shop's pages packed like a marketplace (26 October 2026). The walk and the Start a project wing plates keep their arches until the owner says otherwise."
     }
   ],
   "media": {

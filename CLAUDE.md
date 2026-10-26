@@ -31,8 +31,8 @@ The rest of `site/` is hand-written source. `tools/shop/render.mjs` renders `sit
 4. Jacquard 24 sets only `lastfomo`, `machina`, `hortus`, `arca`, and only through `.word`.
 5. Real facts only. Every number on the page traces to `brand/ledger.json` → `facts`.
 6. No client names. The Machina case is “a medical practice”.
-7. One message per screen: a label, a wordmark, one line, at most one button.
-8. Every wing uses the same arch holder (`.arch`, fully rounded top). Never a rectangle.
+7. One message per screen: a label, a wordmark, one line, at most one button. The shop’s pages are packed like a shop’s, by the owner’s choice.
+8. The arch holder (`.arch`, fully rounded top) belongs to the home page, as part of the brand: every wing uses it there, never a rectangle. Subpages (the cases, the hardware and each product) hold their pictures in square cards (the owner’s rule, 26 October 2026).
 9. Sealed until you look: grey to colour behind a sweep line in the wing colour.
 10. Light on the wire: loops under 1.2 MB, video loads only when its screen is active.
 11. British spelling and typographic punctuation: ’ “ ” and the em dash in labels.

@@ -28,7 +28,7 @@ The QA tools need Playwright and Chromium, so they run on a workstation, not in 
 | 5 | Real facts only; every number traced to `ledger.json`. | R6, R7 | numbers written as words, claims without numbers |
 | 6 | No client names. | — | every line of copy |
 | 7 | One message per screen. | `overflowScreens`, `clippedTextScreens` (symptoms only) | the contact sheets |
-| 8 | Every wing uses the same arch holder. | — | the contact sheets, phone and desktop |
+| 8 | The arch holder on the home page; square cards on subpages. | — | the contact sheets, phone and desktop |
 | 9 | Sealed until you look. | R14 (a still version exists) | the reveal in a browser |
 | 10 | Light on the wire. | R16, build size report | video sizes before upload |
 | 11 | British spelling and typographic punctuation. | R8, R9 | words the ledger does not list |
@@ -97,7 +97,7 @@ A passing build means the page is not wrong in the ways a machine can measure. T
 - **Numbers in words and claims without numbers.** R6 reads digits only: “eight GPUs” or “the fastest” pass unseen. Each still needs a ledger fact or must go.
 - **Meaning.** “0 bytes leave the room” is a premise, never a measurement. The Arca field-note objects are research references, not Arca’s holdings: never imply ownership or sale.
 - **Client names and Wing 04.** The checks know one banned name, not every name. Read for both.
-- **Structure the checks do not model.** One message per screen, the same arch holder on every wing, a sealed reveal that actually reveals.
+- **Structure the checks do not model.** One message per screen (the shop’s pages excepted), the arch holder on the home page and square cards on subpages, a sealed reveal that actually reveals.
 - **Grade and weight of media.** The wing colour as the only saturated colour inside photographs and video; loops under 1.2 MB and films within budget before upload.
 
 ## When a rail seems wrong

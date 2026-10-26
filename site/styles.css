@@ -291,21 +291,20 @@ dialog.reel::backdrop{background:transparent}
   .basket-link span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .basket-link.empty{display:none}
 }
-/* A product photo stands whole on paper inside the arch, clear of its round top, and sweeps from grey to colour
-   behind a line in the wing colour when its screen is active (sealed until you look). */
+/* A product photo stands whole on paper in a square tile, and sweeps from grey to colour behind a line in the wing colour
+   when its screen is active (sealed until you look). Subpages hold their pictures in square cards; the arch belongs to the
+   home page (the owner's choice, 26 October 2026). */
 .goods{background:var(--paper)}
-.arch.goods img{object-fit:contain;padding:22% 8% 8%}
 .goods .seal{display:none}
 .js .goods .seal{display:block;position:absolute;inset:0;z-index:2;pointer-events:none;-webkit-backdrop-filter:grayscale(1);backdrop-filter:grayscale(1);transition:transform 1.2s var(--ease) .45s}
 .js .goods .seal::before{content:"";position:absolute;top:0;bottom:0;left:0;width:2px;background:var(--wing)}
 .js .screen.in .goods .seal{transform:translateX(101%)}
-.shop-cover .arch{height:min(62svh,600px);aspect-ratio:3/4.4;width:auto}
-.shop-cover .h1{font-size:clamp(40px,5.4vw,88px)}
 .h2.sub{font-size:clamp(22px,2.4vw,36px)}
-.strip .price{font:400 clamp(18px,1.6vw,24px)/1 var(--mono);letter-spacing:.02em;color:var(--fg)}
-/* The hardware list (#/hardware) is packed: every product on one screen, each photo whole on paper in a plain tile with no
-   round top (the owner's choice for this list, 26 October 2026). A card's name is its link, and its hit area covers the card. */
-#view-hardware{scroll-snap-type:y proximity}
+/* The shop's pages scroll freely between screens, and a screen grows when its cards need more than the window. */
+.view.shop-v{scroll-snap-type:y proximity}
+.view.shop-v .screen{height:auto;min-height:100%}
+/* The hardware list (#/hardware) is packed: every product on one screen in cards. A card's name is its link, and its hit
+   area covers the card. */
 .screen.cat{align-items:center}
 .cat .wrap{display:grid;gap:clamp(14px,2.6vh,28px)}
 .cat-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(16px,4vw,64px);align-items:end}
@@ -338,6 +337,38 @@ dialog.reel::backdrop{background:transparent}
 @media (min-width:621px) and (max-width:1180px){.good{grid-template-columns:minmax(0,1fr)}.tile{width:100%;aspect-ratio:16/10}}
 @media (max-width:900px){.cat-head{grid-template-columns:1fr;gap:12px}}
 @media (max-width:620px){.goods-grid{grid-template-columns:1fr}.tile{width:96px}}
+/* A shelf: one row of compact cards, the photo above the words. Three to a row on tablets; on phones it scrolls sideways. */
+.shelf{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(var(--n,6),minmax(0,1fr));gap:clamp(10px,1.2vw,16px)}
+.good.mini{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;align-items:stretch;align-content:stretch;gap:10px;padding:clamp(8px,.8vw,12px)}
+.mini .tile{width:100%;aspect-ratio:1}
+.mini .gt{grid-template-rows:auto auto 1fr;align-content:stretch;gap:4px}
+.mini .gn{font-size:clamp(16px,1.25vw,20px)}
+.mini .gp{align-self:end;margin-top:8px;font-size:14px}
+@media (max-width:900px){.shelf{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:620px){
+  .shelf{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:44%;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;margin-right:calc(var(--gr) * -1);padding-right:var(--gr);padding-bottom:6px}
+  .shelf>li{scroll-snap-align:start}
+}
+/* A product page: the photo in a square card beside the name, the price and the basket; what it does in cards; the order
+   with the rest of the hardware on a shelf. */
+.screen.pdp{align-items:center}
+.pdp-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,96px);align-items:center}
+.pdp-pic .tile{width:min(100%,64svh,620px);aspect-ratio:1;margin-inline:auto;border:1px solid var(--line)}
+.pdp-pic .tile img{padding:9%}
+.pdp-info{gap:clamp(12px,2vh,20px)}
+.pdp-info .h1{font-size:clamp(36px,4.6vw,76px)}
+.pdp-price{margin:0;font:400 clamp(24px,2.2vw,34px)/1 var(--mono);letter-spacing:.02em}
+.pdp-note{margin:0;font-size:14px;line-height:1.5;color:var(--fg2);max-width:52ch}
+.pdp-keys{margin:0;padding-top:12px;border-top:1px solid var(--line)}
+.does{list-style:none;margin:clamp(18px,3.6vh,32px) 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:clamp(10px,1.2vw,16px)}
+.does li{display:grid;gap:8px;align-content:start;padding:clamp(14px,1.4vw,20px);border:1px solid var(--line)}
+.does .n{font:500 11px/1.4 var(--mono);letter-spacing:.12em;color:var(--fg2)}
+.does .t{font:300 clamp(20px,1.7vw,26px)/1.15 var(--sans);letter-spacing:-.02em}
+.does .s{font-size:14px;line-height:1.5;color:var(--fg2)}
+.buy{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:18px 32px;padding:clamp(16px,2vw,28px);border:1px solid var(--line);margin-bottom:clamp(20px,4vh,40px)}
+.buy .stack{gap:10px}
+.buy .h2{font-size:clamp(26px,2.8vw,44px)}
+@media (max-width:900px){.pdp-in{grid-template-columns:1fr;gap:20px}.pdp-pic .tile{width:min(100%,46svh)}}
 .lead.gap{margin-top:14px}
 .spec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(20px,4vw,64px);margin:clamp(18px,3.6vh,36px) 0 0;border-bottom:1px solid var(--line)}
 .spec div{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:12px;align-items:baseline;border-top:1px solid var(--line);padding:clamp(9px,1.6vh,14px) 0}
@@ -345,7 +376,6 @@ dialog.reel::backdrop{background:transparent}
 .spec dd{margin:0;font-size:16px;line-height:1.4}
 .inbox{margin-top:clamp(16px,3vh,28px);color:var(--fg2);max-width:120ch}
 .inbox b{display:block;color:var(--fg);font-weight:500;margin-bottom:6px}
-.order{max-width:760px}
 @media (max-width:900px){
   .shop-cover .arch{height:min(30svh,280px)}
   .spec{grid-template-columns:1fr}

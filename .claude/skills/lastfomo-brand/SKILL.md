@@ -22,7 +22,7 @@ Each rule exists because breaking it was either corrected by the owner or caused
 7. **No client names.** The Machina case is "a medical practice". Keep it anonymous.
 8. **Centre the content and keep it safe.** Design at 1920 x 1080 with the content group centred, inside the safety system the format needs (centre-safe square or the middle band). This is what lets one master become square, vertical and banner versions. See `references/layouts.md`.
 9. **One message per screen or shot.** A label, a wordmark, one line and at most one chip or button. If it needs a paragraph, it belongs on a case page.
-10. **Same holder, same shape.** Wing windows are arches with a fully rounded top on every surface. Arca once used a rectangle and looked broken on mobile; the owner asked for consistency.
+10. **Same holder, same shape.** Wing windows are arches with a fully rounded top on every surface. Arca once used a rectangle and looked broken on mobile; the owner asked for consistency. On the website the arch belongs to the home page; subpages (the cases, the shop, each product) hold their pictures in square cards (the owner, 26 October 2026).
 11. **Sealed until you look.** Grey (sealed) to colour (open) via a sweep line in the wing colour is the brand's signature reveal. Use it for unveiling objects, cases and the fourth wing.
 12. **Light on the wire.** GIF loops under 1 MB, thumbnails under 2 MB, web video about 20 MB per minute, a 170 MB master kept separately. Make the light version; never ship only the master.
 

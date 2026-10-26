@@ -50,7 +50,7 @@ Budgets: grass 3,800 instances on desktop and about 2,100 on phones; at most thr
 - Counters measured elapsed time against the animation-frame timestamp and could start negative; they now use `performance.now()` and clamp progress to 0..1.
 - A label rule (`.form label > span`) also matched the pill spans and broke them; it is now scoped with `:not(.pill)`.
 - The `hidden` attribute lost to component `display` rules; a global `[hidden]{display:none!important}` restores it.
-- Arca's rectangular window ignored the mobile layout; every wing now uses the same arch holder.
+- Arca's rectangular window ignored the mobile layout; every wing now uses the same arch holder on the home page. Subpages (cases, the Hortus hardware shop, product pages) use square cards instead, by the owner's rule of 26 October 2026: arches on the home page as the brand, squarish cards everywhere else.
 - Safari let playing video escape rounded corners; the holder carries a mask image to force the clip.
 - Hortus was lit at nearly double brightness and looked flat lime green; all worlds now use the dark neon stage.
 - In three.js r128, keep the default linear output and use unlit (basic) materials for exact brand colours; set `frustumCulled = false` on instanced meshes, or whole fields vanish when their origin leaves the view.

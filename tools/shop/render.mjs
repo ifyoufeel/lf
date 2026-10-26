@@ -35,38 +35,45 @@ const money = (shop, n) => esc(shop.currency.symbol) + n.toLocaleString('en-GB')
 const ne = '<svg aria-hidden="true"><use href="#g-ne"/></svg>';
 const CODE = 'HRT — Hortus · ';
 
-// A product photo in the arch holder, on paper, sealed in grey until its screen is active (rule 9).
-const goods = (file, alt, lazy = true) => `<span class="arch goods"><img${lazy ? ' loading="lazy"' : ''} decoding="async" src="media/${esc(file)}" alt="${esc(alt)}"><i class="seal" aria-hidden="true"></i></span>`;
+// Every product photo stands whole on paper in a square tile and sweeps from grey to colour when its screen is active
+// (rule 9). Subpages hold their pictures in square cards; the arch belongs to the home page (the owner's choice,
+// 26 October 2026).
+const tile = (file, alt, lazy = true) => `<span class="tile goods"><img${lazy ? ' loading="lazy"' : ''} decoding="async" src="media/${esc(file)}" alt="${esc(alt)}"><i class="seal" aria-hidden="true"></i></span>`;
 
-function hardwareScreen(shop) {
-  const h = shop.hardware;
-  const cover = shop.products.find((p) => p.image === h.image);
-  return `<section class="screen shop-cover" id="hortus-hardware" data-title="Hardware" data-wing="hortus"><div class="wrap split"><div class="stack">`
-    + `<p class="code" data-fade style="--d:.1s">${esc(h.code)}</p>`
-    + `<h2 class="h2" data-rise style="--d:.2s"><span>${esc(h.title)}</span></h2>`
-    + `<p class="lead" data-fade style="--d:.5s">${esc(h.lead)}</p>`
-    + `<div class="row" data-fade style="--d:.7s"><a class="btn solid" href="#/hardware">${esc(h.cta)}</a></div>`
-    + `</div><div class="media" data-fade style="--d:.2s">${goods(h.image, cover ? cover.alt : '')}</div></div></section>`;
+// A hyphenated word stays whole on its line ("Wi-Fi"), and a middle dot ends a line rather than starting one.
+const keep = (s) => esc(s).replace(/ · /g, '\u00a0· ').replace(/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)+/gu, (w) => `<span class="nw">${w}</span>`);
+
+// The specs a product's card shows, named in its "keys".
+const keyList = (p) => (p.keys || []).map((k) => `<div><dt>${esc(k)}</dt><dd>${esc(p.specs.find(([n]) => n === k)[1])}</dd></div>`).join('');
+
+// A product card: photo, kind, name, line, two specs and price; a shelf card ("mini") keeps photo, name, kind and price,
+// the price on the card's floor so a row of them lines up. The name is the link, and its hit area covers the card, so the
+// rest reads as plain text.
+function card(shop, p, mini = false) {
+  const kind = `<p class="gk">${keep(p.kind)}</p>`, name = `<h3 class="gn"><a href="#/hardware/${p.slug}">${keep(p.name)}</a></h3>`;
+  const keys = mini ? '' : keyList(p);
+  return `<li class="good${mini ? ' mini' : ''}">${tile(p.image, p.alt)}<div class="gt">${mini ? name + kind : kind + name + `<p class="gs">${esc(p.line)}</p>`}`
+    + (keys ? `<dl class="gd">${keys}</dl>` : '') + `<p class="gp">${money(shop, p.price)}</p></div></li>`;
 }
 
-// The hardware list is packed: each photo stands whole on paper in a plain tile, no round top (the owner's choice for this
-// list, 26 October 2026), and keeps the same grey-to-colour sweep.
-const tile = (file, alt) => `<span class="tile goods"><img loading="lazy" decoding="async" src="media/${esc(file)}" alt="${esc(alt)}"><i class="seal" aria-hidden="true"></i></span>`;
+// A shelf: one row of shelf cards (on phones it scrolls sideways).
+const shelf = (shop, ps, d) => `<ul class="shelf" data-fade style="--n:${ps.length};--d:${d}">${ps.map((p) => card(shop, p, true)).join('')}</ul>`;
 
-// One card per product: kind, name, line, the two specs it names in "keys", and the price. The name is the link, and its
-// hit area covers the card, so the rest reads as plain text. A hyphenated word stays whole on its line ("Wi-Fi").
-const keep = (s) => esc(s).replace(/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)+/gu, (w) => `<span class="nw">${w}</span>`);
-function card(shop, p) {
-  const keys = (p.keys || []).map((k) => `<div><dt>${esc(k)}</dt><dd>${esc(p.specs.find(([n]) => n === k)[1])}</dd></div>`).join('');
-  return `<li class="good">${tile(p.image, p.alt)}<div class="gt"><p class="gk">${keep(p.kind)}</p>`
-    + `<h3 class="gn"><a href="#/hardware/${p.slug}">${keep(p.name)}</a></h3><p class="gs">${esc(p.line)}</p>`
-    + (keys ? `<dl class="gd">${keys}</dl>` : '') + `<p class="gp">${money(shop, p.price)}</p></div></li>`;
+// The Hardware screen on the Hortus case: the way in, and every product on a shelf.
+function hardwareScreen(shop) {
+  const h = shop.hardware;
+  return `<section class="screen cat" id="hortus-hardware" data-title="Hardware" data-wing="hortus"><div class="wrap">`
+    + `<div class="cat-head"><div class="stack"><p class="code" data-fade style="--d:.1s">${esc(h.code)}</p>`
+    + `<h2 class="h2" data-rise style="--d:.2s"><span>${esc(h.title)}</span></h2></div>`
+    + `<div class="stack"><p class="lead" data-fade style="--d:.35s">${esc(h.lead)}</p>`
+    + `<div class="row" data-fade style="--d:.45s"><a class="btn solid" href="#/hardware">${esc(h.cta)}</a></div></div></div>`
+    + shelf(shop, shop.products, '.55s') + `</div></section>`;
 }
 
 function indexView(shop) {
   const x = shop.index;
   const bySlug = Object.fromEntries(shop.products.map((p) => [p.slug, p]));
-  let out = `<main class="view" id="view-hardware" data-view="hardware" data-wing="hortus" data-crumb="Hardware" data-crumb-parent="hortus" data-page-title="Hardware, Hortus — lastfomo" tabindex="-1" hidden>`
+  let out = `<main class="view shop-v" id="view-hardware" data-view="hardware" data-wing="hortus" data-crumb="Hardware" data-crumb-parent="hortus" data-page-title="Hardware, Hortus — lastfomo" tabindex="-1" hidden>`
     + `<section class="screen tall cat" data-title="Hardware" data-wing="hortus"><div class="wrap">`
     + `<div class="cat-head"><div class="stack"><p class="code" data-fade style="--d:.1s">${esc(shop.hardware.code)}</p>`
     + `<h1 class="h1" data-rise style="--d:.2s"><span>${esc(x.title)}</span></h1></div>`
@@ -84,33 +91,39 @@ function indexView(shop) {
   return out;
 }
 
-function productView(shop, p, next) {
+// A product page reads like a shop's: the photo in a square card beside the name, price and basket; then what it does
+// in cards, the specification, and the order with the rest of the hardware on a shelf, starting from the next product.
+function productView(shop, p, others) {
   const m = shop.maker;
   const does = p.does.map((d) => `<li><span class="n">HRT</span><span class="t">${esc(d.t)}</span><span class="s">${esc(d.s)}</span></li>`).join('');
   const specs = p.specs.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
   const box = p.box.map(esc).join('<i>·</i>');
-  return `<main class="view" id="view-hw-${p.slug}" data-view="hw-${p.slug}" data-wing="hortus" data-crumb="${esc(p.name)}" data-crumb-parent="hardware" data-page-title="${esc(p.name)}, Hortus hardware — lastfomo" tabindex="-1" hidden>`
-    + `<section class="screen shop-cover" data-title="${esc(p.name)}" data-wing="hortus"><div class="wrap split"><div class="stack">`
-    + `<p class="code" data-fade style="--d:.1s">${CODE}${esc(p.kind)}</p>`
+  const buy = (d) => `<div class="row" data-fade style="--d:${d}"><button class="btn solid" type="button" data-add="${p.slug}">Add to basket</button><button class="btn" type="button" data-basket>Open the basket</button></div>`;
+  const keys = keyList(p);
+  return `<main class="view shop-v" id="view-hw-${p.slug}" data-view="hw-${p.slug}" data-wing="hortus" data-crumb="${esc(p.name)}" data-crumb-parent="hardware" data-page-title="${esc(p.name)}, Hortus hardware — lastfomo" tabindex="-1" hidden>`
+    + `<section class="screen tall pdp" data-title="${esc(p.name)}" data-wing="hortus"><div class="wrap pdp-in">`
+    + `<div class="pdp-pic" data-fade style="--d:.1s">${tile(p.image, p.alt, false)}</div>`
+    + `<div class="stack pdp-info"><p class="code" data-fade style="--d:.1s">${CODE}${esc(p.kind)}</p>`
     + `<h1 class="h1" data-rise style="--d:.2s"><span>${esc(p.name)}</span></h1>`
-    + `<p class="h2 sub" data-rise style="--d:.35s"><span>${esc(p.line)}</span></p>`
-    + `<p class="strip" data-fade style="--d:.55s"><b class="price">${money(shop, p.price)}</b><i>/</i>Made by ${esc(m.name)}, ${esc(m.country)}</p>`
-    + `<div class="row" data-fade style="--d:.7s"><button class="btn solid" type="button" data-add="${p.slug}">Add to basket</button><a class="btn" href="#/hardware">All hardware</a></div>`
-    + `</div><div class="media" data-fade style="--d:.2s">${goods(p.image, p.alt, false)}</div></div></section>`
+    + `<p class="h2 sub" data-rise style="--d:.3s"><span>${esc(p.line)}</span></p>`
+    + `<p class="pdp-price" data-fade style="--d:.4s">${money(shop, p.price)}</p>`
+    + buy('.5s')
+    + `<p class="pdp-note" data-fade style="--d:.6s">Price in ${esc(shop.currency.name)}, with the maker’s 1-year warranty. Made by ${esc(m.name)}, ${esc(m.country)}.</p>`
+    + (keys ? `<dl class="gd pdp-keys" data-fade style="--d:.7s">${keys}</dl>` : '')
+    + `</div></div></section>`
     + `<section class="screen" data-title="What it does" data-wing="hortus"><div class="wrap">`
     + `<h2 class="h2" data-rise><span>What it does.</span></h2>`
     + `<p class="lead gap" data-fade style="--d:.2s">${esc(p.lead)}</p>`
-    + `<ul class="rows" data-fade style="--d:.3s">${does}</ul></div></section>`
+    + `<ul class="does" data-fade style="--d:.3s">${does}</ul></div></section>`
     + `<section class="screen" data-title="Specification" data-wing="hortus"><div class="wrap">`
     + `<h2 class="h2" data-rise><span>Specification.</span></h2>`
     + `<dl class="spec" data-fade style="--d:.3s">${specs}</dl>`
     + `<p class="strip inbox" data-fade style="--d:.5s"><b>In the box</b>${box}</p></div></section>`
-    + `<section class="screen" data-title="Order" data-wing="hortus"><div class="wrap"><div class="stack order">`
-    + `<p class="code" data-fade style="--d:.1s">${CODE}Order</p>`
+    + `<section class="screen" data-title="Order" data-wing="hortus"><div class="wrap">`
+    + `<div class="buy"><div class="stack"><p class="code" data-fade style="--d:.1s">${CODE}Order</p>`
     + `<h2 class="h2" data-rise style="--d:.2s"><span>${esc(p.name)}, ${money(shop, p.price)}.</span></h2>`
-    + `<p class="lead" data-fade style="--d:.4s">Price in ${esc(shop.currency.name)}, with the maker’s 1-year warranty. We confirm stock, delivery and payment by email before anything ships.</p>`
-    + `<div class="row" data-fade style="--d:.6s"><button class="btn solid" type="button" data-add="${p.slug}">Add to basket</button><button class="btn" type="button" data-basket>Open the basket</button></div></div>`
-    + `<div class="next" data-fade style="--d:.7s"><span class="code" style="color:var(--fg2)">Next in hardware</span><a class="big" href="#/hardware/${next.slug}">${esc(next.name)}${ne}</a></div>`
+    + `<p class="pdp-note" data-fade style="--d:.3s">We confirm stock, delivery and payment by email before anything ships.</p></div>${buy('.4s')}</div>`
+    + `<div class="cat-g"><h2 class="cat-t" data-fade style="--d:.5s">Next in hardware</h2>${shelf(shop, others, '.55s')}</div>`
     + `</div></section></main>`;
 }
 
@@ -147,7 +160,7 @@ export function renderShop(shop) {
   return {
     bar: `<button class="basket-link empty" type="button" data-basket aria-label="Basket"><span>Basket</span><b id="basket-count" hidden></b></button>`,
     hardware: hardwareScreen(shop),
-    views: indexView(shop) + ps.map((p, i) => productView(shop, p, ps[(i + 1) % ps.length])).join(''),
+    views: indexView(shop) + ps.map((p, i) => productView(shop, p, [...ps.slice(i + 1), ...ps.slice(0, i)])).join(''),
     basket: basket(shop),
   };
 }
