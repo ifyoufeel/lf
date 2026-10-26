@@ -200,6 +200,117 @@
       "claim": "E-MODE SensiRoom H irrigation controller, as the maker lists it (imported 25 October 2026): list price ₽16,239 (shown as $162: the owner's rule of 26 October 2026, roubles ÷ 100 rounded to the dollar); watering 10 seconds to 60 minutes; pause 1 minute to 10 hours; pump up to 1,500 W; 3.2 W draw; 220–240 V, 50 Hz; 80×55×120 mm; IP64; 1 kg; 1-year warranty",
       "numbers": ["162", "10", "60", "1", "1,500", "3.2", "220", "240", "50", "80", "55", "120", "64"]
     }
+,
+    {
+      "id": "machina.market.date",
+      "claim": "The Machina compute shows market reports dated July to October 2026, gathered on 26 October 2026",
+      "numbers": ["26", "2026"]
+    },
+    {
+      "id": "machina.market.models",
+      "claim": "Product names as their makers write them: NVIDIA B300, B200, H200, H100, A100, GB300, GB10, RTX PRO 6000; AMD Instinct MI355X and MI300X on CDNA 4 and CDNA 3; GeForce RTX 5090, 5080, 4090 and 3090; memory types HBM3e, HBM3, HBM2e, GDDR7 and GDDR6X",
+      "numbers": ["300", "200", "100", "6000", "355", "4", "3", "2", "7", "6", "5090", "5080", "4090", "3090", "10"]
+    },
+    {
+      "id": "machina.market.b300",
+      "claim": "NVIDIA B300 (Blackwell Ultra), 288 GB HBM3e: about $53,000 per GPU (gpubattle.com, July 2026); an 8-GPU DGX B300 at $300,000 to $350,000, $37,500 to $43,750 a GPU (gpusmith.com, 2026); supply limited, sold on allocation",
+      "numbers": ["288", "37,500", "53,000"]
+    },
+    {
+      "id": "machina.market.b200",
+      "claim": "NVIDIA B200 (Blackwell), 180 GB HBM3e per GPU (Lenovo HGX B200; 1,440 GB per 8-GPU DGX B200): $30,000 to $40,000 in 8-GPU volumes, street quotes $45,000 to $50,000 (intuitionlabs.ai, 2026); on allocation through OEMs and brokers",
+      "numbers": ["180", "30,000", "50,000"]
+    },
+    {
+      "id": "machina.market.mi355x",
+      "claim": "AMD Instinct MI355X, 288 GB HBM3e: purchase estimates $25,000 (gpucost.org) to $34,500 (gpuadvisor.com range $25,500 to $34,500), 2026; no AMD list price, sold to order through integrators",
+      "numbers": ["288", "25,000", "34,500"]
+    },
+    {
+      "id": "machina.market.h200",
+      "claim": "NVIDIA H200, 141 GB HBM3e: $31,000 to $32,000 for an H200 NVL card (TRG Datacenters, via intuitionlabs.ai, October 2026)",
+      "numbers": ["141", "31,000", "32,000"]
+    },
+    {
+      "id": "machina.market.h100",
+      "claim": "NVIDIA H100, 80 GB: new cards $25,000 to $40,000, PCIe at the low end and SXM5 at the high (intuitionlabs.ai, 2026; cloudzero.com puts a new 80 GB card near $31,000)",
+      "numbers": ["80", "25,000", "40,000"]
+    },
+    {
+      "id": "machina.market.mi300x",
+      "claim": "AMD Instinct MI300X, 192 GB HBM3: estimated $15,000 per OAM module; September 2026 market average $20,600 (gpupoet.com); sold to order",
+      "numbers": ["192", "15,000", "20,600"]
+    },
+    {
+      "id": "machina.market.a100",
+      "claim": "NVIDIA A100, 80 GB HBM2e: new $7,000 to $15,000 (jarvislabs.ai, 2026)",
+      "numbers": ["80", "7,000", "15,000"]
+    },
+    {
+      "id": "machina.market.dgx-station",
+      "claim": "NVIDIA DGX Station (GB300), up to 784 GB of coherent memory (NVIDIA): from $92,887 (betterclaw.io, October 2026); built to order by OEM partners",
+      "numbers": ["784", "92,887"]
+    },
+    {
+      "id": "machina.market.rtx-pro-6000",
+      "claim": "NVIDIA RTX PRO 6000 Blackwell, 96 GB GDDR7: $16,000 on NVIDIA's marketplace from August 2026 and $16,699 to $17,999 at US retailers on 13 October 2026 (one report, tech-insider.org); launch price $8,565",
+      "numbers": ["96", "16,000", "17,999"]
+    },
+    {
+      "id": "machina.market.dgx-spark",
+      "claim": "NVIDIA DGX Spark (GB10), 128 GB unified memory: $6,950 on NVIDIA's US Marketplace, October 2026 (tech-insider.org); a 64 GB model from $4,999 through OEM partners from 23 October 2026",
+      "numbers": ["128", "6,950"]
+    },
+    {
+      "id": "machina.market.rtx-5090",
+      "claim": "GeForce RTX 5090, 32 GB GDDR7: list price $1,999; mid-October 2026 street prices from $4,299 (Micro Center, Walmart) to a $5,229 US average (price tracker), delisted at several retailers (buysellram.com, tech-insider.org)",
+      "numbers": ["32", "4,299", "5,229"]
+    },
+    {
+      "id": "machina.market.rtx-4090",
+      "claim": "GeForce RTX 4090, 24 GB GDDR6X, used: $2,271 from completed eBay sales to a $2,999 asking median on 25 October 2026 (GPU price trackers)",
+      "numbers": ["24", "2,271", "2,999"]
+    },
+    {
+      "id": "machina.market.rtx-3090",
+      "claim": "GeForce RTX 3090, 24 GB GDDR6X, used: a normal range of $1,400 to $1,550, median $1,499 (used-market guide, October 2026)",
+      "numbers": ["24", "1,400", "1,550"]
+    },
+    {
+      "id": "machina.market.rtx-5080",
+      "claim": "GeForce RTX 5080, 16 GB GDDR7: list price $999; October 2026 asking floor $1,450 for new cards, Amazon new-card average $1,623 (market reports)",
+      "numbers": ["16", "1,450", "1,623"]
+    },
+    {
+      "id": "machina.calc.choices",
+      "claim": "The calculator's choices as the page offers them: a team of up to 10, up to 50 or up to 250 people; 8B-, 32B- and 70B-class models. Its results are estimates (site/shop.json → machina.calc)",
+      "numbers": ["10", "50", "250", "8", "32", "70"]
+    },
+    {
+      "id": "arca.market.gold",
+      "claim": "Gold in 2026, US dollars per troy ounce: month-end closes January $4,847.87, February $5,263.83, March $4,682.29, April $4,626.63, May $4,515.85, June $3,986.73, July $4,056.34, August $4,452.37, September $4,192.60 (goldtickers.com); $3,994.90 at Kitco on 25 October 2026, 3:07 pm ET; the record $5,501.70, LBMA PM price, 29 January 2026; chart ticks at $4,000, $4,500 and $5,000",
+      "numbers": ["4,847.87", "5,263.83", "4,682.29", "4,626.63", "4,515.85", "3,986.73", "4,056.34", "4,452.37", "4,192.60", "3,994.90", "5,501.70", "25", "3:07", "29", "2026", "4,000", "4,500", "5,000"]
+    },
+    {
+      "id": "arca.market.gold-rub",
+      "claim": "The Bank of Russia's gold price from 24 October 2026: 10,482.37 roubles a gram (cbr.ru, via sia.ru)",
+      "numbers": ["10,482.37", "24"]
+    },
+    {
+      "id": "arca.market.eagle",
+      "claim": "American Gold Eagle, 1 oz of fine gold, 22 carat, United States Mint: gold inside $3,994.90 at the 25 October 2026 spot; dealers typically sell current 1 oz Eagles 3 to 8 per cent over spot (usagold.com, 2026), so about $4,115 to $4,314 that day",
+      "numbers": ["1", "22", "3,994.90", "4,115", "4,314"]
+    },
+    {
+      "id": "arca.market.st-george",
+      "claim": "St George the Victorious, 50 roubles, Bank of Russia: 7.78 g of 999 fine gold; gold inside about 81,553 roubles at the Bank of Russia price of 24 October 2026 (7.78 × 10,482.37); banks and dealers price it on the day",
+      "numbers": ["50", "999", "7.78", "81,553"]
+    },
+    {
+      "id": "arca.market.chervonets",
+      "claim": "Chervonets, the Sower, 10 roubles (USSR 1975 to 1982; Goznak re-issue): 7.742 g of fine gold in 900 alloy; gold inside about 81,155 roubles at the Bank of Russia price of 24 October 2026; 1976 uncirculated about 105,000 roubles at auction, rare varieties to 143,600 roubles (raritetus.ru, fcoins.ru)",
+      "numbers": ["10", "900", "7.742", "81,155", "1976", "105,000", "143,600"]
+    }
   ],
   "approvedLines": {
     "house": [
@@ -328,8 +439,15 @@
     "defense": "defence",
     "jewelry": "jewellery"
   },
-  "placeholders": [],
+  "placeholders": [
+    { "token": "[ARTIST]", "owner": "The owner names the artist of each work in the Arca market (site/shop.json → arca.art)." },
+    { "token": "[ARTWORK TITLE]", "owner": "The owner gives each work's title, with a photo in site/media/ and its ledger media entry and rights." },
+    { "token": "[MEDIUM AND YEAR]", "owner": "The owner gives each work's medium and year, and its price or 'Price on request'." }
+  ],
   "unconfirmed": [
+    "The Machina compute (#/compute) and the Arca market (#/market) are suggested wording: their titles ('Local AI hardware, sized to the work.', 'Compute for a private AI.', 'The market, by tier.', 'Size a private AI.', 'Gold coins and art, to keep.', 'The Arca market.', 'Gold coins, against the gold inside.', 'Art, by invitation.', 'How a request works.'), leads, supply words ('On allocation', 'To order', 'In stock', 'Short', 'Used market'), calculator questions and answers, buttons ('See the compute', 'Ask to source', 'Add to basket', 'Sourcing only', 'See the market', 'Ask about the art') and request steps.",
+    "The calculator is an estimate, and its method is suggested (site/shop.json → machina.calc): model weights at 4-bit (8B-class 5 GB, 32B-class 20 GB, 70B-class 40 GB); working memory per person answered at once (1, 2 and 2.5 GB); 6 GB more for speech and 16 GB for images; 1.2 times for overhead; 1, 3, 8 and 25 people at once for the four team sizes; each build's ceiling on cards per machine and people served. Costs cover the cards only, at the market ranges shown.",
+    "The basket now serves all three wings: the label 'Basket', the empty line naming the three markets, 'A line marked “by email” is priced in our reply.', 'By email' on request lines, and the order email's 'Order for lastfomo' and 'Priced by email' are suggested wording.",
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
@@ -385,6 +503,12 @@
       "site": "the home page keeps the arch; subpages hold their pictures in square cards: the Hardware screen on the Hortus case (every product on a shelf), the packed hardware list, and each product's page, laid out like a shop's",
       "figma": "Rule 8: every wing uses the arch holder (.arch, fully rounded top), never a rectangle; rule 7: one message per screen",
       "decision": "Owner: arches on the home page, as part of the brand; square cards on subpages, and the shop's pages packed like a marketplace (26 October 2026). The walk and the Start a project wing plates keep their arches until the owner says otherwise."
+    },
+    {
+      "topic": "Market prices on the page",
+      "site": "the Machina compute and the Arca market show GPU and gold prices from dealer, integrator, tracker and central-bank reports, dated, with an estimating calculator",
+      "figma": "Rule 5: every number traces to the ledger; never estimate a figure",
+      "decision": "Owner (26 October 2026): show today's market prices and supply, and a calculator 'of course estimated'. Each market figure is a dated, sourced fact (machina.market.*, arca.market.*); the calculator's results are labelled estimates. Refresh the snapshot before the shop goes live."
     }
   ],
   "media": {

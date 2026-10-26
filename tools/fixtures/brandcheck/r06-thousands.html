@@ -1,6 +1,7 @@
 <!doctype html>
-<!-- expect: R6 error 1 -->
-<!-- A price grouped in thousands is one number: “190,370” is reported once, not as 190 and 370. -->
+<!-- expect: R6 error 2 -->
+<!-- A price grouped in thousands is one number: “190,370” is reported once, not as 190 and 370; “9,876.54” once, not
+     as 9,876 and 54. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -26,6 +27,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 system-ui,s
     <h2 class="word">machina</h2>
     <p class="lead">What thinks. 8 GPUs and 176 GB of VRAM, inside the practice.</p>
     <p class="lead">The controller lists at ₽190,370.</p>
+    <p class="lead">Gold closed at $9,876.54 an ounce.</p>
     <canvas class="plate" data-plate="machina" aria-hidden="true"></canvas>
     <img src="media/machina-rig.jpg" alt="The wide view of the eight-GPU rig with its cooling fans lit">
   </section>

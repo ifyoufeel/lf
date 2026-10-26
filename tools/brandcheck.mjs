@@ -1144,8 +1144,8 @@ export function check(options = {}) {
 
   /* ---- R6 facts-ledger ---- */
   const allowedNumbers = new Set((ledger.facts || []).flatMap((f) => (f.numbers || []).map(String)));
-  // A number grouped in thousands (2,000 or 140,120) is one number, as the page writes it.
-  for (const m of vis.text.matchAll(/\$?\d{1,3}(?:,\d{3})+(?![\d,])|\$?\d+(?:[.:]\d+)*/g)) {
+  // A number grouped in thousands (2,000 or 140,120), with any decimals (3,994.90), is one number, as the page writes it.
+  for (const m of vis.text.matchAll(/\$?\d{1,3}(?:,\d{3})+(?:\.\d+)?(?![\d,]|\.\d)|\$?\d+(?:[.:]\d+)*/g)) {
     const num = m[0].replace(/^\$/, '');
     if (allowedNumbers.has(num)) continue;
     F.error('R6', `${num} is not in the facts ledger: "${snippet(vis.text, m.index, m[0].length)}"`, hfile.display, visLine(m.index));

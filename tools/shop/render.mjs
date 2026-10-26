@@ -1,14 +1,19 @@
-// Renders the Hortus hardware shop from site/shop.json into the page, at four markers in site/index.html:
+// Renders the shop from site/shop.json into the page, at six markers in site/index.html:
 //   <!-- shop:bar -->       the basket button in the header
 //   <!-- shop:hardware -->  the Hardware screen on the Hortus case
-//   <!-- shop:views -->     the hardware view (#/hardware) and one view per product (#/hardware/<slug>)
-//   <!-- shop:basket -->    the basket dialog with the order form, and the product data main.js reads
+//   <!-- shop:machina -->   the Compute screen on the Machina case (tools/shop/markets.mjs)
+//   <!-- shop:arca -->      the Market screen on the Arca case (tools/shop/markets.mjs)
+//   <!-- shop:views -->     the hardware view (#/hardware), one view per product (#/hardware/<slug>), the Machina
+//                           compute (#/compute) and the Arca market (#/market)
+//   <!-- shop:basket -->    the basket dialog with the order form, and the data main.js reads
 // Used by tools/build.mjs (every target) and tools/brandcheck.mjs (the source check), so the shop is checked
 // like any hand-written screen. Each marker becomes one line of markup, so line numbers in site/index.html hold.
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { esc, num, ne, keep, tile, steps } from './html.mjs';
+import { machinaScreen, computeView, arcaScreen, marketView, marketItems, computeData, checkMarkets } from './markets.mjs';
 
-export const MARKERS = ['bar', 'hardware', 'views', 'basket'];
+export const MARKERS = ['bar', 'hardware', 'machina', 'arca', 'views', 'basket'];
 const marker = (k) => `<!-- shop:${k} -->`;
 
 /** site/shop.json, or null when the site has no shop. Throws on a file that is not valid JSON or misses a field. */
@@ -27,21 +32,12 @@ export function loadShop(siteDir) {
     slugs.add(p.slug);
   }
   for (const g of shop.index?.groups || []) for (const s of g.products) if (!slugs.has(s)) throw new Error(`site/shop.json: group ${g.id} lists ${s}, which is not a product`);
+  checkMarkets(shop);
   return shop;
 }
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const money = (shop, n) => esc(shop.currency.symbol) + n.toLocaleString('en-GB');
-const ne = '<svg aria-hidden="true"><use href="#g-ne"/></svg>';
+const money = (shop, n) => esc(shop.currency.symbol) + num(n);
 const CODE = 'HRT — Hortus · ';
-
-// Every product photo stands whole on paper in a square tile and sweeps from grey to colour when its screen is active
-// (rule 9). Subpages hold their pictures in square cards; the arch belongs to the home page (the owner's choice,
-// 26 October 2026).
-const tile = (file, alt, lazy = true) => `<span class="tile goods"><img${lazy ? ' loading="lazy"' : ''} decoding="async" src="media/${esc(file)}" alt="${esc(alt)}"><i class="seal" aria-hidden="true"></i></span>`;
-
-// A hyphenated word stays whole on its line ("Wi-Fi"), and a middle dot ends a line rather than starting one.
-const keep = (s) => esc(s).replace(/ · /g, '\u00a0· ').replace(/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)+/gu, (w) => `<span class="nw">${w}</span>`);
 
 // The specs a product's card shows, named in its "keys".
 const keyList = (p) => (p.keys || []).map((k) => `<div><dt>${esc(k)}</dt><dd>${esc(p.specs.find(([n]) => n === k)[1])}</dd></div>`).join('');
@@ -85,7 +81,7 @@ function indexView(shop) {
   out += `</div></section>`
     + `<section class="screen" data-title="Order" data-wing="hortus"><div class="wrap">`
     + `<h2 class="h2" data-rise><span>How ordering works.</span></h2>`
-    + `<ol class="steps" data-fade style="--d:.3s">${x.steps.map((s, i) => `<li><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="t">${esc(s.t)}</span><span class="s">${esc(s.s)}</span></li>`).join('')}</ol>`
+    + steps(x.steps)
     + `<div class="next" data-fade style="--d:.5s"><button class="btn solid" type="button" data-basket>Open the basket</button><a class="big" href="#/hortus">Hortus${ne}</a></div>`
     + `</div></section></main>`;
   return out;
@@ -128,16 +124,23 @@ function productView(shop, p, others) {
 }
 
 function basket(shop) {
-  const data = { symbol: shop.currency.symbol, code: shop.currency.code, contact: shop.contact, maker: shop.maker.name,
-    products: shop.products.map((p) => ({ slug: p.slug, name: p.name, kind: p.kind, price: p.price })) };
-  return `<dialog class="basket" id="basket" data-wing="hortus" aria-labelledby="basket-title"><div class="basket-in">`
-    + `<div class="basket-head"><p class="code">${CODE}Basket</p><button class="btn x" type="button" id="basket-x">Close</button></div>`
+  // The basket is the house's: Hortus hardware at its prices, and the lines the other wings price by email (Arca coins
+  // and art, Machina builds and sourcing). It takes the wing colour of the page it opens on.
+  const data = { symbol: shop.currency.symbol, code: shop.currency.code, contact: shop.contact,
+    wings: { hortus: 'Hortus hardware, made by ' + shop.maker.name, machina: 'Machina compute', arca: 'Arca market' },
+    products: [...shop.products.map((p) => ({ slug: p.slug, name: p.name, kind: p.kind, price: p.price, wing: 'hortus', href: '#/hardware/' + p.slug })), ...marketItems(shop)],
+    compute: computeData(shop) };
+  const ways = [['#/hardware', 'Hortus hardware'], shop.machina && ['#/compute', 'Machina compute'], shop.arca && ['#/market', 'the Arca market']].filter(Boolean)
+    .map(([h, t]) => `<a href="${h}">${t}</a>`);
+  const list = ways.length > 1 ? ways.slice(0, -1).join(', ') + ' or ' + ways[ways.length - 1] : ways[0];
+  return `<dialog class="basket" id="basket" aria-labelledby="basket-title"><div class="basket-in">`
+    + `<div class="basket-head"><p class="code">Basket</p><button class="btn x" type="button" id="basket-x">Close</button></div>`
     + `<p class="sr" id="basket-status" role="status"></p>`
     + `<div id="basket-main"><h2 class="h2" id="basket-title" tabindex="-1">The basket.</h2>`
-    + `<p class="lead" id="basket-empty">Nothing in it yet. <a href="#/hardware">See the hardware</a>.</p>`
+    + `<p class="lead" id="basket-empty">Nothing in it yet. See ${list}.</p>`
     + `<ul class="lines" id="basket-lines" aria-label="In the basket"></ul>`
     + `<div class="total" id="basket-sum" hidden><span>Subtotal</span><b id="basket-total"></b></div>`
-    + `<p class="note" id="basket-note" hidden>Prices in ${esc(shop.currency.name)}. Nothing is charged here: we reply by email with stock, delivery and payment.</p>`
+    + `<p class="note" id="basket-note" hidden>Prices in ${esc(shop.currency.name)}. A line marked “by email” is priced in our reply. Nothing is charged here: we reply by email with stock, delivery and payment.</p>`
     + `<form class="form" id="order" hidden><div class="fields">`
     + `<label><span>Your name</span><input name="name" autocomplete="name" maxlength="120" required></label>`
     + `<label><span>Email</span><input name="email" type="email" autocomplete="email" maxlength="200" required></label>`
@@ -160,7 +163,10 @@ export function renderShop(shop) {
   return {
     bar: `<button class="basket-link empty" type="button" data-basket aria-label="Basket"><span>Basket</span><b id="basket-count" hidden></b></button>`,
     hardware: hardwareScreen(shop),
-    views: indexView(shop) + ps.map((p, i) => productView(shop, p, [...ps.slice(i + 1), ...ps.slice(0, i)])).join(''),
+    machina: shop.machina ? machinaScreen(shop) : '',
+    arca: shop.arca ? arcaScreen(shop) : '',
+    views: indexView(shop) + ps.map((p, i) => productView(shop, p, [...ps.slice(i + 1), ...ps.slice(0, i)])).join('')
+      + (shop.machina ? computeView(shop) : '') + (shop.arca ? marketView(shop) : ''),
     basket: basket(shop),
   };
 }
