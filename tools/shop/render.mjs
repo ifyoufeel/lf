@@ -103,7 +103,7 @@ function productView(shop, p, others) {
     + `<p class="h2 sub" data-rise style="--d:.3s"><span>${esc(p.line)}</span></p>`
     + `<p class="pdp-price" data-fade style="--d:.4s">${money(shop, p.price)}</p>`
     + buy('.5s')
-    + `<p class="pdp-note" data-fade style="--d:.6s">Price in ${esc(shop.currency.name)}, with the maker’s 1-year warranty. Made by ${esc(m.name)}, ${esc(m.country)}.</p>`
+    + `<p class="pdp-note" data-fade style="--d:.6s">Price in ${esc(shop.currency.name)}, with the maker’s 1-year warranty. Made by ${esc(m.name)}.</p>`
     + (keys ? `<dl class="gd pdp-keys" data-fade style="--d:.7s">${keys}</dl>` : '')
     + `</div></div></section>`
     + `<section class="screen" data-title="What it does" data-wing="hortus"><div class="wrap">`

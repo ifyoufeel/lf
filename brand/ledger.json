@@ -202,6 +202,12 @@
     }
 ,
     {
+      "id": "hortus.shop.names",
+      "claim": "The names the shop gives, by the owner on 26 October 2026: the maker shown as AGC162 (the products are E-MODE's, as the hortus.shop.* facts record); HortusRoom S for E-MODE's SensiRoom H, and in the same pattern HortusPilot N (PonicsPilot), HortusPilot F (PonicsPilot 32), HortusPilot pH (pH controller Wi-Fi), HortusRoom A (Microclimate) and HortusRoom C (SensiRoom CO2 Wi-Fi)",
+      "numbers": ["162"]
+    }
+,
+    {
       "id": "machina.study.models",
       "claim": "Product names as their makers write them: GeForce RTX 5080 and 5090, NVIDIA RTX PRO 6000, NVIDIA DGX Spark",
       "numbers": ["5080", "5090", "6000"]
@@ -376,6 +382,7 @@
   },
   "placeholders": [],
   "unconfirmed": [
+    "Shop product names that follow the owner's example (SensiRoom H became HortusRoom S, 26 October 2026) are suggested: HortusPilot N (nutrients), HortusPilot F (the full feed line), HortusPilot pH, HortusRoom A (air) and HortusRoom C (CO₂).",
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
@@ -414,9 +421,9 @@
     },
     {
       "topic": "Who makes the Hortus hardware",
-      "site": "the Hortus case says the feeding systems and control hardware are designed and built in-house; the shop sells controllers made by E-MODE (Russia) and names the maker on every product",
+      "site": "the Hortus case says the feeding systems and control hardware are designed and built in-house; the shop sells E-MODE's controllers under Hortus names, with the maker shown as AGC162",
       "figma": "Hortus: feeding systems and hardware, designed, machined, wired and assembled in-house",
-      "decision": "Owner (26 October 2026): the shop is good to go live as the Artifact shows it, so the case’s ‘in-house’ stands beside the shop’s E-MODE naming until the owner says otherwise."
+      "decision": "Owner (26 October 2026): the shop shows the maker as AGC162 and the products under Hortus names, and does not say where they are made. The photos, which still carry E-MODE's logos, are to be reworked."
     },
     {
       "topic": "Shop photo colour",
@@ -593,41 +600,41 @@
       "role": "Arca case cover poster (first frame of the cover footage)",
       "rights": "own"
     },
-    "shop-ponics-pilot.jpg": {
-      "alt": "The PonicsPilot dosing controller: five peristaltic pumps above five labelled bottles",
-      "role": "Hortus shop: PonicsPilot (also the hardware screen on the Hortus case)",
+    "shop-hortuspilot-n.jpg": {
+      "alt": "The HortusPilot N dosing controller: five peristaltic pumps above five labelled bottles",
+      "role": "Hortus shop: HortusPilot N, E-MODE's PonicsPilot (also the hardware screen on the Hortus case)",
       "rights": "check",
-      "note": "E-MODE's product photo from e-mode.pro, resized; reuse to be agreed with the maker"
+      "note": "E-MODE's product photo from e-mode.pro, resized; reuse to be agreed with the maker; it shows E-MODE's logos, and the owner will rework it"
     },
-    "shop-ponics-pilot-32.jpg": {
-      "alt": "The PonicsPilot 32 panel: five pumps above five bottles, pH− and pH+ on the left",
-      "role": "Hortus shop: PonicsPilot 32 (also the hardware cover)",
+    "shop-hortuspilot-f.jpg": {
+      "alt": "The HortusPilot F panel: five pumps above five bottles, pH− and pH+ on the left",
+      "role": "Hortus shop: HortusPilot F, E-MODE's PonicsPilot 32 (also the hardware cover)",
       "rights": "check",
-      "note": "E-MODE's product photo from e-mode.pro, resized; reuse to be agreed with the maker"
+      "note": "E-MODE's product photo from e-mode.pro, resized; reuse to be agreed with the maker; it shows E-MODE's logos, and the owner will rework it"
     },
-    "shop-ph-wifi.jpg": {
-      "alt": "The pH controller: two peristaltic pumps marked pH− and pH+, with its electrode on a cable",
-      "role": "Hortus shop: pH Controller Wi-Fi",
+    "shop-hortuspilot-ph.jpg": {
+      "alt": "The HortusPilot pH controller: two peristaltic pumps marked pH− and pH+, with its electrode on a cable",
+      "role": "Hortus shop: HortusPilot pH, E-MODE's pH controller Wi-Fi",
       "rights": "check",
-      "note": "E-MODE's product photo from e-mode.pro, cropped to the product (the maker's icons and gift badge left out)"
+      "note": "E-MODE's product photo from e-mode.pro, cropped to the product (the maker's icons and gift badge left out); it shows E-MODE's logos, and the owner will rework it"
     },
-    "shop-microclimate.jpg": {
-      "alt": "The Microclimate controller: two sockets beside a small screen, with its sensor on a cable",
-      "role": "Hortus shop: Microclimate",
+    "shop-hortusroom-a.jpg": {
+      "alt": "The HortusRoom A controller: two sockets beside a small screen, with its sensor on a cable",
+      "role": "Hortus shop: HortusRoom A, E-MODE's Microclimate",
       "rights": "check",
-      "note": "E-MODE's product photo from e-mode.pro; reuse to be agreed with the maker"
+      "note": "E-MODE's product photo from e-mode.pro; reuse to be agreed with the maker; it shows E-MODE's logos, and the owner will rework it"
     },
-    "shop-sensiroom-co2-wifi.jpg": {
-      "alt": "The SensiRoom CO₂ controller: a white case with a screen and three buttons, cables below",
-      "role": "Hortus shop: SensiRoom CO₂ Wi-Fi",
+    "shop-hortusroom-c.jpg": {
+      "alt": "The HortusRoom C controller: a white case with a screen and three buttons, cables below",
+      "role": "Hortus shop: HortusRoom C, E-MODE's SensiRoom CO₂ Wi-Fi",
       "rights": "check",
-      "note": "E-MODE's product photo from e-mode.pro, resized; reuse to be agreed with the maker"
+      "note": "E-MODE's product photo from e-mode.pro, resized; reuse to be agreed with the maker; it shows E-MODE's logos, and the owner will rework it"
     },
-    "shop-sensiroom-h.jpg": {
-      "alt": "The SensiRoom H controller: a socket below a small screen, its moisture probe on a cable",
-      "role": "Hortus shop: SensiRoom H",
+    "shop-hortusroom-s.jpg": {
+      "alt": "The HortusRoom S controller: a socket below a small screen, its moisture probe on a cable",
+      "role": "Hortus shop: HortusRoom S, E-MODE's SensiRoom H",
       "rights": "check",
-      "note": "E-MODE's product photo from e-mode.pro; reuse to be agreed with the maker"
+      "note": "E-MODE's product photo from e-mode.pro; reuse to be agreed with the maker; it shows E-MODE's logos, and the owner will rework it"
     }
   },
   "videos": {
