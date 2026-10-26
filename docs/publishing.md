@@ -319,10 +319,13 @@ Image URLs must be absolute ([Open Graph protocol](https://ogp.me/)). X reads `o
 
 ### Icons
 
-- `favicon.svg`: a void square with the paper horse whole and centred at about 80% of the width. The horse is 420 × 120, so it reads small at 16 and 32 pixels. Check it at those sizes. If it does not read, ask the owner about a glyph from `brand/marks/glyphs.svg`. Never crop the horse to fill the square.
-- `favicon.ico` or a 32 × 32 PNG for browsers without SVG icons.
-- `apple-touch-icon.png`, 180 × 180, the same composition on a solid void background, the horse inside the central 80% so rounded corners never reach it.
-- Colours come from `brand/tokens.json` (void `#080808`, paper `#ffffff`), written by the build, not by hand.
+In place since 26 October 2026, by the owner’s request: the white horse on black. `tools/build.mjs` writes them into the web build’s root with `tools/icons.mjs`, from `brand/marks/horse.svg` and the void (`#080808`) and paper (`#ffffff`) tokens, so nothing is drawn by hand:
+
+- `favicon.svg`: a void square with the paper horse whole and centred at 80% of the width, the mark’s own path.
+- `favicon.ico`: 16, 32 and 48 pixel PNGs in one ICO, for browsers without SVG icons.
+- `apple-touch-icon.png`: 180 × 180, the same composition, so the horse stays inside the central 80% and rounded corners never reach it.
+
+The PNGs are drawn by `tools/icons.mjs` itself (the outline flattened and filled even-odd, 64 samples a pixel), so the build needs no image library; they match Chromium’s own render of `favicon.svg` to within a mean of 1.5 levels in 255. The horse is 420 × 120, so at 16 pixels it is a small white mark; at 32 pixels, what a high-density tab shows, it reads as the horse. A glyph from `brand/marks/glyphs.svg` would read better at 16 pixels, if the owner ever wants one. `site/index.html` links them; the Artifact leaves the links out, since claude.ai owns its tab’s icon.
 
 ```html
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">

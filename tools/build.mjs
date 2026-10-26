@@ -10,6 +10,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { loadShop, withShop } from './shop/render.mjs';
+import { icons } from './icons.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const P = (...p) => join(ROOT, ...p);
@@ -104,6 +105,10 @@ if (!existsSync(P('site', THREE_FILE))) fail(`missing site/${THREE_FILE}, the th
 const THREE_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 const THREE_SRI = 'sha512-' + createHash('sha512').update(readFileSync(P('site', THREE_FILE))).digest('base64');
 
+// The icons served at the web build's root: the horse whole on a void square, from brand/marks/horse.svg and the
+// tokens (tools/icons.mjs). The Artifact leaves them out, since claude.ai owns its tab's icon.
+const ICONS = icons(P('brand/marks/horse.svg'), { bg: T.color.void, fg: T.color.paper });
+
 // A web build: the source as files, tokens generated, manifest filled. CSP-friendly: no inline script.
 // Returns how many images it carries.
 function writeWeb(dir, page) {
@@ -117,6 +122,7 @@ function writeWeb(dir, page) {
   mkdirSync(P(dir, dirname(THREE_FILE)), { recursive: true });
   copyFileSync(P('site', THREE_FILE), P(dir, THREE_FILE));
   for (const r of [...own, ...loopFiles, ...coverFiles]) { mkdirSync(dirname(P(dir, r)), { recursive: true }); copyFileSync(P('site', r), P(dir, r)); }
+  for (const [name, data] of Object.entries(ICONS)) writeFileSync(P(dir, name), data);
   return own.length;
 }
 rmSync(P('dist'), { recursive: true, force: true });
@@ -139,6 +145,7 @@ const dataUri = (rel) => 'data:image/jpeg;base64,' + readFileSync(P('site', rel)
 let head = html.slice(html.indexOf('<head>') + 6, html.indexOf('</head>'));
 let body = html.slice(html.indexOf('<body>') + 6, html.lastIndexOf('</body>'));
 head = head.replace(/<meta charset="[^"]*">\s*/, '').replace(/<meta name="viewport"[^>]*>\s*/, '');
+head = head.replace(/<link rel="(?:icon|apple-touch-icon)"[^>]*>\s*/g, '');
 head = once(head, /(<title>[^<]*<\/title>)/, (t) => t + '\n<meta name="claude:viewport-fit-sides" content="cover">');
 head = once(head, /<link rel="stylesheet" href="tokens\.css">\s*<link rel="stylesheet" href="styles\.css">/, () => `<style>\n${read('site/tokens.css')}\n${read('site/styles.css')}</style>`);
 head = once(head, /<script src="boot\.js"><\/script>/, () => `<script>${scriptSafe(read('site/boot.js'))}</script>`);

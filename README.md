@@ -46,6 +46,7 @@ shop/
   source/                what the importer brought back: the maker's Russian text, prices and photos (not shipped)
 tools/
   build.mjs              tokens, brand check, both publish targets
+  icons.mjs              the favicons: the white horse on black, drawn by the build
   shop/render.mjs        renders site/shop.json into the page (used by the build and the brand check)
   shop/previews.mjs      the Machina and Arca previews, for render.mjs
   shop/import-emode.mjs  imports the maker's products into shop/source/ (run by the shop-import workflow)
