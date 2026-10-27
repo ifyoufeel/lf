@@ -273,7 +273,8 @@
       "Wear headphones.",
       "Inspect what you find.",
       "Seventeen signals. Three wings.",
-      "You walked the whole house."
+      "You walked the whole house.",
+      "The sound field."
     ],
     "machina": [
       "What thinks.",
@@ -313,7 +314,8 @@
       "Explore",
       "Enter with sound",
       "Enter in silence",
-      "Keep walking"
+      "Keep walking",
+      "Open the sound field"
     ]
   },
   "banned": [
@@ -392,8 +394,7 @@
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
     "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief.",
-    "The Research screen on the Hortus case (‘Each study reads open data and ends in a tool a grower can use.’) and the research pages’ headlines and labels are suggested wording, written with the studies (27 October 2026). ‘Research first’ and ‘We learn the field before we touch it’ are the house principle in the brand’s copy.",
-    "The sound field in the walk (27 October 2026), for the owner's review before it goes live: the stone names, the loop and scene names, ‘Below the line, a layer rests’, ‘Louder’, ‘Brighter’ and ‘Open the sound field’ come from the owner's own Sound Field artifact. The lines written for the site are suggested wording: ‘The sound field.’, ‘The stones woke around the column.’, ‘The stones wake once all three wings are explored.’, ‘The sound field. Press E to play.’ (on phones ‘Tap Play to mix the stones.’), ‘The jam plays on while you walk the house.’, ‘The drone holds the hum of the house. Drag it to shape it.’, the hints under the field and the settings line ‘Each stone round the house column is one layer of a jam. Drag them to mix.’"
+    "The Research screen on the Hortus case (‘Each study reads open data and ends in a tool a grower can use.’) and the research pages’ headlines and labels are suggested wording, written with the studies (27 October 2026). ‘Research first’ and ‘We learn the field before we touch it’ are the house principle in the brand’s copy."
   ],
   "conflicts": [
     {

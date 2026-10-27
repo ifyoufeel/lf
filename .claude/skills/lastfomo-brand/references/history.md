@@ -37,6 +37,7 @@ Footage sources supplied by the owner: the GPU rig clip (60 fps), the plant rese
 6. **Landing page:** scroll by scroll, showreels in place, a page per case with metrics and scope. From comments: Arca consistent on mobile, the same arch holder for every wing, the approved loops in the holders, and a Start a project page.
 7. **Walking experience:** PolyFauna-like portals to three worlds with interactive objects and ambient sound. From comments: Hortus and Arca restyled in Machina's dark neon look with a per-wing grade.
 8. **Walkthrough film:** real captures of the site and real gameplay, edited with brand cards.
+9. **Sound field:** the walking experience's jam machine (seven rune stones, one jam in A minor, scenes) moved into the landing page's walk as its reward: the stones rise in the house once all three wings are explored. The owner tried it in a review Artifact and approved it to go live, wording included (27 October 2026). Next, by the owner's request: more loops per stone and more scenes.
 
 ## Open items
 
