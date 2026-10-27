@@ -1,0 +1,157 @@
+"""Research 2 field analysis: phenology classes (Kansas), irrigated area (Mkushi), dry-season comparison (Java),
+FAO-56 reference evapotranspiration and NDVI-scaled crop water demand."""
+import sys, json, glob, os
+import numpy as np, pandas as pd
+from sklearn.cluster import KMeans
+D = sys.argv[1]; O = sys.argv[2]; os.makedirs(O, exist_ok=True)
+
+def load(site):
+    s = json.load(open(f"{D}/{site}/series.json"))
+    rows = [r for r in s["rows"] if "ndvi_mean" in r]
+    files = sorted(glob.glob(f"{D}/{site}/*.npz"))
+    stack = {}
+    for f in files:
+        date = os.path.basename(f)[:10]
+        z = np.load(f)
+        stack.setdefault(date, []).append(z)
+    return s, rows, stack
+
+def et0_pm(df, elev_kpa=None, lat=0.0):
+    """FAO-56 Penman-Monteith daily ET0 (mm/day). Rs from W m-2 daily mean -> MJ m-2 d-1."""
+    Tmax, Tmin = df.T2M_MAX.values, df.T2M_MIN.values
+    T = (Tmax + Tmin) / 2
+    P = df.PS.values / 10.0  # hPa -> kPa
+    gamma = 0.000665 * P
+    es = (0.6108 * np.exp(17.27 * Tmax / (Tmax + 237.3)) + 0.6108 * np.exp(17.27 * Tmin / (Tmin + 237.3))) / 2
+    ea = 0.6108 * np.exp(17.27 * df.T2MDEW.values / (df.T2MDEW.values + 237.3))
+    delta = 4098 * (0.6108 * np.exp(17.27 * T / (T + 237.3))) / (T + 237.3) ** 2
+    u2 = df.WS2M.values
+    Rs = df.RS.values * 0.0864
+    J = pd.to_datetime(df.index).dayofyear.values
+    phi = np.deg2rad(lat)
+    dr = 1 + 0.033 * np.cos(2 * np.pi * J / 365); dec = 0.409 * np.sin(2 * np.pi * J / 365 - 1.39)
+    ws = np.arccos(np.clip(-np.tan(phi) * np.tan(dec), -1, 1))
+    Ra = 24 * 60 / np.pi * 0.0820 * dr * (ws * np.sin(phi) * np.sin(dec) + np.cos(phi) * np.cos(dec) * np.sin(ws))
+    z = 0.0  # Rso from Ra; elevation term handled via pressure-derived altitude
+    alt = 44331.5 * (1 - (P / 101.325) ** 0.190263)
+    Rso = (0.75 + 2e-5 * alt) * Ra
+    Rns = 0.77 * Rs
+    sigma = 4.903e-9
+    Rnl = sigma * (((Tmax + 273.16) ** 4 + (Tmin + 273.16) ** 4) / 2) * (0.34 - 0.14 * np.sqrt(np.maximum(ea, 0))) * (1.35 * np.clip(Rs / np.maximum(Rso, 1e-6), 0.25, 1.0) - 0.35)
+    Rn = Rns - Rnl
+    et0 = (0.408 * delta * Rn + gamma * 900 / (T + 273) * u2 * (es - ea)) / (delta + gamma * (1 + 0.34 * u2))
+    vpd = es - ea
+    return pd.DataFrame(dict(et0=et0, vpd=vpd, rs_mj=Rs, dli=Rs * 2.04, tmean=T), index=df.index)
+
+res = {}
+# ---------------- Kansas ----------------
+s, rows, stack = load("kansas")
+dates = sorted(stack)
+good = [d for d in dates if np.isfinite(stack[d][0]["ndvi"].astype("float32")).mean() > 0.97]
+arr = np.stack([np.nanmean([z["ndvi"].astype("float32") for z in stack[d]], axis=0) for d in good])  # (T, 600, 600)
+T, H, W = arr.shape
+doy = np.array([pd.Timestamp(d).dayofyear for d in good])
+grid = np.arange(70, 290, 10)  # 11 Mar to 17 Oct, 10-day steps
+flat = arr.reshape(T, -1)
+interp = np.empty((grid.size, flat.shape[1]), dtype="float32")
+for j in range(flat.shape[1]):
+    v = flat[:, j]; ok = np.isfinite(v)
+    interp[:, j] = np.interp(grid, doy[ok], v[ok]) if ok.sum() >= 3 else np.nan
+X = interp.T
+ok = np.isfinite(X).all(1)
+km = KMeans(n_clusters=5, n_init=10, random_state=0).fit(X[ok][::7])
+lab = np.full(X.shape[0], -1); lab[ok] = km.predict(X[ok])
+cent = km.cluster_centers_
+# name clusters by phenology
+names = {}
+for c in range(5):
+    curve = cent[c]; pk = grid[np.argmax(curve)]; mx = curve.max(); mn = curve.min()
+    if mx < 0.35: n = "Fallow or bare"
+    elif pk < 160: n = "Winter wheat (peak spring)"
+    elif mx > 0.75 and pk >= 180: n = "Irrigated summer crop (maize-like)"
+    elif pk >= 180: n = "Summer crop, lower canopy (sorghum/soy-like)"
+    else: n = "Grass and field margins"
+    names[c] = dict(name=n, peak_doy=int(pk), max=float(mx), share=float((lab == c).mean()))
+labmap = lab.reshape(H, W)
+res["kansas"] = dict(dates=good, grid_doy=grid.tolist(), clusters=names, centroids=cent.round(3).tolist(),
+                     window_mean=[float(np.nanmean(a)) for a in arr])
+np.save(f"{O}/kansas_labels.npy", labmap.astype("int8"))
+np.save(f"{O}/kansas_ndvi_stack.npy", arr.astype("float16"))
+json.dump(good, open(f"{O}/kansas_dates.json", "w"))
+# water demand for the maize-like class
+wx = pd.read_csv(f"{D}/kansas/weather_daily.csv", index_col=0, parse_dates=True)
+e = et0_pm(wx.dropna(subset=["T2M_MAX", "RS"]), lat=s["lat"])
+mz = max(names, key=lambda c: names[c]["max"])
+curve = pd.Series(cent[mz], index=pd.to_datetime("2026-01-01") + pd.to_timedelta(grid - 1, unit="D"))
+days = pd.date_range("2026-04-01", "2026-09-30")
+nd = np.interp(days.dayofyear, grid, cent[mz])
+kc = 0.30 + (1.20 - 0.30) * np.clip((nd - 0.15) / (0.85 - 0.15), 0, 1)   # FAO-56 maize Kc_ini 0.30 .. Kc_mid 1.20, NDVI-scaled
+ee = e.reindex(days)
+etc = kc * ee.et0.values
+rain = wx.reindex(days).IMERG.fillna(wx.reindex(days).PRECTOTCORR)
+eff = np.minimum(rain.values, etc * 1.0)  # effective rainfall capped at demand (no carry-over), simple
+res["kansas_water"] = dict(class_name=names[mz]["name"], et0_sum=float(np.nansum(ee.et0)), etc_sum=float(np.nansum(etc)),
+                           rain_sum=float(np.nansum(rain)), net_irrigation=float(np.nansum(etc) - np.nansum(eff)),
+                           kc_peak=float(kc.max()), et0_peak=float(np.nanmax(ee.et0)),
+                           daily=[dict(d=str(d.date()), et0=round(float(a), 2), etc=round(float(b), 2), rain=round(float(c), 1), ndvi=round(float(n), 3))
+                                  for d, a, b, c, n in zip(days, ee.et0.values, etc, rain.values, nd)])
+# Kansas weather extras: GDD base 10 cap 30, VPD
+t = wx.loc["2026-04-15":"2026-09-30"]
+gdd = ((np.minimum(t.T2M_MAX, 30) + np.maximum(t.T2M_MIN, 10)) / 2 - 10).clip(lower=0)
+res["kansas_water"]["gdd_apr15_sep30"] = float(gdd.sum())
+res["kansas_water"]["vpd_jja_mean"] = float(e.loc["2026-06-01":"2026-08-31"].vpd.mean())
+res["kansas_water"]["dli_jja_mean"] = float(e.loc["2026-06-01":"2026-08-31"].dli.mean())
+
+# ---------------- Mkushi ----------------
+s2, rows2, stack2 = load("mkushi")
+d2 = sorted(stack2)
+good2 = [d for d in d2 if np.isfinite(stack2[d][0]["ndvi"].astype("float32")).mean() > 0.95]
+arr2 = np.stack([np.nanmean([z["ndvi"].astype("float32") for z in stack2[d]], axis=0) for d in good2])
+jul = [i for i, d in enumerate(good2) if d[5:7] in ("07", "08")]
+irr = np.nanmedian(arr2[jul], axis=0) > 0.6
+oct_ = [i for i, d in enumerate(good2) if d[5:7] in ("09", "10")]
+res["mkushi"] = dict(dates=good2, irrigated_share=float(irr.mean()),
+                     irrigated_series=[float(np.nanmean(a[irr])) for a in arr2],
+                     other_series=[float(np.nanmean(a[~irr])) for a in arr2])
+np.save(f"{O}/mkushi_ndvi_stack.npy", arr2.astype("float16")); json.dump(good2, open(f"{O}/mkushi_dates.json", "w"))
+np.save(f"{O}/mkushi_irrigated.npy", irr)
+wx2 = pd.read_csv(f"{D}/mkushi/weather_daily.csv", index_col=0, parse_dates=True)
+e2 = et0_pm(wx2.dropna(subset=["T2M_MAX", "RS"]), lat=s2["lat"])
+days2 = pd.date_range("2026-05-01", "2026-09-30")
+nd2 = np.interp(days2.dayofyear, [pd.Timestamp(d).dayofyear for d in good2], res["mkushi"]["irrigated_series"])
+kc2 = 0.30 + (1.15 - 0.30) * np.clip((nd2 - 0.15) / (0.85 - 0.15), 0, 1)  # FAO-56 wheat Kc_mid 1.15
+etc2 = kc2 * e2.reindex(days2).et0.values
+rain2 = wx2.reindex(days2).IMERG.fillna(wx2.reindex(days2).PRECTOTCORR)
+res["mkushi_water"] = dict(et0_sum=float(np.nansum(e2.reindex(days2).et0)), etc_sum=float(np.nansum(etc2)), rain_sum=float(np.nansum(rain2)),
+                           net_irrigation=float(np.nansum(etc2) - np.nansum(np.minimum(rain2.values, etc2))),
+                           daily=[dict(d=str(d.date()), et0=round(float(a), 2), etc=round(float(b), 2), rain=round(float(c), 1), ndvi=round(float(n), 3))
+                                  for d, a, b, c, n in zip(days2, e2.reindex(days2).et0.values, etc2, rain2.values, nd2)])
+
+# ---------------- Java: dry season 2025 vs 2026 ----------------
+s3, rows3, stack3 = load("java")
+d3 = sorted(stack3)
+def season_max(year):
+    ds = [d for d in d3 if d.startswith(str(year)) and d[5:7] in ("07", "08", "09")]
+    a = np.stack([np.nanmean([z["ndvi"].astype("float32") for z in stack3[d]], axis=0) for d in ds])
+    return ds, np.nanmax(a, axis=0), a
+ds25, mx25, a25 = season_max(2025); ds26, mx26, a26 = season_max(2026)
+res["java"] = dict(dates_2025=ds25, dates_2026=ds26,
+                   green_share_2025=float(np.nanmean(mx25 > 0.5)), green_share_2026=float(np.nanmean(mx26 > 0.5)),
+                   median_max_2025=float(np.nanmedian(mx25)), median_max_2026=float(np.nanmedian(mx26)),
+                   series=[dict(d=r["date"], ndvi=r["ndvi_mean"], valid=r["valid"]) for r in rows3])
+np.save(f"{O}/java_max2025.npy", mx25.astype("float16")); np.save(f"{O}/java_max2026.npy", mx26.astype("float16"))
+wx3 = pd.read_csv(f"{D}/java/weather_daily.csv", index_col=0, parse_dates=True)
+r3 = wx3.IMERG.fillna(wx3.PRECTOTCORR)
+res["java"]["rain_jas_2025"] = float(r3.loc["2025-07-01":"2025-09-14"].sum())
+res["java"]["rain_jas_2026"] = float(r3.loc["2026-07-01":"2026-09-14"].sum())
+res["series"] = {k: [dict(d=r["date"], ndvi=round(r["ndvi_mean"], 4), p10=round(r["ndvi_p10"], 4), p90=round(r["ndvi_p90"], 4),
+                         ndre=round(r["ndre_mean"], 4), ndmi=round(r["ndmi_mean"], 4), valid=round(r["valid"], 3))
+                    for r in json.load(open(f"{D}/{k}/series.json"))["rows"] if "ndvi_mean" in r] for k in ["kansas", "mkushi", "java"]}
+res["sites"] = {k: dict(lon=json.load(open(f"{D}/{k}/series.json"))["lon"], lat=json.load(open(f"{D}/{k}/series.json"))["lat"],
+                         tile=json.load(open(f"{D}/{k}/series.json"))["tile"]) for k in ["kansas", "mkushi", "java"]}
+json.dump(res, open(f"{O}/fields.json", "w"), indent=1)
+print(json.dumps({k: v for k, v in res["kansas"].items() if k in ("clusters",)}, indent=1))
+print({k: v for k, v in res["kansas_water"].items() if k != "daily"})
+print({k: v for k, v in res["mkushi"].items() if k in ("irrigated_share", "dates")})
+print({k: v for k, v in res["mkushi_water"].items() if k != "daily"})
+print({k: v for k, v in res["java"].items() if k != "series"})

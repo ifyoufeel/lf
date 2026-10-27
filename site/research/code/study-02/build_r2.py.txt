@@ -1,0 +1,131 @@
+import sys, json, io, base64, glob, os
+sys.path.insert(0, "r2/scripts")
+import numpy as np, pandas as pd
+from PIL import Image, ImageEnhance
+from s2lib import *
+D = "r2/data"; O = "r2/out"; S = "build/site"
+F = json.load(open(f"{O}/fields.json"))
+
+def b64png(arr8):
+    im = Image.fromarray(arr8.astype("uint8"), mode="L"); bio = io.BytesIO(); im.save(bio, format="PNG", optimize=True)
+    return "data:image/png;base64," + base64.b64encode(bio.getvalue()).decode()
+
+def down(a, n=150, mode="mean"):
+    H = a.shape[0]; k = H // n
+    a = a[:k * n, :k * n].astype("float32").reshape(n, k, n, k)
+    if mode == "mean":
+        with np.errstate(all="ignore"): return np.nanmean(a, axis=(1, 3))
+    return a[:, k // 2, :, k // 2]
+
+def ndvi8(a):
+    a = np.where(np.isfinite(a), a, 0)
+    return np.clip(a / 0.9 * 255, 0, 255)
+
+def et0_pm(df, lat):
+    Tmax, Tmin = df.T2M_MAX.values, df.T2M_MIN.values; T = (Tmax + Tmin) / 2; P = df.PS.values / 10.0
+    gamma = 0.000665 * P
+    es = (0.6108 * np.exp(17.27 * Tmax / (Tmax + 237.3)) + 0.6108 * np.exp(17.27 * Tmin / (Tmin + 237.3))) / 2
+    ea = 0.6108 * np.exp(17.27 * df.T2MDEW.values / (df.T2MDEW.values + 237.3))
+    delta = 4098 * (0.6108 * np.exp(17.27 * T / (T + 237.3))) / (T + 237.3) ** 2
+    u2 = df.WS2M.values; Rs = df.RS.values * 0.0864
+    J = pd.to_datetime(df.index).day_of_year.values; phi = np.deg2rad(lat)
+    dr = 1 + 0.033 * np.cos(2 * np.pi * J / 365); dec = 0.409 * np.sin(2 * np.pi * J / 365 - 1.39)
+    ws = np.arccos(np.clip(-np.tan(phi) * np.tan(dec), -1, 1))
+    Ra = 24 * 60 / np.pi * 0.0820 * dr * (ws * np.sin(phi) * np.sin(dec) + np.cos(phi) * np.cos(dec) * np.sin(ws))
+    alt = 44331.5 * (1 - (P / 101.325) ** 0.190263); Rso = (0.75 + 2e-5 * alt) * Ra
+    Rnl = 4.903e-9 * (((Tmax + 273.16) ** 4 + (Tmin + 273.16) ** 4) / 2) * (0.34 - 0.14 * np.sqrt(np.maximum(ea, 0))) * (1.35 * np.clip(Rs / np.maximum(Rso, 1e-6), 0.25, 1.0) - 0.35)
+    et0 = (0.408 * delta * (0.77 * Rs - Rnl) + gamma * 900 / (T + 273) * u2 * (es - ea)) / (delta + gamma * (1 + 0.34 * u2))
+    hs = 0.0023 * (Ra * 0.408) * (T + 17.8) * np.sqrt(np.maximum(Tmax - Tmin, 0))
+    return pd.DataFrame(dict(et0=et0, et0_hs=hs, vpd=es - ea, rs=Rs, dli=Rs * 2.04, tmax=Tmax, tmin=Tmin), index=df.index)
+
+def water(curve_doy, curve_ndvi, wx, lat, kc_mid, year=2026, name=""):
+    days = pd.date_range(f"{year}-01-01", f"{year}-10-15")
+    days = days[(days.day_of_year >= int(min(curve_doy))) & (days.day_of_year <= int(max(curve_doy)))]
+    nd = np.interp(days.day_of_year, curve_doy, curve_ndvi)
+    present = np.where(nd >= 0.30)[0]
+    if not len(present): return None
+    i0 = max(present[0] - 15, 0); i1 = present[-1]
+    days = days[i0:i1 + 1]; nd = nd[i0:i1 + 1]
+    e = et0_pm(wx.dropna(subset=["T2M_MAX", "RS"]), lat).reindex(days)
+    kc = 0.30 + (kc_mid - 0.30) * np.clip((nd - 0.15) / (0.85 - 0.15), 0, 1)
+    etc = kc * e.et0.values; etc_hs = kc * e.et0_hs.values
+    rain = wx.reindex(days).IMERG.fillna(wx.reindex(days).PRECTOTCORR).values
+    df = pd.DataFrame(dict(etc=etc, etc_hs=etc_hs, rain=rain), index=days)
+    blk = df.resample("10D").sum()
+    deficit = (blk.etc - 0.8 * blk.rain).clip(lower=0).sum(); deficit_hs = (blk.etc_hs - 0.8 * blk.rain).clip(lower=0).sum()
+    return dict(name=name, start=str(days[0].date()), end=str(days[-1].date()), days=len(days), kc_mid=kc_mid,
+                et0=float(np.nansum(e.et0)), et0_hs=float(np.nansum(e.et0_hs)), etc=float(np.nansum(etc)), etc_hs=float(np.nansum(etc_hs)),
+                rain=float(np.nansum(rain)), net_irrigation=float(deficit), net_irrigation_hs=float(deficit_hs),
+                peak_etc=float(np.nanmax(etc)), mean_etc_peak_month=float(df.etc.resample("MS").mean().max()),
+                daily=[dict(d=str(d.date()), etc=round(float(a), 2), rain=round(float(r), 1), ndvi=round(float(n), 3), et0=round(float(z), 2))
+                       for d, a, r, n, z in zip(days, etc, rain, nd, e.et0.values)])
+
+out = {}
+# ---- Kansas classes, renamed by phenology ----
+grid = np.array(F["kansas"]["grid_doy"]); C = np.array(F["kansas"]["centroids"])
+lab = np.load(f"{O}/kansas_labels.npy")
+cls = []
+for i, c in enumerate(C):
+    spring = c[(grid >= 90) & (grid <= 130)].max(); summer = c[(grid >= 190) & (grid <= 260)].max()
+    spk = grid[(grid >= 150)][np.argmax(c[grid >= 150])]
+    if spring < 0.45 and summer < 0.45: n, kc = "Dryland, fallow and field corners", None
+    elif spring >= 0.6 and summer >= 0.6: n, kc = "Wheat, then a second summer crop", 1.15
+    elif spring >= 0.6: n, kc = "Winter wheat, then fallow", 1.15
+    elif spk <= 215: n, kc = "Irrigated maize", 1.20
+    else: n, kc = "Late-sown summer crop", 1.10
+    cls.append(dict(id=i, name=n, share=float((lab == i).mean()), curve=[round(float(v), 3) for v in c], kc_mid=kc))
+wxk = pd.read_csv(f"{D}/kansas/weather_daily.csv", index_col=0, parse_dates=True)
+lat_k = F["sites"]["kansas"]["lat"]
+for c in cls:
+    if c["kc_mid"]:
+        w = water(grid, np.array(c["curve"]), wxk, lat_k, c["kc_mid"], name=c["name"])
+        c["water"] = {k: v for k, v in w.items() if k != "daily"}
+        if c["name"] == "Irrigated maize": maize_daily = w["daily"]
+ek = et0_pm(wxk.dropna(subset=["T2M_MAX", "RS"]), lat_k)
+jja = ek.loc["2026-06-01":"2026-08-31"]
+t = wxk.loc["2026-05-01":"2026-09-30"]
+gdd = ((np.minimum(t.T2M_MAX, 30) + np.maximum(t.T2M_MIN, 10)) / 2 - 10).clip(lower=0).sum()
+out["kansas"] = dict(site=F["sites"]["kansas"], classes=cls, grid_doy=grid.tolist(),
+                     labels=b64png(down(lab.astype("float32") * 40 + 40, mode="nearest")), label_codes={c["id"]: c["id"] * 40 + 40 for c in cls},
+                     maize_daily=maize_daily,
+                     climate=dict(jja_tmax=float(jja.tmax.mean()), jja_tmin=float(jja.tmin.mean()), jja_vpd=float(jja.vpd.mean()), jja_dli=float(jja.dli.mean()),
+                                  jja_et0=float(jja.et0.mean()), jja_et0_hs=float(jja.et0_hs.mean()), gdd_may_sep=float(gdd),
+                                  hot_days_35=int((t.T2M_MAX >= 35).sum()),
+                                  # Jun-Aug mean daily maximum, NASA POWER MERRA-2 monthly, 1991-2020 and 2012
+                                  jja_tmax_normal=33.56, jja_tmax_2012=36.44))
+st = np.load(f"{O}/kansas_ndvi_stack.npy").astype("float32"); dk = json.load(open(f"{O}/kansas_dates.json"))
+pick = [i for i, d in enumerate(dk)]
+frames = []
+for i in pick:
+    frames.append(dict(d=dk[i], img=b64png(ndvi8(down(st[i]))), mean=round(float(np.nanmean(st[i])), 3)))
+out["kansas"]["frames"] = frames
+# ---- Mkushi ----
+mk = F["mkushi"]; irr = np.load(f"{O}/mkushi_irrigated.npy")
+st2 = np.load(f"{O}/mkushi_ndvi_stack.npy").astype("float32"); d2 = json.load(open(f"{O}/mkushi_dates.json"))
+wxm = pd.read_csv(f"{D}/mkushi/weather_daily.csv", index_col=0, parse_dates=True)
+doy2 = np.array([pd.Timestamp(d).day_of_year for d in d2])
+wm = water(doy2, np.array(mk["irrigated_series"]), wxm, F["sites"]["mkushi"]["lat"], 1.15, name="Irrigated winter wheat (pivots)")
+em = et0_pm(wxm.dropna(subset=["T2M_MAX", "RS"]), F["sites"]["mkushi"]["lat"])
+out["mkushi"] = dict(site=F["sites"]["mkushi"], dates=d2, irrigated_share=mk["irrigated_share"],
+                     irrigated_series=[round(v, 3) for v in mk["irrigated_series"]], other_series=[round(v, 3) for v in mk["other_series"]],
+                     mask=b64png(down(irr.astype("float32") * 255, mode="nearest")),
+                     water={k: v for k, v in wm.items() if k != "daily"}, wheat_daily=wm["daily"],
+                     frames=[dict(d=d2[i], img=b64png(ndvi8(down(st2[i]))), mean=round(float(np.nanmean(st2[i])), 3)) for i in range(len(d2))],
+                     climate=dict(jja_tmax=float(em.loc["2026-06-01":"2026-08-31"].tmax.mean()), jja_vpd=float(em.loc["2026-06-01":"2026-08-31"].vpd.mean()),
+                                  jja_dli=float(em.loc["2026-06-01":"2026-08-31"].dli.mean()), jja_tmax_normal=25.08))
+# ---- Java ----
+jv = F["java"]
+m25 = np.load(f"{O}/java_max2025.npy").astype("float32"); m26 = np.load(f"{O}/java_max2026.npy").astype("float32")
+out["java"] = dict(site=F["sites"]["java"], **{k: jv[k] for k in ["dates_2025", "dates_2026", "green_share_2025", "green_share_2026", "median_max_2025", "median_max_2026", "rain_jas_2025", "rain_jas_2026"]},
+                   max2025=b64png(ndvi8(down(m25))), max2026=b64png(ndvi8(down(m26))), series=jv["series"])
+out["series"] = F["series"]
+def _clean(o):  # browsers reject NaN in JSON
+    if isinstance(o, float): return None if (o != o or o in (float("inf"), float("-inf"))) else o
+    if isinstance(o, dict): return {k: _clean(v) for k, v in o.items()}
+    if isinstance(o, list): return [_clean(v) for v in o]
+    return o
+json.dump(_clean(out), open(f"{S}/data/r2-fields.json", "w"), separators=(",", ":"), allow_nan=False)
+print(os.path.getsize(f"{S}/data/r2-fields.json") // 1024, "KB")
+for c in cls: print(c["name"], round(c["share"], 3), {k: round(v, 1) if isinstance(v, float) else v for k, v in c.get("water", {}).items()})
+print("mkushi", {k: round(v, 1) if isinstance(v, float) else v for k, v in wm.items() if k != "daily"})
+print(out["kansas"]["climate"])

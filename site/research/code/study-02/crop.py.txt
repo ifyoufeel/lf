@@ -1,0 +1,11 @@
+import sys; sys.path.insert(0, sys.argv[1])
+from s2lib import *
+from PIL import Image
+scene, epsg, px, py, left, top, half, out = sys.argv[2], sys.argv[3], float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]), float(sys.argv[7]), float(sys.argv[8]), sys.argv[9]
+x = left + px * 100; y = top - py * 100
+lon, lat = Transformer.from_crs(epsg, "EPSG:4326", always_xy=True).transform(x, y)
+print("center lon/lat", round(lon, 5), round(lat, 5))
+with rasterio.open("/vsicurl/" + B + scene + "TCI.tif") as src:
+    w = from_bounds(x - half, y - half, x + half, y + half, src.transform)
+    a = src.read(window=w)
+Image.fromarray(np.moveaxis(a, 0, -1)).save(out, quality=90)

@@ -1,0 +1,29 @@
+"""Monthly regional means from NASA POWER (MERRA-2 and IMERG) Zarr stores on AWS, anonymous HTTPS."""
+import sys, json
+import numpy as np, pandas as pd, xarray as xr
+sys.path.insert(0, sys.argv[1])
+from regions import REGIONS
+OUT = sys.argv[2]
+B = "https://nasa-power.s3.amazonaws.com/"
+m2 = xr.open_zarr(B + "merra2/temporal/power_merra2_monthly_temporal_utc.zarr", consolidated=True)
+im = xr.open_zarr(B + "imerg/temporal/power_imerg_monthly_temporal_utc.zarr", consolidated=True)
+VARS = ["PRECTOTCORR", "T2M", "T2M_MAX_AVG", "GWETROOT"]
+frames = []
+for r in REGIONS:
+    la0, la1 = r["lat"]; lo0, lo1 = r["lon"]
+    sub = m2[VARS].sel(lat=slice(la0, la1), lon=slice(lo0, lo1))
+    w = np.cos(np.deg2rad(sub.lat))
+    # land-only: GWETROOT is defined over land; use its long-term mean as the mask
+    sub = sub.load()
+    land = sub["GWETROOT"].mean("time", skipna=True).notnull()
+    mean = sub.where(land).weighted(w).mean(("lat", "lon"))
+    df = mean.to_dataframe()[VARS]
+    isub = im["IMERG_PRECTOT"].sel(lat=slice(la0, la1), lon=slice(lo0, lo1)).load()
+    iw = np.cos(np.deg2rad(isub.lat))
+    imean = isub.weighted(iw).mean(("lat", "lon")).to_series().rename("IMERG_PRECTOT")
+    df = df.join(imean, how="left")
+    df["region"] = r["id"]
+    frames.append(df.reset_index())
+    print(r["id"], int(land.sum()), "land cells", df.dropna(subset=["PRECTOTCORR"]).index.max(), file=sys.stderr)
+out = pd.concat(frames)
+out.to_csv(OUT, index=False)

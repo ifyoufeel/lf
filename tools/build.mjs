@@ -4,8 +4,9 @@
 //          ──►  dist/web/                    full document + files, for any static host (Vercel)
 //          ──►  dist/artifact/lastfomo.html  fragment with CSS, JS and images inlined, for a claude.ai Artifact
 //          ──►  dist/preview/                the web build with the Hortus shop, while site/shop.json is not live
+//   site/research/  ──►  dist/web/research/   the Hortus research pages, beside the landing page
 // Usage: node tools/build.mjs [--no-check]
-import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync, cpSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -53,6 +54,33 @@ async function brandcheck(opts, label) {
   return r.errors.length === 0;
 }
 if (!args.has('--no-check') && !(await brandcheck({}, 'source'))) fail('brand check failed on site/. Fix the errors above (or run with --no-check to inspect the output).');
+
+/* ---------- 2b. the research pages, checked as one page ---------- */
+// Hortus research (/research): an index and a page per study, with their tools, papers and decks, in site/research/.
+// The source check reads the landing page only, so the build checks the research page here, assembled as one page
+// (out/check/research.html, kept so a finding's line can be read): the site's tokens, the research styles and the
+// research scripts inline; three.js and jsPDF are third-party code and stay out. Every rail applies but two that the
+// studies cannot meet by their nature: R6 (every number in the facts ledger) and R7's ban on percentages. Their
+// numbers are data, computed from public archives by the scripts published beside them (/research/code/) and cited in
+// their papers. Open item for the owner: confirm that exemption (README → open items).
+const RESEARCH = 'site/research';
+const STUDY_DATA = (e) => e.rule === 'R6' || (e.rule === 'R7' && /percentage/i.test(e.message));
+if (existsSync(P(RESEARCH, 'index.html')) && !args.has('--no-check')) {
+  const swap = (page, re, text) => { let n = 0; const out = page.replace(re, () => { n++; return text; }); if (n !== 1) fail(`research check: expected one ${re} in ${RESEARCH}/index.html, found ${n}`); return out; };
+  let page = read(`${RESEARCH}/index.html`);
+  page = swap(page, /<link rel="stylesheet" href="\/tokens\.css">/, `<style>\n${read('site/tokens.css')}\n</style>`);
+  page = swap(page, /<link rel="stylesheet" href="\/research\/research\.css">/, `<style>\n${read(`${RESEARCH}/research.css`)}\n</style>`);
+  page = page.replace(/<script src="\/research\/js\/([\w-]+)\.js"><\/script>/g, (_, n) => `<script>\n${read(`${RESEARCH}/js/${n}.js`).replace(/<\/script/gi, '<\\/script')}\n</script>`);
+  mkdirSync(P('out/check'), { recursive: true });
+  writeFileSync(P('out/check/research.html'), page);
+  const { check } = await import(pathToFileURL(P('tools/brandcheck.mjs')).href);
+  const r = await check({ root: ROOT, html: P('out/check/research.html') });
+  const errors = r.errors.filter((e) => !STUDY_DATA(e)), data = r.errors.length - errors.length;
+  for (const w of r.warnings) console.warn(`  warn  ${w.rule} ${w.id}: ${w.message}${w.file ? ` (${w.file}${w.line ? ':' + w.line : ''})` : ''}`);
+  for (const e of errors) console.error(`  ERROR ${e.rule} ${e.id}: ${e.message}${e.file ? ` (${e.file}${e.line ? ':' + e.line : ''})` : ''}`);
+  console.log(`build: research check — ${errors.length} errors, ${r.warnings.length} warnings (${data} study figures left to the papers: R6 and R7's percentages)`);
+  if (errors.length) fail('brand check failed on site/research/. Fix the errors above.');
+}
 
 /* ---------- 3. assemble ---------- */
 // The Hortus shop renders from site/shop.json at its markers in site/index.html. The Artifact always carries it, for
@@ -123,6 +151,8 @@ function writeWeb(dir, page) {
   copyFileSync(P('site', THREE_FILE), P(dir, THREE_FILE));
   for (const r of [...own, ...loopFiles, ...coverFiles]) { mkdirSync(dirname(P(dir, r)), { recursive: true }); copyFileSync(P('site', r), P(dir, r)); }
   for (const [name, data] of Object.entries(ICONS)) writeFileSync(P(dir, name), data);
+  // The research pages ship as they stand: they name every file under /research/ themselves.
+  if (existsSync(P(RESEARCH, 'index.html'))) cpSync(P(RESEARCH), P(dir, 'research'), { recursive: true });
   return own.length;
 }
 rmSync(P('dist'), { recursive: true, force: true });
@@ -161,6 +191,8 @@ const pics = shared.length ? `<script type="application/json" id="lf-pics">${JSO
   + `<script>(() => { const m = JSON.parse(document.getElementById('lf-pics').textContent), fill = (r) => r.querySelectorAll('img[data-pic]').forEach((i) => { i.src = m[i.dataset.pic]; }); fill(document); document.querySelectorAll('template').forEach((t) => fill(t.content)); })();</script>\n` : '';
 body = once(body, /<script src="explore\.js"><\/script>/, () => `${pics}<script>\n${scriptSafe(read('site/explore.js'))}</script>`);
 body = once(body, /<script src="main\.js"><\/script>/, () => `<script>\n${scriptSafe(read('site/main.js'))}</script>`);
+// Links into the research pages leave the Artifact for the live site, in a new tab.
+body = body.replace(/<a ([^>]*?)href="\/research([^"]*)"/g, (_, pre, rest) => `<a ${pre}href="https://lastfomo.com/research${rest}" target="_blank" rel="noopener"`);
 const fragment = head.trim() + '\n' + body.trim() + '\n';
 mkdirSync(P('dist/artifact'), { recursive: true });
 writeFileSync(P('dist/artifact/lastfomo.html'), fragment);
@@ -174,6 +206,10 @@ const kb = (p) => (statSync(P(p)).size / 1024).toFixed(0) + ' KB';
 console.log(`build: dist/web/index.html ${kb('dist/web/index.html')} + ${webImages} images${shop ? (shopLive ? ', with the shop' : ', without the shop (site/shop.json: "live": false)') : ''}`);
 if (shop && !shopLive) console.log(`build: dist/preview/index.html ${kb('dist/preview/index.html')}, the web build with the shop, for QA only`);
 console.log(`build: dist/artifact/lastfomo.html ${kb('dist/artifact/lastfomo.html')}${shop ? ', with the shop' : ''}`);
+if (existsSync(P('dist/web/research/index.html'))) {
+  const size = (d) => readdirSync(d, { withFileTypes: true }).reduce((n, e) => n + (e.isDirectory() ? size(join(d, e.name)) : statSync(join(d, e.name)).size), 0);
+  console.log(`build: dist/web/research/ ${(size(P('dist/web/research')) / 1048576).toFixed(1)} MB, the research pages`);
+}
 const missing = Object.entries(media.loops).filter(([, v]) => !v).map(([w]) => w);
 if (missing.length) console.log(`build: posters stand in for the ${missing.join(' and ')} loop${missing.length > 1 ? 's' : ''} (not uploaded yet)`);
 const ledger = JSON.parse(read('brand/ledger.json'));

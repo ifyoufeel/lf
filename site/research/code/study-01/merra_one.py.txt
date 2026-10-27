@@ -1,0 +1,21 @@
+import sys
+import numpy as np, pandas as pd, xarray as xr
+sys.path.insert(0, sys.argv[1])
+from regions import REGIONS
+ids = sys.argv[3].split(",")
+B = "https://nasa-power.s3.amazonaws.com/"
+m2 = xr.open_zarr(B + "merra2/temporal/power_merra2_monthly_temporal_utc.zarr", consolidated=True)
+im = xr.open_zarr(B + "imerg/temporal/power_imerg_monthly_temporal_utc.zarr", consolidated=True)
+VARS = ["PRECTOTCORR", "T2M", "T2M_MAX_AVG", "GWETROOT"]
+old = pd.read_csv(sys.argv[2], parse_dates=["time"])
+old = old[~old.region.isin(ids)]
+frames = [old]
+for r in [x for x in REGIONS if x["id"] in ids]:
+    sub = m2[VARS].sel(lat=slice(*r["lat"]), lon=slice(*r["lon"])).load()
+    land = sub["GWETROOT"].mean("time", skipna=True).notnull()
+    df = sub.where(land).weighted(np.cos(np.deg2rad(sub.lat))).mean(("lat", "lon")).to_dataframe()[VARS]
+    isub = im["IMERG_PRECTOT"].sel(lat=slice(*r["lat"]), lon=slice(*r["lon"])).load()
+    df = df.join(isub.weighted(np.cos(np.deg2rad(isub.lat))).mean(("lat", "lon")).to_series().rename("IMERG_PRECTOT"), how="left")
+    df["region"] = r["id"]; frames.append(df.reset_index())
+    print(r["id"], "done", file=sys.stderr)
+pd.concat(frames).to_csv(sys.argv[2], index=False)

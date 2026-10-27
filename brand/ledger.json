@@ -251,6 +251,11 @@
       "id": "arca.study.art",
       "claim": "Global art sales in billions of US dollars, as each year's Art Basel and UBS Art Market Report (Arts Economics) gave them: 2019 $64.1 (2020 report), 2020 $50.1, 2021 $65.1, 2022 $67.8, 2023 $65.0, 2024 $57.5 (2025 report), 2025 $59.6 (2026 report, 12 March 2026: up on 2024, led by works above $10 million); chart ticks at $20B, $40B and $60B",
       "numbers": ["2019", "64.1", "2020", "50.1", "2021", "65.1", "2022", "67.8", "2023", "65.0", "2024", "57.5", "2025", "59.6", "10", "20", "40", "60"]
+    },
+    {
+      "id": "hortus.research.studies",
+      "claim": "Hortus research, published at /research on 27 October 2026: “The 2026–27 El Niño” (climate and crops: NOAA OISST, NASA POWER, FAO yields) and “Seeing what plants need” (plant vision and automation: Sentinel-2 fields in Kansas, Mkushi and West Java), each with its page, tools, paper, deck, data and scripts. The studies’ own figures are data computed by those scripts and cited in the papers; the build checks the research pages for every rail but R6 and R7’s percentages.",
+      "numbers": ["2026", "27"]
     }
   ],
   "approvedLines": {
@@ -386,7 +391,8 @@
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
-    "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief."
+    "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief.",
+    "The Research screen on the Hortus case (‘Each study reads open data and ends in a tool a grower can use.’) and the research pages’ headlines and labels are suggested wording, written with the studies (27 October 2026). ‘Research first’ and ‘We learn the field before we touch it’ are the house principle in the brand’s copy."
   ],
   "conflicts": [
     {

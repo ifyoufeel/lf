@@ -1,0 +1,83 @@
+import sys, json
+import numpy as np, pandas as pd
+from scipy import stats as sps
+sys.path.insert(0, "r1/scripts")
+from regions import REGIONS
+O = "r1/out"; S = "build/site/data"
+en = pd.read_csv(f"{O}/enso_monthly.csv", index_col=0, parse_dates=True)
+EV = json.load(open(f"{O}/enso_events.json"))
+seas = pd.read_csv(f"{O}/regional_seasons.csv")
+RS = pd.read_csv(f"{O}/rain_sensitivity.csv")
+AG = pd.read_csv(f"{O}/rain_dataset_agreement.csv")
+YS = pd.read_csv(f"{O}/yield_sensitivity.csv")
+YL = pd.read_csv(f"{O}/yield_anoms_long.csv")
+WS = pd.read_csv(f"{O}/wdi_cereal_sensitivity.csv")
+OUT = json.load(open(f"{O}/outlook_2026.json"))
+RB = pd.read_csv(f"{O}/robustness.csv")
+r = lambda v, k=3: None if (v is None or (isinstance(v, float) and not np.isfinite(v))) else round(float(v), k)
+d = {}
+d["enso"] = [dict(m=str(t.date())[:7], a=r(row.n34_anom), rel=r(row.rel), roni=r(row.roni), n=int(row.n_days)) for t, row in en.iterrows()]
+d["events"] = EV["events"]; d["scale"] = EV["scale"]; d["latest"] = dict(month=EV["last_month"], rel=EV["last_rel"],
+    abs=r(en.n34_anom.dropna().iloc[-1]), days_note="1–24 October 2026, three sampled days, preliminary OISST")
+an = {}
+for Y in [1982, 1997, 2015, 2023, 2026]:
+    vals = []
+    for k in range(18):
+        t = pd.Timestamp(f"{Y}-01-01") + pd.DateOffset(months=k)
+        v = en.rel.get(t, np.nan)
+        vals.append(r(v))
+    an[str(Y)] = vals
+d["analogues"] = an
+regs = []
+for R in REGIONS:
+    s = seas[seas.region == R["id"]].set_index("year")
+    rs = RS[RS.region == R["id"]].iloc[0]
+    ag = AG[AG.region == R["id"]].iloc[0]
+    y26 = s.loc[2026]
+    regs.append(dict(id=R["id"], name=R["name"], crop=R["crop"], lat=R["lat"], lon=R["lon"], season=R["season"], cross=R["cross"], sign=R["sign"],
+        im=dict(n=int(rs.im_n), slope=r(rs.im_slope, 2), lo=r(rs.im_lo, 2), hi=r(rs.im_hi, 2), p=r(rs.im_p, 4), r=r(rs.im_r, 3)),
+        m2=dict(n=int(rs.m2_n), slope=r(rs.m2_slope, 2), lo=r(rs.m2_lo, 2), hi=r(rs.m2_hi, 2), p=r(rs.m2_p, 4)),
+        tmax=dict(slope=r(rs.tmax_slope, 2), lo=r(rs.tmax_lo, 2), hi=r(rs.tmax_hi, 2), p=r(rs.tmax_p, 4)),
+        agree=dict(r=r(ag.r, 2), d2023=r(ag.d2023, 1)),
+        hist=[dict(y=int(y), rain=r(row.rain_im_pct, 1), m2=r(row.rain_m2_pct, 1), enso=r(row.enso, 2), tmax=r(row.tmax_anom, 2)) for y, row in s.iterrows() if 1982 <= y <= 2025],
+        now=dict(rain=r(y26.rain_im_todate_pct, 1), months=str(y26.months_todate) if isinstance(y26.months_todate, str) else "",
+                 tmax=r(y26.tmax_todate_anom, 2), enso=r(y26.enso_todate, 2), n=int(y26.n_im), total=int(y26.n_total))))
+d["regions"] = regs
+ys = []
+for _, row in YS.iterrows():
+    sub = YL[(YL.code == row.code) & (YL.crop == row.crop) & (YL.lag == row.lag)]
+    ys.append(dict(code=row.code, country=row.country, crop=row.crop, region=row.region, lag=int(row.lag), n=int(row.n),
+                   slope=r(row.slope, 2), lo=r(row.lo, 2), hi=r(row.hi, 2), p=r(row.p, 4), r=r(row.r, 3),
+                   vs=[r(float(x), 1) for x in str(row.vs_anoms).split(",")], vs_years=[int(x) for x in str(row.vs_years).split(",")],
+                   vs_mean=r(row.vs_mean, 1), other_sd=r(row.other_sd, 1),
+                   series=[dict(y=int(a.year), v=r(a.anom, 1), t=r(a.yield_t_ha, 3)) for a in sub.itertuples() if 1975 <= a.year <= 2018]))
+d["yields"] = ys
+d["wdi"] = json.loads(WS.to_json(orient="records"))
+d["robust"] = json.loads(RB.to_json(orient="records"))
+# client-side prediction parameters
+models = []
+for o in OUT:
+    rid = o["region"]; lag = o["lag"]
+    s = seas[seas.region == rid].set_index("year").enso
+    sub = YL[(YL.code == o["code"]) & (YL.crop == o["crop"]) & (YL.lag == lag)].set_index("year").anom
+    xs, yv = [], []
+    for Y in range(1982, 2019 - lag):
+        x = s.get(Y, np.nan); y = sub.get(Y + lag, np.nan)
+        if np.isfinite(x) and np.isfinite(y): xs.append(x); yv.append(y)
+    xs, yv = np.array(xs), np.array(yv); n = len(xs)
+    b1, b0 = np.polyfit(xs, yv, 1); res = yv - (b0 + b1 * xs); s2 = np.sqrt((res ** 2).sum() / (n - 2))
+    models.append(dict(code=o["code"], country=o["country"], crop=o["crop"], region=rid, region_name=o["region_name"], harvest_year=o["harvest_year"],
+                       b0=r(b0, 4), b1=r(b1, 4), s=r(s2, 4), n=n, xbar=r(xs.mean(), 4), sxx=r(((xs - xs.mean()) ** 2).sum(), 4), xmax=r(xs.max(), 2),
+                       p=r(o["p"], 4), basis=o["basis"], enso_obs=r(o["enso_todate"], 2) if o["basis"] != "scenarios" else None,
+                       rain_todate=r(o["rain_todate_pct"], 1) if o["rain_todate_pct"] is not None else None, months=o["rain_months"],
+                       tmax_todate=r(o["tmax_todate"], 2) if o["tmax_todate"] is not None else None,
+                       preds=[{k: r(v, 2) for k, v in p.items()} for p in o["preds"]]))
+d["models"] = models
+d["global"] = [dict(crop=row.crop, lag=int(row.lag), slope=r(row.slope, 2), lo=r(row.lo, 2), hi=r(row.hi, 2), p=r(row.p, 3),
+                    vs=[r(float(x), 1) for x in str(row.vs_anoms).split(",")]) for _, row in YS[YS.code == "OWID_WRL"].iterrows()]
+d["meta"] = dict(built="2026-10-26", vs_years=[1982, 1991, 1997, 2015])
+json.dump(d, open(f"{S}/r1.json", "w"), separators=(",", ":"))
+sst = json.load(open(f"{O}/sst_anom_oct2026.json"))
+json.dump(sst, open(f"{S}/sst-oct2026.json", "w"), separators=(",", ":"))
+import os; print(os.path.getsize(f"{S}/r1.json") // 1024, "KB r1.json;", os.path.getsize(f"{S}/sst-oct2026.json") // 1024, "KB sst")
+for m in models: print(m["country"], m["crop"], m["n"], m["b1"], m["s"], m["xmax"], m["basis"], m["enso_obs"])

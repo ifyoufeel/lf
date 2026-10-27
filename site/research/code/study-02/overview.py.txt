@@ -1,0 +1,20 @@
+import sys; sys.path.insert(0, sys.argv[1])
+from s2lib import *
+from PIL import Image
+import concurrent.futures as cf
+tile, year, months, out = sys.argv[2], int(sys.argv[3]), [int(x) for x in sys.argv[4].split(",")], sys.argv[5]
+sc = scenes(tile, year, months)
+def cc(s):
+    try:
+        p = item(s)["properties"]; return s, p.get("eo:cloud_cover", 100), p.get("s2:nodata_pixel_percentage", 100)
+    except Exception: return s, 100, 100
+with cf.ThreadPoolExecutor(8) as ex: res = list(ex.map(cc, sc))
+res = sorted(res, key=lambda r: (r[2] > 5, r[1]))
+for r in res[:6]: print(r[0].split("/")[-2], round(r[1], 2), round(r[2], 1))
+best = res[0][0]
+with rasterio.open("/vsicurl/" + B + best + "TCI.tif") as src:
+    a = src.read(out_shape=(3, 1098, 1098), resampling=Resampling.average)
+    tr = Transformer.from_crs(src.crs, "EPSG:4326", always_xy=True)
+    print("crs", src.crs, "UL", tr.transform(src.bounds.left, src.bounds.top), "LR", tr.transform(src.bounds.right, src.bounds.bottom), "left", src.bounds.left, "top", src.bounds.top)
+Image.fromarray(np.moveaxis(a, 0, -1)).save(out, quality=85)
+print("best", best)

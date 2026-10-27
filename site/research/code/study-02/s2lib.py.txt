@@ -1,0 +1,45 @@
+import re, json, urllib.request, concurrent.futures as cf, os
+os.environ.setdefault("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
+os.environ.setdefault("CPL_VSIL_CURL_ALLOWED_EXTENSIONS", ".tif")
+# set CURL_CA_BUNDLE here if your network needs a custom certificate bundle
+os.environ.setdefault("GDAL_HTTP_MAX_RETRY", "4")
+import numpy as np, rasterio
+from rasterio.windows import from_bounds
+from rasterio.enums import Resampling
+from pyproj import Transformer
+B = "https://e84-earth-search-sentinel-data.s3.us-west-2.amazonaws.com/"
+
+def get(u):
+    for i in range(4):
+        try:
+            with urllib.request.urlopen(u, timeout=90) as r: return r.read()
+        except Exception:
+            if i == 3: raise
+
+def list_prefixes(prefix):
+    s = get(B + f"?list-type=2&delimiter=/&prefix={prefix}").decode()
+    return re.findall(r"<Prefix>([^<]*)</Prefix>", s)[1:]
+
+def scenes(tile, year, months=range(1, 13)):
+    z, band, sq = tile[:2], tile[2], tile[3:]
+    out = []
+    pre = [f"sentinel-2-c1-l2a/{int(z)}/{band}/{sq}/{year}/{m}/" for m in months]
+    with cf.ThreadPoolExecutor(8) as ex:
+        for lst in ex.map(list_prefixes, pre):
+            out += lst
+    return sorted(out)
+
+def item(scene):
+    name = scene.rstrip("/").split("/")[-1]
+    return json.loads(get(B + scene + name + ".json"))
+
+def read_window(scene, band, lon, lat, half_m, res=10):
+    url = "/vsicurl/" + B + scene + band + ".tif"
+    with rasterio.open(url) as src:
+        tr = Transformer.from_crs("EPSG:4326", src.crs, always_xy=True)
+        x, y = tr.transform(lon, lat)
+        w = from_bounds(x - half_m, y - half_m, x + half_m, y + half_m, src.transform)
+        n = int(round(2 * half_m / res))
+        a = src.read(1, window=w, out_shape=(n, n), resampling=Resampling.nearest if band == "SCL" else Resampling.bilinear,
+                     boundless=True, fill_value=0)
+        return a

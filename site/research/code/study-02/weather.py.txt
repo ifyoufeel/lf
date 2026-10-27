@@ -1,0 +1,21 @@
+"""Daily weather 2025-2026 for the field sites from NASA POWER Zarr on AWS: MERRA-2 (temperature, humidity, wind,
+pressure, precipitation) and FLASHFlux (shortwave radiation); IMERG daily precipitation where available."""
+import sys, json
+import numpy as np, pandas as pd, xarray as xr
+B = "https://nasa-power.s3.amazonaws.com/"
+sites = {k: json.load(open(f"{sys.argv[1]}/{k}/series.json")) for k in ["kansas", "mkushi", "java"]}
+m2 = xr.open_zarr(B + "merra2/temporal/power_merra2_daily_temporal_utc.zarr", consolidated=True)
+ff = xr.open_zarr(B + "flashflux/temporal/power_flashflux_daily_temporal_lst.zarr", consolidated=True)
+im = xr.open_zarr(B + "imerg/temporal/power_imerg_daily_temporal_utc.zarr", consolidated=True)
+print(ff["ALLSKY_SFC_SW_DWN"].attrs, file=sys.stderr)
+print(m2["PS"].attrs.get("units"), m2["WS2M"].attrs.get("units"), m2["T2MDEW"].attrs.get("units"), file=sys.stderr)
+out = {}
+for k, s in sites.items():
+    lat, lon = s["lat"], s["lon"]
+    a = m2[["T2M_MAX", "T2M_MIN", "T2M", "T2MDEW", "RH2M", "WS2M", "PS", "PRECTOTCORR"]].sel(time=slice("2025-01-01", "2026-12-31")).sel(lat=lat, lon=lon, method="nearest").load().to_dataframe()
+    r = ff["ALLSKY_SFC_SW_DWN"].sel(time=slice("2025-01-01", "2026-12-31")).sel(lat=lat, lon=lon, method="nearest").load().to_series().rename("RS")
+    p = im["IMERG_PRECTOT"].sel(time=slice("2025-01-01", "2026-12-31")).sel(lat=slice(lat - 0.05, lat + 0.05), lon=slice(lon - 0.05, lon + 0.05)).mean(("lat", "lon")).load().to_series().rename("IMERG")
+    df = a.drop(columns=[c for c in a.columns if c in ("lat", "lon")]).join(r, how="left").join(p, how="left")
+    df.index = pd.to_datetime(df.index).date
+    df.to_csv(f"{sys.argv[1]}/{k}/weather_daily.csv")
+    print(k, df.dropna(subset=["T2M_MAX"]).index.max(), df.dropna(subset=["RS"]).index.max(), df.dropna(subset=["IMERG"]).index.max(), file=sys.stderr)

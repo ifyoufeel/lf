@@ -1,0 +1,17 @@
+"""IMERG daily precipitation, 1 Jan to latest 2026, regional means (NASA POWER Zarr on AWS)."""
+import sys
+import numpy as np, pandas as pd, xarray as xr
+sys.path.insert(0, sys.argv[1])
+from regions import REGIONS
+B = "https://nasa-power.s3.amazonaws.com/"
+ds = xr.open_zarr(B + "imerg/temporal/power_imerg_daily_temporal_utc.zarr", consolidated=True)
+v = ds["IMERG_PRECTOT"].sel(time=slice("2026-01-01", "2026-12-31"))
+frames = []
+for r in REGIONS:
+    sub = v.sel(lat=slice(*r["lat"]), lon=slice(*r["lon"])).load()
+    w = np.cos(np.deg2rad(sub.lat))
+    ser = sub.weighted(w).mean(("lat", "lon")).to_series().rename("imerg_mm_day")
+    df = ser.reset_index(); df["region"] = r["id"]
+    frames.append(df)
+    print(r["id"], df.dropna().time.max(), file=sys.stderr)
+pd.concat(frames).to_csv(sys.argv[2], index=False)

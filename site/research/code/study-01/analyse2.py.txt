@@ -1,0 +1,238 @@
+"""Research 1 — full analysis. Inputs: OISST-derived ENSO (enso_monthly.csv from analyse.py), NASA POWER regional
+monthly climate, FAO yields (OWID mirror; WDI cereal yield). Outputs CSV/JSON in out/."""
+import sys, json, warnings
+import numpy as np, pandas as pd
+import statsmodels.api as sm
+from scipy import stats as sps
+from statsmodels.nonparametric.smoothers_lowess import lowess
+warnings.filterwarnings("ignore")
+ROOT = sys.argv[1]; D = ROOT + "/data/"; O = ROOT + "/out/"
+sys.path.insert(0, ROOT + "/scripts")
+from regions import REGIONS
+REG = {r["id"]: r for r in REGIONS}
+
+en = pd.read_csv(O + "enso_monthly.csv", index_col=0, parse_dates=True)
+enm = en[["rel"]].copy(); enm["year"] = enm.index.year; enm["month"] = enm.index.month
+EV = json.load(open(O + "enso_events.json"))
+
+# ---------- seasonal tables (IMERG primary rainfall, MERRA-2 temperature) ----------
+rm = pd.read_csv(D + "regions_monthly.csv", parse_dates=["time"])
+rm["year"] = rm.time.dt.year; rm["month"] = rm.time.dt.month; rm["days"] = rm.time.dt.days_in_month
+
+def months_for(r, Y):
+    first = r["season"][0]
+    return [(Y + (1 if (r["cross"] and mo < first) else 0), mo) for mo in r["season"]]
+
+rows = []
+for r in REGIONS:
+    g = rm[rm.region == r["id"]].set_index(["year", "month"])
+    e = enm.set_index(["year", "month"])
+    for Y in range(1981, 2027):
+        sel = months_for(r, Y)
+        sub = g.reindex(sel); es = e.reindex(sel)
+        okm = sub.IMERG_PRECTOT.notna()
+        rows.append(dict(region=r["id"], year=Y,
+            n_im=int(okm.sum()), n_total=len(sel),
+            rain_im=float((sub.IMERG_PRECTOT * sub.days).sum()) if okm.all() else np.nan,
+            rain_im_todate=float((sub.IMERG_PRECTOT * sub.days)[okm].sum()) if okm.any() else np.nan,
+            months_todate=",".join(str(m) for (yy, m), ok in zip(sel, okm) if ok),
+            rain_m2=float((sub.PRECTOTCORR * sub.days).sum()) if sub.PRECTOTCORR.notna().all() else np.nan,
+            tmax=float(sub.T2M_MAX_AVG.mean()) if sub.T2M_MAX_AVG.notna().all() else np.nan,
+            tmax_todate=float(sub.T2M_MAX_AVG.mean()) if sub.T2M_MAX_AVG.notna().any() else np.nan,
+            enso=float(es.rel.mean()) if es.rel.notna().all() else np.nan,
+            enso_todate=float(es.rel.mean()) if es.rel.notna().any() else np.nan))
+S = pd.DataFrame(rows)
+# climatologies: IMERG 2001-2020, MERRA-2 1991-2020
+out = []
+for rid, t in S.groupby("region"):
+    t = t.copy()
+    bi = t[(t.year >= 2001) & (t.year <= 2020)]; bm = t[(t.year >= 1991) & (t.year <= 2020)]
+    t["rain_im_pct"] = 100 * (t.rain_im / bi.rain_im.mean() - 1)
+    t["rain_m2_pct"] = 100 * (t.rain_m2 / bm.rain_m2.mean() - 1)
+    t["tmax_anom"] = t.tmax - bm.tmax.mean()
+    # to-date climatology for partial seasons: same months only
+    g = rm[rm.region == rid]
+    def todate_pct(row):
+        if not row.months_todate: return np.nan
+        mons = [int(x) for x in row.months_todate.split(",")]
+        r = REG[rid]; first = r["season"][0]
+        clim = 0.0
+        for mo in mons:
+            gg = g[(g.month == mo) & (g.year >= 2001) & (g.year <= 2020)]
+            clim += (gg.IMERG_PRECTOT * gg.days).mean()
+        return 100 * (row.rain_im_todate / clim - 1)
+    t["rain_im_todate_pct"] = t.apply(todate_pct, axis=1)
+    def tmax_todate_anom(row):
+        if not row.months_todate: return np.nan
+        mons = [int(x) for x in row.months_todate.split(",")]
+        clim = np.mean([g[(g.month == mo) & (g.year >= 1991) & (g.year <= 2020)].T2M_MAX_AVG.mean() for mo in mons])
+        return row.tmax_todate - clim
+    t["tmax_todate_anom"] = t.apply(tmax_todate_anom, axis=1)
+    out.append(t)
+S = pd.concat(out)
+S.to_csv(O + "regional_seasons.csv", index=False, float_format="%.3f")
+
+def ols(x, y):
+    x = np.asarray(x, float); y = np.asarray(y, float)
+    ok = np.isfinite(x) & np.isfinite(y); x, y = x[ok], y[ok]
+    f = sm.OLS(y, sm.add_constant(x)).fit()
+    ci = f.conf_int(0.05)[1]
+    return dict(n=int(ok.sum()), slope=float(f.params[1]), lo=float(ci[0]), hi=float(ci[1]), p=float(f.pvalues[1]),
+                r=float(np.corrcoef(x, y)[0, 1]), b0=float(f.params[0]), sd=float(np.sqrt(f.scale)), fit=f, x=x)
+
+def predict(res, x0, level=0.8):
+    f = res["fit"]; pr = f.get_prediction(np.array([[1.0, x0]])).summary_frame(alpha=1 - level)
+    mean = float(pr["mean"].iloc[0]); lo = float(pr["obs_ci_lower"].iloc[0]); hi = float(pr["obs_ci_upper"].iloc[0])
+    se_obs = (hi - mean) / sps.t.ppf(0.5 + level / 2, f.df_resid)
+    return mean, lo, hi, se_obs, f.df_resid
+
+clim_rows = []
+for r in REGIONS:
+    t = S[S.region == r["id"]]
+    a = ols(t[(t.year >= 2001) & (t.year <= 2025)].enso, t[(t.year >= 2001) & (t.year <= 2025)].rain_im_pct)
+    b = ols(t[(t.year >= 1982) & (t.year <= 2025)].enso, t[(t.year >= 1982) & (t.year <= 2025)].rain_m2_pct)
+    c = ols(t[(t.year >= 1982) & (t.year <= 2025)].enso, t[(t.year >= 1982) & (t.year <= 2025)].tmax_anom)
+    clim_rows.append(dict(region=r["id"], name=r["name"], crop=r["crop"], season="-".join(str(m) for m in r["season"]),
+        sign=r["sign"], im_n=a["n"], im_slope=a["slope"], im_lo=a["lo"], im_hi=a["hi"], im_p=a["p"], im_r=a["r"],
+        m2_n=b["n"], m2_slope=b["slope"], m2_lo=b["lo"], m2_hi=b["hi"], m2_p=b["p"], m2_r=b["r"],
+        tmax_slope=c["slope"], tmax_lo=c["lo"], tmax_hi=c["hi"], tmax_p=c["p"]))
+CL = pd.DataFrame(clim_rows); CL.to_csv(O + "rain_sensitivity.csv", index=False, float_format="%.4f")
+
+# agreement between IMERG and MERRA-2 rainfall anomalies 2001-2025
+agree = []
+for rid, t in S[(S.year >= 2001) & (S.year <= 2025)].groupby("region"):
+    ok = t.rain_im_pct.notna() & t.rain_m2_pct.notna()
+    agree.append(dict(region=rid, r=float(np.corrcoef(t.rain_im_pct[ok], t.rain_m2_pct[ok])[0, 1]),
+                      d2023=float(t[t.year == 2023].rain_m2_pct.iloc[0] - t[t.year == 2023].rain_im_pct.iloc[0])))
+AG = pd.DataFrame(agree); AG.to_csv(O + "rain_dataset_agreement.csv", index=False, float_format="%.3f")
+
+S26 = S[S.year == 2026][["region", "n_im", "n_total", "months_todate", "rain_im_todate_pct", "tmax_todate_anom", "enso_todate"]]
+S26.to_csv(O + "season_2026.csv", index=False, float_format="%.3f")
+
+# ---------- yields ----------
+Y = pd.read_csv(D + "owid_key_crop_yields.csv")
+col = {"Maize": "Maize (tonnes per hectare)", "Wheat": "Wheat (tonnes per hectare)", "Rice": "Rice (tonnes per hectare)",
+       "Soybeans": "Soybeans (tonnes per hectare)", "Cocoa beans": "Cocoa beans (tonnes per hectare)", "Beans": "Beans (tonnes per hectare)"}
+W = pd.read_csv(D + "wdi_ag.yld.crel.kg.csv")
+PAIRS = [("ZAF","Maize","saf_highveld",1), ("ZMB","Maize","saf_zambezi",1), ("ZWE","Maize","saf_zambezi",1),
+         ("MWI","Maize","saf_zambezi",1), ("MOZ","Maize","saf_zambezi",1), ("ETH","Maize","eth_highlands",0),
+         ("ETH","Wheat","eth_highlands",0), ("IND","Rice","ind_core",0), ("IDN","Rice","idn_java",0),
+         ("THA","Rice","tha_central",0), ("AUS","Wheat","aus_east",0), ("GTM","Maize","cam_dry",0),
+         ("HND","Maize","cam_dry",0), ("SLV","Maize","cam_dry",0), ("NIC","Maize","cam_dry",0),
+         ("HND","Beans","cam_dry",0), ("NIC","Beans","cam_dry",0), ("CIV","Cocoa beans","waf_cocoa",1),
+         ("GHA","Cocoa beans","waf_cocoa",1), ("ARG","Soybeans","arg_pampas",1), ("ARG","Maize","arg_pampas",1),
+         ("BRA","Soybeans","bra_south",1), ("KEN","Maize","ken_bimodal",1), ("USA","Maize","usa_cornbelt",0),
+         ("USA","Soybeans","usa_cornbelt",0)]
+NAMES = {"ZAF":"South Africa","ZMB":"Zambia","ZWE":"Zimbabwe","MWI":"Malawi","MOZ":"Mozambique","ETH":"Ethiopia","IND":"India",
+         "IDN":"Indonesia","THA":"Thailand","AUS":"Australia","GTM":"Guatemala","HND":"Honduras","SLV":"El Salvador",
+         "NIC":"Nicaragua","CIV":"Côte d’Ivoire","GHA":"Ghana","ARG":"Argentina","BRA":"Brazil","KEN":"Kenya","USA":"United States",
+         "OWID_WRL":"World","WLD":"World"}
+
+def detrend(years, vals, frac=0.3):
+    ok = np.isfinite(vals)
+    tr = lowess(vals[ok], years[ok], frac=frac, it=3, return_sorted=False)
+    out = np.full_like(vals, np.nan, dtype=float); out[ok] = 100 * (vals[ok] / tr - 1)
+    return out
+
+def enso_for(region, Y):
+    t = S[(S.region == region) & (S.year == Y)]
+    return float(t.enso.iloc[0]) if len(t) else np.nan
+
+def peak(Y):  # Nov(Y)-Jan(Y+1) mean of the relative index
+    e = en.rel
+    v = [e.get(pd.Timestamp(f"{Y}-11-01")), e.get(pd.Timestamp(f"{Y}-12-01")), e.get(pd.Timestamp(f"{Y+1}-01-01"))]
+    return float(np.mean(v)) if all(x is not None and np.isfinite(x) for x in v) else np.nan
+
+VS = [e["dev_year"] for e in EV["events"] if e["peak"] >= 2.0 and not e["ongoing"]]   # very strong (1982, 1991, 1997, 2015)
+ST = [e["dev_year"] for e in EV["events"] if 1.5 <= e["peak"] < 2.0 and not e["ongoing"]]
+
+yrows, ysens, longrows = [], [], []
+for code, crop, rid, lag in PAIRS + [("OWID_WRL", c, None, L) for c in ["Maize", "Wheat", "Rice", "Soybeans"] for L in (0, 1)]:
+    d = Y[Y.Code == code].sort_values("Year")
+    yrs = d.Year.values.astype(float); vals = d[col[crop]].values.astype(float)
+    if np.isfinite(vals).sum() < 30: continue
+    an = detrend(yrs, vals)
+    dd = pd.DataFrame(dict(year=yrs.astype(int), yield_t_ha=vals, anom=an))
+    for _, row in dd.iterrows():
+        longrows.append(dict(code=code, crop=crop, region=rid, lag=lag, year=int(row.year), yield_t_ha=row.yield_t_ha, anom=row.anom))
+    seasons = np.arange(1982, 2018 + 1 - lag)
+    x = np.array([enso_for(rid, s) if rid else peak(s) for s in seasons])
+    yv = np.array([dd.set_index("year").anom.get(s + lag, np.nan) for s in seasons])
+    res = ols(x, yv)
+    comp_vs = [float(dd.set_index("year").anom.get(s + lag, np.nan)) for s in VS]
+    comp_st = [float(dd.set_index("year").anom.get(s + lag, np.nan)) for s in ST]
+    others = [float(v) for s, v in zip(seasons, yv) if s not in VS + ST and np.isfinite(v)]
+    sd_all = float(np.nanstd(yv))
+    ysens.append(dict(code=code, country=NAMES.get(code, code), crop=crop, region=rid or "peak NDJ", lag=lag, n=res["n"],
+        slope=res["slope"], lo=res["lo"], hi=res["hi"], p=res["p"], r=res["r"], b0=res["b0"], sd_resid=res["sd"],
+        anom_sd=sd_all, vs_years=",".join(map(str, VS)), vs_anoms=",".join(f"{v:.1f}" for v in comp_vs),
+        vs_mean=float(np.nanmean(comp_vs)), strong_mean=float(np.nanmean(comp_st)) if comp_st else np.nan,
+        other_mean=float(np.mean(others)), other_sd=float(np.std(others))))
+    if rid or lag == 0:
+        yrows.append((code, crop, rid, lag, res))
+YS = pd.DataFrame(ysens); YS.to_csv(O + "yield_sensitivity.csv", index=False, float_format="%.4f")
+pd.DataFrame(longrows).to_csv(O + "yield_anoms_long.csv", index=False, float_format="%.4f")
+
+# WDI cereal yield (to 2024): same detrend, sensitivity 1982-2023
+wrows = []
+for code, crop, rid, lag in PAIRS:
+    if crop not in ("Maize", "Wheat", "Rice"): continue
+    d = W[W["Country Code"] == code].sort_values("Year")
+    if len(d) < 30: continue
+    yrs = d.Year.values.astype(float); vals = d.Value.values.astype(float)
+    an = detrend(yrs, vals); s2 = pd.Series(an, index=d.Year.values.astype(int))
+    seasons = np.arange(1982, int(d.Year.max()) + 1 - lag)
+    x = np.array([enso_for(rid, s) for s in seasons]); yv = np.array([s2.get(s + lag, np.nan) for s in seasons])
+    res = ols(x, yv)
+    wrows.append(dict(code=code, country=NAMES[code], region=rid, lag=lag, n=res["n"], slope=res["slope"], lo=res["lo"], hi=res["hi"],
+                      p=res["p"], r=res["r"], last_year=int(d.Year.max()),
+                      a2016=float(s2.get(2016, np.nan)), a2024=float(s2.get(2024, np.nan)), a2023=float(s2.get(2023, np.nan)),
+                      a1992=float(s2.get(1992, np.nan)), a1983=float(s2.get(1983, np.nan)), a1998=float(s2.get(1998, np.nan))))
+WS = pd.DataFrame(wrows).drop_duplicates(subset=["code"]); WS.to_csv(O + "wdi_cereal_sensitivity.csv", index=False, float_format="%.3f")
+
+# ---------- 2026-27 outlook ----------
+SCEN = [2.0, 2.5, 3.0]
+OUT = []
+for code, crop, rid, lag in PAIRS:
+    sel = YS[(YS.code == code) & (YS.crop == crop)]
+    if not len(sel):
+        print("skip (short series)", code, crop); continue
+    row = sel.iloc[0]
+    res = [x for x in yrows if x[0] == code and x[1] == crop][0][4]
+    r = REG[rid]
+    s26 = S[(S.region == rid) & (S.year == 2026)].iloc[0]
+    observed = (s26.n_im == s26.n_total) or (not r["cross"] and max(r["season"]) <= 10 and s26.n_im >= len(r["season"]) - 1)
+    rec = dict(code=code, country=NAMES[code], crop=crop, region=rid, region_name=r["name"], lag=lag,
+               harvest_year=2026 + lag, slope=row.slope, slope_lo=row.lo, slope_hi=row.hi, p=row.p, n=int(row.n),
+               rain_todate_pct=float(s26.rain_im_todate_pct) if np.isfinite(s26.rain_im_todate_pct) else None,
+               rain_months=s26.months_todate, tmax_todate=float(s26.tmax_todate_anom) if np.isfinite(s26.tmax_todate_anom) else None,
+               enso_todate=float(s26.enso_todate) if np.isfinite(s26.enso_todate) else None, season_observed=bool(s26.n_im > 0))
+    xs = [float(s26.enso_todate)] if (s26.n_im > 0 and not r["cross"]) else SCEN
+    rec["basis"] = "observed ENSO so far in season" if len(xs) == 1 else "scenarios"
+    preds = []
+    for x0 in xs:
+        mu, lo, hi, se, df = predict(res, x0)
+        p10 = float(sps.t.cdf((-10 - mu) / se, df))
+        preds.append(dict(enso=x0, mean=mu, lo80=lo, hi80=hi, p_loss10=p10))
+    rec["preds"] = preds
+    mid = preds[0] if len(preds) == 1 else preds[1]
+    rec["mean_mid"] = mid["mean"]; rec["p_loss10_mid"] = mid["p_loss10"]
+    OUT.append(rec)
+json.dump(OUT, open(O + "outlook_2026.json", "w"), indent=1)
+
+# ---------- global check (FEWS NET: global output changed little in strong El Niño years) ----------
+G = YS[YS.code == "OWID_WRL"][["crop", "lag", "n", "slope", "lo", "hi", "p", "vs_anoms", "vs_mean", "other_sd"]]
+G.to_csv(O + "global_check.csv", index=False, float_format="%.3f")
+
+summary = dict(enso_events=EV, very_strong_years=VS, strong_years=ST,
+               rain_sensitivity=CL.to_dict(orient="records"), dataset_agreement=AG.to_dict(orient="records"),
+               season_2026=S26.to_dict(orient="records"), yield_sensitivity=YS.to_dict(orient="records"),
+               wdi=WS.to_dict(orient="records"), outlook=OUT, global_check=G.to_dict(orient="records"))
+json.dump(summary, open(O + "results.json", "w"), indent=1, default=float)
+pd.set_option("display.width", 250)
+print(CL[["region", "im_n", "im_slope", "im_lo", "im_hi", "im_p", "m2_slope", "m2_p", "tmax_slope", "tmax_p"]].round(2).to_string())
+print(AG.round(2).to_string())
+print(S26.round(2).to_string())
+print(YS[["country", "crop", "lag", "n", "slope", "lo", "hi", "p", "r", "vs_anoms", "vs_mean", "other_sd"]].round(2).to_string())
+print(WS.round(2).to_string())
+for o in OUT: print(o["country"], o["crop"], o["basis"], [ (round(p["enso"],2), round(p["mean"],1), round(p["lo80"],1), round(p["hi80"],1), round(p["p_loss10"],2)) for p in o["preds"]], o["rain_todate_pct"])

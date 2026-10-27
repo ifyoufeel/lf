@@ -1,0 +1,55 @@
+"""Research 2: Sentinel-2 L2A (Earth Search Collection 1 on AWS) time series for three field windows."""
+import sys, json, os, concurrent.futures as cf
+sys.path.insert(0, sys.argv[1])
+from s2lib import *
+OUT = sys.argv[2]
+SITES = {
+ "kansas": dict(tile="14SLH", lon=-101.0858, lat=38.0554, half=3000, years={2026: range(3, 11)}, max_cloud=50, max_nodata=5),
+ "mkushi": dict(tile="35LQE", lon=29.2385, lat=-13.8385, half=3000, years={2026: range(1, 11)}, max_cloud=70, max_nodata=5),
+ "java":   dict(tile="48MZT", lon=None, lat=None, half=3000, years={2025: range(5, 11), 2026: range(5, 11)}, max_cloud=70, max_nodata=10),
+}
+site = sys.argv[3]
+S = SITES[site]
+if site == "java":
+    x = 799980 + 480 * 100; y = 9300040 - 220 * 100
+    S["lon"], S["lat"] = Transformer.from_crs("EPSG:32748", "EPSG:4326", always_xy=True).transform(x, y)
+os.makedirs(f"{OUT}/{site}", exist_ok=True)
+cands = []
+for yr, months in S["years"].items():
+    cands += scenes(S["tile"], yr, months)
+def meta(s):
+    try:
+        p = item(s)["properties"]; return s, p.get("eo:cloud_cover", 100), p.get("s2:nodata_pixel_percentage", 100), p.get("datetime")
+    except Exception: return s, 100, 100, None
+with cf.ThreadPoolExecutor(8) as ex: M = list(ex.map(meta, cands))
+M = [m for m in M if m[1] <= S["max_cloud"] and m[2] <= S["max_nodata"]]
+print(site, "candidates", len(cands), "kept", len(M), file=sys.stderr)
+VALID = {4, 5, 6}
+def proc(m):
+    s, cc, nd, dt = m
+    try:
+        scl = read_window(s, "SCL", S["lon"], S["lat"], S["half"])
+        valid = np.isin(scl, list(VALID))
+        frac = float(valid.mean())
+        if frac < 0.6:
+            return dict(scene=s, date=dt[:10], cloud=cc, valid=frac), None
+        b = {k: read_window(s, k, S["lon"], S["lat"], S["half"]).astype("float32") * 0.0001 - 0.1 for k in ["B02", "B03", "B04", "B08", "B05", "B8A", "B11"]}
+        ndvi = (b["B08"] - b["B04"]) / (b["B08"] + b["B04"] + 1e-6)
+        ndre = (b["B8A"] - b["B05"]) / (b["B8A"] + b["B05"] + 1e-6)
+        ndmi = (b["B8A"] - b["B11"]) / (b["B8A"] + b["B11"] + 1e-6)
+        ndvi[~valid] = np.nan; ndre[~valid] = np.nan; ndmi[~valid] = np.nan
+        stats = dict(scene=s, date=dt[:10], cloud=cc, valid=frac,
+                     ndvi_mean=float(np.nanmean(ndvi)), ndvi_p10=float(np.nanpercentile(ndvi, 10)), ndvi_p90=float(np.nanpercentile(ndvi, 90)),
+                     ndvi_gt06=float(np.nanmean(ndvi > 0.6)), ndre_mean=float(np.nanmean(ndre)), ndmi_mean=float(np.nanmean(ndmi)))
+        rgb = np.stack([b["B04"], b["B03"], b["B02"]], -1)
+        return stats, dict(ndvi=ndvi.astype("float16"), ndre=ndre.astype("float16"), ndmi=ndmi.astype("float16"), rgb=np.clip(rgb, 0, 1).astype("float16"))
+    except Exception as e:
+        return dict(scene=s, date=(dt or "")[:10], error=str(e)[:200]), None
+rows = []
+with cf.ThreadPoolExecutor(6) as ex:
+    for stats, arr in ex.map(proc, M):
+        rows.append(stats)
+        if arr is not None:
+            np.savez_compressed(f"{OUT}/{site}/{stats['date']}_{stats['scene'].split('/')[-2][:3]}.npz", **arr)
+        print(site, stats.get("date"), round(stats.get("valid", 0), 2), round(stats.get("ndvi_mean", float("nan")), 3) if "ndvi_mean" in stats else stats.get("error", ""), file=sys.stderr)
+json.dump(dict(site=site, lon=S["lon"], lat=S["lat"], tile=S["tile"], half=S["half"], rows=sorted(rows, key=lambda r: r["date"])), open(f"{OUT}/{site}/series.json", "w"), indent=1)

@@ -1,0 +1,20 @@
+"""Crop-belt regions used in Research 1. Boxes are deliberately coarse and mostly over land; they are
+summaries of where the crop is grown, not masks of fields."""
+REGIONS = [
+ # id, name, lat0, lat1, lon0, lon1, crops, season months (1-12), season year offset rule, expected El Niño sign
+ dict(id="saf_highveld", name="South Africa Highveld", lat=(-29.0,-25.0), lon=(25.0,31.0), crop="Maize", season=[12,1,2,3], cross=True, sign=-1, countries=["ZAF"]),
+ dict(id="saf_zambezi", name="Zambezi maize belt (ZMB, ZWE, MWI)", lat=(-19.0,-12.0), lon=(25.0,35.5), crop="Maize", season=[12,1,2,3], cross=True, sign=-1, countries=["ZMB","ZWE","MWI","MOZ"]),
+ dict(id="eth_highlands", name="Ethiopian highlands (kiremt)", lat=(7.0,14.0), lon=(36.0,40.0), crop="Maize, teff, wheat", season=[6,7,8,9], cross=False, sign=-1, countries=["ETH"]),
+ dict(id="eth_northeast", name="Northern and eastern Ethiopia", lat=(9.0,14.5), lon=(38.5,42.0), crop="Sorghum, maize, teff", season=[6,7,8,9], cross=False, sign=-1, countries=["ETH"]),
+ dict(id="ind_core", name="India core monsoon zone", lat=(18.0,28.0), lon=(73.0,87.0), crop="Rice (kharif)", season=[6,7,8,9], cross=False, sign=-1, countries=["IND"]),
+ dict(id="idn_java", name="Java", lat=(-8.8,-6.0), lon=(105.5,114.5), crop="Rice", season=[7,8,9,10], cross=False, sign=-1, countries=["IDN"]),
+ dict(id="tha_central", name="Thailand rice plains", lat=(13.0,18.0), lon=(99.0,105.0), crop="Rice", season=[5,6,7,8,9,10], cross=False, sign=-1, countries=["THA"]),
+ dict(id="aus_east", name="Eastern Australia wheat belt", lat=(-36.0,-26.0), lon=(143.0,152.0), crop="Wheat", season=[6,7,8,9,10], cross=False, sign=-1, countries=["AUS"]),
+ dict(id="cam_dry", name="Central America Dry Corridor", lat=(12.5,15.5), lon=(-90.5,-86.0), crop="Maize, beans", season=[5,6,7,8,9,10], cross=False, sign=-1, countries=["GTM","HND","SLV","NIC"]),
+ dict(id="waf_cocoa", name="Côte d’Ivoire–Ghana cocoa belt", lat=(5.5,8.0), lon=(-8.0,-1.5), crop="Cocoa", season=[11,12,1,2,3], cross=True, sign=-1, countries=["CIV","GHA"]),
+ dict(id="bra_northeast", name="North-east Brazil", lat=(-10.0,-4.0), lon=(-42.0,-36.0), crop="Maize, beans", season=[2,3,4,5], cross=True, sign=-1, countries=[]),
+ dict(id="arg_pampas", name="Argentine Pampas", lat=(-38.0,-30.0), lon=(-64.0,-58.0), crop="Soybean, maize", season=[11,12,1,2], cross=True, sign=+1, countries=["ARG"]),
+ dict(id="bra_south", name="Southern Brazil", lat=(-30.0,-24.0), lon=(-56.0,-49.0), crop="Soybean", season=[11,12,1,2], cross=True, sign=+1, countries=["BRA"]),
+ dict(id="ken_bimodal", name="Kenya and southern Somalia short rains", lat=(-4.0,4.0), lon=(36.0,42.0), crop="Maize", season=[10,11,12], cross=False, sign=+1, countries=["KEN"]),
+ dict(id="usa_cornbelt", name="US Corn Belt", lat=(38.0,45.0), lon=(-97.0,-85.0), crop="Maize, soybean", season=[6,7,8], cross=False, sign=0, countries=["USA"]),
+]

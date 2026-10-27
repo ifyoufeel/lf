@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Research, Hortus — lastfomo</title>
+<meta name="description" content="Hortus research: studies read from open data, each with its own page, tools, paper and deck.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&family=Jacquard+24&display=swap">
+<link rel="stylesheet" href="/tokens.css">
+<link rel="stylesheet" href="/research/research.css">
+<script src="/boot.js"></script>
+</head>
+<body data-wing="hortus">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="g-lux" viewBox="0 0 24 24" fill="currentColor"><path transform="translate(1 1)" d="M 11 0 C 11.5 6.5 15.5 10.5 22 11 C 15.5 11.5 11.5 15.5 11 22 C 10.5 15.5 6.5 11.5 0 11 C 6.5 10.5 10.5 6.5 11 0 Z"/></symbol>
+<symbol id="g-ne" viewBox="0 0 24 24" fill="currentColor"><path transform="translate(4.94 5.25)" d="M 13.8 11 L 12.3 11 L 12.3 2.6 L 1.1 13.8 L 0 12.8 L 11.3 1.5 L 2.8 1.5 L 2.8 0 L 13.8 0 L 13.8 11 Z"/></symbol>
+<symbol id="g-e" viewBox="0 0 24 24" fill="currentColor"><path transform="translate(2.25 4.94)" d="M 19.8 7.1 L 12.8 14.1 L 11.7 13.1 L 16.9 7.8 L 0 7.8 L 0 6.3 L 16.9 6.3 L 11.7 1.1 L 12.8 0 L 19.8 7.1 Z"/></symbol>
+<symbol id="g-s" viewBox="0 0 24 24" fill="currentColor"><path transform="translate(4.94 2.25)" d="M 6.3 0 L 7.8 0 L 7.8 16.9 L 13.1 11.7 L 14.1 12.8 L 7.1 19.8 L 0 12.8 L 1.1 11.7 L 6.3 16.9 L 6.3 0 Z"/></symbol>
+<symbol id="g-plus" viewBox="0 0 24 24" fill="currentColor"><path transform="translate(2.25 2.25)" d="M 9 10.5 L 0 10.5 L 0 9 L 9 9 L 9 0 L 10.5 0 L 10.5 9 L 19.5 9 L 19.5 10.5 L 10.5 10.5 L 10.5 19.5 L 9 19.5 L 9 10.5 Z"/></symbol>
+<symbol id="g-lock" viewBox="0 0 24 24" fill="currentColor"><path transform="translate(5 3)" fill-rule="evenodd" d="M 0 7.5 L 14 7.5 L 14 18 L 0 18 L 0 7.5 Z M 6 11 L 8 11 L 8 14.5 L 6 14.5 L 6 11 Z"/><path transform="translate(5 3)" d="M 2.5 7.5 L 2.5 4.5 C 2.5 3.3 3 2.2 3.8 1.3 C 4.7 0.5 5.8 0 7 0 C 8.2 0 9.3 0.5 10.2 1.3 C 11 2.2 11.5 3.3 11.5 4.5 L 11.5 7.5 L 9.5 7.5 L 9.5 4.5 C 9.5 3.8 9.2 3.2 8.8 2.7 C 8.3 2.3 7.7 2 7 2 C 6.3 2 5.7 2.3 5.2 2.7 C 4.8 3.2 4.5 3.8 4.5 4.5 L 4.5 7.5 L 2.5 7.5 Z"/></symbol>
+<symbol id="g-key" viewBox="0 0 24 24" fill="currentColor"><path transform="translate(2.5 6.5)" fill-rule="evenodd" d="M 5.5 0 C 4 0 2.6 0.6 1.6 1.6 C 0.6 2.6 0 4 0 5.5 C 0 7 0.6 8.4 1.6 9.4 C 2.6 10.4 4 11 5.5 11 C 7 11 8.4 10.4 9.4 9.4 C 10.4 8.4 11 7 11 5.5 C 11 4 10.4 2.6 9.4 1.6 C 8.4 0.6 7 0 5.5 0 Z M 5.5 2.5 C 6.3 2.5 7.1 2.8 7.6 3.4 C 8.2 3.9 8.5 4.7 8.5 5.5 C 8.5 6.3 8.2 7.1 7.6 7.6 C 7.1 8.2 6.3 8.5 5.5 8.5 C 4.7 8.5 3.9 8.2 3.4 7.6 C 2.8 7.1 2.5 6.3 2.5 5.5 C 2.5 4.7 2.8 3.9 3.4 3.4 C 3.9 2.8 4.7 2.5 5.5 2.5 Z"/><path transform="translate(2.5 6.5)" d="M 10.8 4.5 L 19 4.5 L 19 6.5 L 17 6.5 L 17 9.5 L 15 9.5 L 15 6.5 L 13.5 6.5 L 13.5 8.5 L 11.5 8.5 L 11.5 6.5 L 10.8 6.5 L 10.8 4.5 Z"/></symbol>
+<symbol id="g-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></symbol>
+</svg>
+<a class="skip" href="#research" data-skip>Skip to content</a>
+<header class="bar">
+  <div class="bar-in">
+    <div class="bar-l">
+      <a class="brand" href="/" aria-label="lastfomo, home"><svg viewBox="0 0 420 120" fill="currentColor" aria-hidden="true" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M322.101 1.53716C320.348 2.91274 319.256 3.04607 312.945 2.65567C306.632 2.26447 305.449 2.40897 302.994 3.87317C301.461 4.7865 298.595 6.29781 296.625 7.23109C294.655 8.16358 292.505 9.19666 291.848 9.52479C291.074 9.91279 290.742 11.001 290.904 12.6153C291.159 15.1556 290.591 15.5205 286.943 15.1612C284.536 14.9249 284.411 16.8258 286.713 18.666C290.052 21.3366 280.896 33.3256 275.917 32.8019C273.957 32.5959 273.62 32.8657 273.397 34.8129C273.13 37.1482 272.314 37.3813 267.256 36.5693C264.172 36.0743 264.506 37.8116 267.86 39.7013C273.171 42.6952 282.031 40.4111 290.636 33.8286C293.788 31.4175 294.967 31.7648 298.904 36.262C302.231 40.0614 302.251 40.0198 295.63 43.1319C288.638 46.4187 278.291 46.7133 268.85 43.8959C265.955 43.0313 260.899 41.813 257.615 41.1871C254.331 40.5619 246.542 38.7489 240.305 37.1593C225.232 33.3168 216.24 33.201 199.61 36.6372C182.405 40.1923 180.226 40.3208 172.533 38.2395C156.02 33.7711 141.289 40.8885 116.24 65.4365C87.5356 93.5685 68.5251 101.841 56.5125 91.428C52.7374 88.1556 53.2039 86.7983 58.717 85.022C80.3809 78.0411 90.8641 63.0255 78.5458 56.6202C73.0988 53.7884 64.3853 55.8075 56.7132 61.681C54.7253 63.2027 50.6619 65.2457 47.6828 66.2205C34.6862 70.4742 21.2796 80.3204 12.5439 92.0276C9.49555 96.1128 5.29683 100.96 3.21419 102.798C-1.1318 106.634 -1.06413 107.74 3.37819 105.457C7.05386 103.567 11.6968 99.05 15.0047 94.1457C19.9446 86.8199 21.9651 85.3956 21.9651 89.2365C21.9651 92.0771 23.4721 96.5408 24.4315 96.5408C24.8263 96.5408 25.1496 96.1703 25.1496 95.7168C25.1496 92.6551 27.5952 89.1288 28.6835 90.6201C29.7495 92.0803 29.943 91.9949 32.9252 88.7567C36.4082 84.9757 36.2108 85.0244 43.1641 86.2387C47.8205 87.0514 48.4288 87.4123 51.7892 91.357C65.964 107.996 89.8013 99.9841 126.35 66.298C144.675 49.4078 150.883 46.2439 165.696 46.2439C177.439 46.2439 179.814 47.5213 176.76 52.1949C175.232 54.5341 175.133 58.6361 176.445 65.284C177.247 69.3445 177.247 70.475 176.448 70.9708C173.76 72.6362 159.196 73.3443 151.642 72.1763C147.518 71.5384 145.366 73.3132 145.36 77.3585C145.353 82.2221 128.895 99.7885 122.892 101.34C115.95 103.134 114.366 103.879 110.799 107.027C104.039 112.994 106.86 114.569 117.671 110.863C128.5 107.149 128.909 106.867 140.188 95.3265C153.829 81.3703 153.741 81.4118 163.559 84.3019C175.953 87.9496 190.66 86.487 201.83 80.4961C206.816 77.8216 207.396 77.7665 213.559 79.376C216.081 80.0346 219.725 80.5735 221.657 80.5735C225.947 80.5735 225.565 81.2337 218.093 86.7361C211.051 91.9214 211.307 92.822 220.409 94.9009C224.466 95.8278 229.699 97.4756 232.039 98.563C234.379 99.6504 239.024 101.242 242.363 102.099C251.276 104.389 252.174 106.287 247.664 113.306C241.691 122.603 248.317 121.646 260.386 111.47C267.603 105.385 262.642 98.6636 248.212 94.9784C231.949 90.8245 230.512 89.4593 238.845 86.075C245.772 83.2608 252.218 76.6942 254.693 69.9289C255.537 67.6208 256.984 68.7673 258.109 72.6378C261.071 82.8265 269.803 87.2215 287.868 87.6175C299.163 87.8642 301.227 88.1068 302.596 89.3483C303.472 90.1419 307.548 92.8244 311.656 95.3089C326.608 104.354 327.287 105.407 320.555 109.115C313.554 112.971 304.892 112.971 301.877 109.115C300.087 106.826 299.661 106.638 298.252 107.515C296.911 108.351 295.939 108.192 292.163 106.517C286.892 104.18 285.267 104.053 283.484 105.841C279.964 109.371 300.701 121.934 306.438 119.746C307.665 119.278 310.264 118.895 312.211 118.895C314.159 118.895 318.337 118.176 321.498 117.298C324.658 116.42 328.505 115.676 330.046 115.646C334.342 115.559 335.709 114.697 336.982 111.269C339.197 105.304 339.164 105.053 335.921 103.327C329.752 100.042 325.115 93.9221 323.406 86.8095C322.712 83.9202 324.007 83.3103 325.615 85.7701C327.394 88.4933 346.535 88.7376 356.334 86.162C359.618 85.299 363.737 84.5845 365.489 84.5741C367.24 84.5637 369.7 84.0184 370.953 83.363C372.208 82.7067 373.669 82.1702 374.2 82.1702C376.474 82.1702 399.232 93.5285 402.423 96.2557C405.397 98.7985 416.519 103.726 419.284 103.726C420.49 103.726 420.122 101.104 418.556 98.5367C417.437 96.702 413.841 94.5153 403.198 89.1958C395.554 85.3756 386.849 80.4362 383.854 78.2183C377.31 73.3746 372.212 72.7751 364.84 75.9829C359.614 78.2574 346.865 78.6055 344.796 76.5314C342.695 74.4237 342.461 57.5423 344.463 52.4496C349.497 39.643 361.461 34.8225 361.496 45.5868C361.512 50.4066 363.672 53.3557 368.324 54.9053C370.267 55.5528 373.291 56.9356 375.042 57.9782C376.794 59.0209 379.458 60.4324 380.962 61.115C382.468 61.7984 384.83 63.2227 386.213 64.2797C392.676 69.224 399.272 63.6115 393.913 57.7267C387.154 50.3068 385.115 46.3876 384.558 39.7548C384.366 37.4675 383.451 34.025 382.524 32.1041C381.179 29.3178 380.94 27.7714 381.34 24.4542C382.308 16.4155 374.85 9.54474 373.726 17.4406C373.414 19.6281 372.39 20.2093 370.718 19.149C369.766 18.5463 369.739 17.8884 370.55 15.1724C371.759 11.1271 370.633 6.22275 367.858 3.43966C364.402 -0.0260346 362.312 1.35194 364.693 5.52738C367.205 9.93435 365.952 10.5443 362.421 6.63392C358.956 2.79539 358.956 2.79538 352.271 2.62613C342.432 2.37704 334.807 1.68645 331.66 0.758755C327.501 -0.466732 324.323 -0.208058 322.101 1.53716ZM332.511 6.26428C334.573 8.33124 334.839 9.15195 334.839 13.4495C334.839 18.6988 333.952 19.569 332.135 16.1057C331.501 14.8986 329.164 12.1274 326.939 9.94871C321.859 4.96932 321.79 3.93066 326.541 3.93066C329.506 3.93066 330.617 4.36497 332.511 6.26428ZM302.886 24.7424C306.421 26.7582 308.426 29.3657 309.114 32.8402C309.633 35.466 309.633 35.466 306.112 32.5807C300.89 28.3007 297.288 26.2912 294.834 26.288C292.475 26.2848 292.082 25.5711 293.6 24.0494C295.075 22.57 299.679 22.9133 302.886 24.7424ZM76.9942 59.0696C80.931 61.1829 79.8522 66.8888 75.2101 68.5118C70.2272 70.2539 60.5918 69.0092 59.6309 66.5C57.9097 61.9996 71.5655 56.1564 76.9942 59.0696Z"/></svg></a>
+      <nav class="crumbs" aria-label="You are here"><ol><li><a href="/">Home</a></li><li><a href="/#/hortus">Hortus</a></li><li data-crumb-index><a href="/research" data-go="research">Research</a></li><li data-crumb-study hidden><span aria-current="page"></span></li></ol></nav>
+    </div>
+    <div class="links">
+      <a class="btn" href="/#/start">Start a project</a>
+    </div>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><i data-prog></i></div>
+<nav class="dots" data-dots aria-label="Sections on this page"></nav>
+
+<!-- ============================== RESEARCH INDEX ============================== -->
+<main class="view" data-view="research" data-wing="hortus" data-crumb="Research" tabindex="-1">
+  <section class="screen cover plate" data-title="Research">
+    <div class="cover-bg" aria-hidden="true"><canvas data-scene="meadow"></canvas></div>
+    <div class="wrap">
+      <div class="cover-copy">
+        <p class="code" data-fade style="--d:.1s">HRT — Hortus · Research</p>
+        <h1 class="word" data-pix style="--d:.15s">hortus</h1>
+        <p class="h2" data-rise style="--d:.4s"><span>Research first.</span></p>
+        <p class="lead" data-fade style="--d:.6s">We learn the field before we touch it. Each study reads public data, shows its method and ends in a tool a grower can use.</p>
+        <div class="row" data-fade style="--d:.8s"><a class="btn solid" href="#research" data-latest>Latest study<svg aria-hidden="true"><use href="#g-e"/></svg></a><button class="btn" type="button" data-jump="studies">All studies<svg aria-hidden="true"><use href="#g-s"/></svg></button></div>
+      </div>
+    </div>
+    <div class="cue" aria-hidden="true"><span>Scroll</span><i></i></div>
+  </section>
+
+  <section class="screen" id="studies" data-title="Studies">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — Index</p><h2 class="h2" data-rise><span>Every study, its own page.</span></h2></div>
+      <ol class="index" data-studies data-up style="--d:.3s"></ol>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Method">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s">HRT — Method</p><h2 class="h2" data-rise><span>One method, every study.</span></h2><p class="lead" data-fade style="--d:.4s">Public measurements become an index. The index feeds a model, the model supports a decision, and where a decision repeats, hardware takes it over.</p></div>
+        <div class="fit-schema" data-schema="method" data-up style="--d:.35s"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Questions">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — Questions</p><h2 class="h2" data-rise><span>Questions the data can answer.</span></h2></div>
+      <ul class="rows qa" data-up style="--d:.3s">
+        <li><span class="n">Q1</span><span class="t">El Niño crop risk, months ahead</span><span class="s"><a href="#el-nino-2026" data-go="el-nino-2026">Study 01</a></span><span class="e ev"><b>Strong</b> evidence</span></li>
+        <li><span class="n">Q2</span><span class="t">Blind spots in rainfall data</span><span class="s"><a href="#el-nino-2026" data-go="el-nino-2026">Study 01</a></span><span class="e ev"><b>Strong</b> evidence</span></li>
+        <li><span class="n">Q3</span><span class="t">Irrigation in hotter summers</span><span class="s"><a href="#plant-vision" data-go="plant-vision">Study 02</a></span><span class="e ev"><b>Moderate</b> evidence</span></li>
+        <li><span class="n">Q4</span><span class="t">Drought on smallholder rice</span><span class="s"><a href="#plant-vision" data-go="plant-vision">Study 02</a></span><span class="e ev"><b>Moderate</b> evidence</span></li>
+        <li><span class="n">Q5</span><span class="t">Stress seen before it spreads</span><span class="s"><a href="#plant-vision" data-go="plant-vision">Study 02</a></span><span class="e ev"><b>Limited</b> evidence</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Sources">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — Sources</p><h2 class="h2" data-rise><span>Open data only.</span></h2><p class="lead" data-fade style="--d:.4s">Every number comes from public archives, read on 26 October 2026, and every script is published with the pages.</p></div>
+      <div class="pills srcs" data-up style="--d:.45s"><span class="chip">NOAA OISST v2.1</span><span class="chip">NASA POWER · MERRA-2 · IMERG · FLASHFlux</span><span class="chip">Copernicus Sentinel-2 L2A</span><span class="chip">FAO yields via Our World in Data</span><span class="chip">World Bank WDI</span><span class="chip mute">Natural Earth</span></div>
+      <p class="note" data-fade style="--d:.6s">NOAA and NASA data on the AWS Open Data registry; Sentinel-2 through Earth Search. Contains modified Copernicus Sentinel data 2025–2026.</p>
+    </div>
+    <footer class="foot"><span>lastfomo — Hortus · Research</span><a href="/#/hortus">Back to Hortus<svg aria-hidden="true" width="12" height="12"><use href="#g-ne"/></svg></a></footer>
+  </section>
+</main>
+
+<!-- ============================== STUDY 01 · EL NIÑO ============================== -->
+<main class="view" data-view="el-nino-2026" data-wing="hortus" data-crumb="The 2026–27 El Niño" data-key="r1" tabindex="-1" hidden>
+  <section class="screen cover plate" data-title="Study">
+    <div class="cover-bg" aria-hidden="true"><canvas data-scene="globe"></canvas></div>
+    <div class="wrap">
+      <div class="cover-in">
+        <div class="cover-copy">
+          <p class="code" data-fade style="--d:.1s">HRT — Study 01 · Climate and crops</p>
+          <h1 class="h1" data-rise style="--d:.2s"><span>The <span class="nw">2026–27</span> El Niño.</span></h1>
+          <p class="lead" data-fade style="--d:.5s">Read from open data: where the harvest is at risk, measured from ocean temperatures, satellite rainfall and forty years of national yields.</p>
+          <div class="row" data-fade style="--d:.7s"><button class="btn solid" type="button" data-read="r1">Read the paper</button><button class="btn" type="button" data-deck="r1">View the deck</button></div>
+        </div>
+        <div class="hero-stat" data-fade style="--d:.9s"><span class="v" data-fact="r1-oct-big">+2.67 °C</span><span class="k">Relative Niño-3.4, October 2026. Highest month since 1982.</span></div>
+      </div>
+    </div>
+    <div class="cue" aria-hidden="true"><span>Scroll</span><i></i></div>
+  </section>
+
+  <section class="screen" data-title="The event">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 01 · The event</p><h2 class="h2" data-rise><span>Past every month since 1982.</span></h2><p class="lead" data-fade style="--d:.4s">The relative Niño-3.4 index reached <b data-fact="r1-oct-inline">+2.67 °C</b> in October. The previous highest month was <span data-fact="r1-prev">+2.51 °C in November 2015</span>.</p></div>
+      <figure class="fig" data-sweep style="--d:.5s"><div class="chart fit" data-c="enso"></div><figcaption>NOAA OISST v2.1, January 1982 to 24 October 2026; October is preliminary. Shaded: El Niño events.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Past events">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 02 · Past events</p><h2 class="h2" data-rise><span>Ahead of 1982, 1997 and 2015.</span></h2></div>
+      <figure class="fig" data-sweep style="--d:.45s"><div class="chart fit" data-c="ana"></div><ul class="legend"><li><i class="focus"></i>2026</li><li><i></i>1982, 1997, 2015, 2023</li></ul></figure>
+    </div>
+  </section>
+
+  <section class="screen" data-title="At a glance">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 03 · At a glance</p><h2 class="h2" data-rise><span>Four numbers to keep.</span></h2></div>
+      <div class="stats" data-stats="r1" data-up style="--d:.3s"></div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Mechanism">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s">HRT — 04 · Mechanism</p><h2 class="h2" data-rise><span>How El Niño reaches a field.</span></h2><p class="lead" data-fade style="--d:.4s">Warm water spreads east and the rising air follows it. Rain belts shift. What it costs a harvest depends on the crop’s stage when the rain fails.</p><p class="note" data-fade style="--d:.55s">After Ropelewski and Halpert (1987) and Iizumi et al. (2014).</p></div>
+        <div class="fit-schema" data-schema="enso" data-up style="--d:.35s"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Rain map">
+    <div class="wrap">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 05 · Rain</p><h2 class="h2" data-rise><span>Rain moves. It does not vanish.</span></h2><p class="lead" data-fade style="--d:.4s">Filled belts dry out in El Niño seasons; dashed belts get wetter. Choose a belt to see every season.</p></div>
+      <figure class="fig" data-sweep style="--d:.5s"><div class="chart fit-map" data-c="map"></div></figure>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Fifteen belts">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 06 · Fifteen belts</p><h2 class="h2" data-rise><span>Fifteen belts, one pattern.</span></h2></div>
+      <figure class="fig" data-sweep style="--d:.4s"><div class="chart fit" data-c="rain"></div><figcaption>Seasonal rain, % per °C of the index, IMERG 2001–2025, with 95% intervals. Highlighted: significant at 5%.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen" id="seasons" data-title="Every season">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat">
+          <p class="code" data-fade style="--d:.05s">HRT — 07 · Every season</p>
+          <h2 class="h2" data-rise><span>Every season since 2001.</span></h2>
+          <label class="ctl" data-fade style="--d:.35s"><span>Crop belt</span><select class="inp" data-region-select></select></label>
+          <p class="lead" data-rp="line" data-fade style="--d:.45s"></p>
+          <dl class="kv" data-rp="kv" data-fade style="--d:.55s"></dl>
+        </div>
+        <figure class="fig" data-sweep style="--d:.45s"><div class="chart fit-m" data-c="region"></div><ul class="legend"><li><i class="dot focus"></i>2026 so far</li><li><i class="dot"></i>2001–2025</li><li><i class="dash"></i>Fitted line</li></ul></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Data check">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s">HRT — 08 · A data check</p><h2 class="h2" data-rise><span>One dataset missed a drought.</span></h2><div class="big-num" data-fade style="--d:.4s"><span class="v w" data-count="52" data-prefix="+">+52</span><small>points</small></div><p class="lead" data-fade style="--d:.55s">MERRA-2 put the 2023–24 Zambezi season near normal. Satellite rainfall measured <span data-fact="zam-im">−53%</span>. We use satellite rain and keep MERRA-2 for heat.</p></div>
+        <figure class="fig" data-sweep style="--d:.5s"><p class="ttl">MERRA-2 against IMERG <i>correlation, 2001–2025</i></p><div class="chart fit-m" data-c="agree"></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="2026 so far">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 09 · 2026 so far</p><h2 class="h2" data-rise><span>The dry side is dry, and hot.</span></h2></div>
+      <div class="pills seg" role="radiogroup" aria-label="Measure" data-fade style="--d:.3s"><label class="pill"><input type="radio" name="now-m" value="rain" checked><span>Rain</span></label><label class="pill"><input type="radio" name="now-m" value="heat"><span>Heat</span></label></div>
+      <figure class="fig" data-sweep style="--d:.45s"><div class="chart fit" data-c="now"></div><figcaption data-now-cap>Rain to the end of September, % of the 2001–2020 normal for the same months (IMERG).</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Yields">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 10 · Yields</p><h2 class="h2" data-rise><span>Southern Africa carries the signal.</span></h2></div>
+      <figure class="fig" data-sweep style="--d:.4s"><div class="chart fit" data-c="ys"></div><figcaption>Yield, % of trend per °C of the crop-season index, FAO 1982–2018, 95% intervals. The twelve pairs with p below 0.15; all 21 are in the paper.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="screen" id="record" data-title="The record">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat">
+          <p class="code" data-fade style="--d:.05s">HRT — 11 · The record</p>
+          <h2 class="h2" data-rise><span>Harvest by harvest.</span></h2>
+          <label class="ctl" data-fade style="--d:.35s"><span>Crop and country</span><select class="inp" data-ysel></select></label>
+          <p class="lead" data-yline data-fade style="--d:.45s"></p>
+        </div>
+        <figure class="fig" data-sweep style="--d:.45s"><div class="chart fit-m" data-c="yseries"></div><ul class="legend"><li><i class="dot focus"></i>Harvest after a very strong El Niño</li><li><i></i>Yield, % of trend</li></ul></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="World">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s">HRT — 12 · World</p><h2 class="h2" data-rise><span>World totals barely move.</span></h2><p class="lead" data-fact="global-line" data-fade style="--d:.4s"></p></div>
+        <figure class="fig" data-sweep style="--d:.5s"><p class="ttl">World yield per °C <i>onset year and the next</i></p><div class="chart fit-m" data-c="glob"></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Outlook">
+    <div class="wrap">
+      <div class="duo outlook">
+        <div class="hd flat">
+          <p class="code" data-fade style="--d:.05s">HRT — 13 · Outlook</p>
+          <h2 class="h2" data-rise><span>Set the strength. See the risk.</span></h2>
+          <div class="dial" data-fade style="--d:.35s"><p class="big-num" id="enso-val" aria-live="polite">+2.5 °C</p><label class="ctl" for="enso-slider"><span>Season-mean index</span><input id="enso-slider" class="range" type="range" min="1.5" max="3" step="0.1" value="2.5" aria-describedby="enso-val"></label></div>
+          <div class="pills seg" role="radiogroup" aria-label="Seasons" data-fade style="--d:.45s"><label class="pill"><input type="radio" name="out-s" value="ahead" checked><span>Seasons ahead</span></label><label class="pill"><input type="radio" name="out-s" value="now"><span>Under way</span></label></div>
+        </div>
+        <figure class="fig" data-sweep style="--d:.5s"><div class="chart fit" data-c="out"></div><ul class="legend"><li><i class="dot"></i>Mean</li><li><i></i>80% interval</li><li><i class="focus"></i>Loss above 10% more likely than not</li><li>* Beyond the 1982–2018 record</li></ul></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Read with care">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 14 · Read with care</p><h2 class="h2" data-rise><span>Where the record ends.</span></h2></div>
+      <div class="big-num" data-fade style="--d:.35s"><span class="v w" data-beyond>11/11</span><small data-beyond-of>rows beyond the record</small></div>
+      <p class="lead gap" data-extrap data-fade style="--d:.45s"></p>
+      <div class="row" data-fade style="--d:.55s"><button class="btn solid" type="button" data-export="outlook">Export the outlook</button></div>
+      <p class="note" data-dl-note hidden>Saving files is not available in this view.</p>
+    </div>
+  </section>
+
+  <section class="screen" data-title="What to do">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 15 · Action</p><h2 class="h2" data-rise><span>What to do now.</span></h2></div>
+      <ul class="rows act" data-up style="--d:.3s">
+        <li><span class="n">Agencies</span><span class="t">Plan for Southern Africa’s 2027 lean season</span><span class="e ev"><b>Strong</b></span></li>
+        <li><span class="n">Growers</span><span class="t">Shorter-season maize, water saved early</span><span class="e ev"><b>Moderate</b></span></li>
+        <li><span class="n">Buyers</span><span class="t">Price a regional shortfall, not a global one</span><span class="e ev"><b>Moderate</b></span></li>
+        <li><span class="n">Analysts</span><span class="t">Check reanalysis rain against satellites</span><span class="e ev"><b>Strong</b></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Read">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s">HRT — 16 · Read and present</p><h2 class="h2" data-rise><span>Read it. Present it.</span></h2><p class="lead" data-fade style="--d:.4s">A research article with methods, limits and verified references, and a 20-slide deck.</p><div class="row" data-fade style="--d:.55s"><button class="btn solid" type="button" data-read="r1">Read the paper</button><button class="btn" type="button" data-deck="r1">View the deck</button></div><div class="row" data-dl-row data-fade style="--d:.65s"><button class="btn small" type="button" data-pdf="r1-paper">Paper PDF</button><button class="btn small" type="button" data-pdf="r1-deck">Deck PDF</button></div></div>
+        <div class="ask" data-ask="r1" data-up style="--d:.45s"><label class="ctl" for="ask-r1"><span>Ask about this study</span><textarea id="ask-r1" class="inp" rows="2" placeholder="Why does Kenya get wetter while Zimbabwe dries?"></textarea></label><div class="row"><button class="btn" type="button" data-ask-btn="r1">Ask Claude</button><button class="btn small" type="button" data-ask-stop="r1" hidden>Stop</button></div><div class="answer" data-ask-out="r1" hidden><h4>Answer, from the study’s numbers</h4><p></p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Next">
+    <div class="wrap mid"><div class="next-wrap" data-next></div></div>
+    <footer class="foot"><span>lastfomo — Hortus · Research</span><a href="/#/hortus">Back to Hortus<svg aria-hidden="true" width="12" height="12"><use href="#g-ne"/></svg></a></footer>
+  </section>
+</main>
+
+<!-- ============================== STUDY 02 · PLANT VISION ============================== -->
+<main class="view" data-view="plant-vision" data-wing="hortus" data-crumb="Seeing what plants need" data-key="r2" tabindex="-1" hidden>
+  <section class="screen cover plate" data-title="Study">
+    <div class="cover-bg" aria-hidden="true"><canvas data-scene="scan"></canvas></div>
+    <div class="wrap">
+      <div class="cover-in">
+        <div class="cover-copy">
+          <p class="code" data-fade style="--d:.1s">HRT — Study 02 · Plant vision and automation</p>
+          <h1 class="h1" data-rise style="--d:.2s"><span>Seeing what plants need.</span></h1>
+          <p class="lead" data-fade style="--d:.5s">AI vision for plant analytics and a five-tier path from a phone photo to an autonomous room, tested on three fields read from orbit in 2026.</p>
+          <div class="row" data-fade style="--d:.7s"><button class="btn solid" type="button" data-jump="analyse">Analyse a photo</button><button class="btn" type="button" data-read="r2">Read the paper</button><button class="btn" type="button" data-deck="r2">View the deck</button></div>
+        </div>
+        <div class="hero-stat" data-fade style="--d:.9s"><span class="v">5 tiers</span><span class="k">Look, sense, control, predict, autonomy.</span></div>
+      </div>
+    </div>
+    <div class="cue" aria-hidden="true"><span>Scroll</span><i></i></div>
+  </section>
+
+  <section class="screen" data-title="Evidence">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 01 · Evidence</p><h2 class="h2" data-rise><span>Lab accuracy is not field accuracy.</span></h2></div>
+      <div class="stats three" data-up style="--d:.3s">
+        <div class="stat"><span class="v" data-count="99.35" data-dec="2" data-suffix="%">99.35%</span><span class="k">Lab images</span><span class="x">PlantVillage test set. On photos taken elsewhere: 31.4%.</span></div>
+        <div class="stat"><span class="v" data-count="49.0" data-dec="1" data-suffix="%">49.0%</span><span class="k">From 8 background pixels</span><span class="x">The labels leak through the backdrop, not the leaf.</span></div>
+        <div class="stat"><span class="v w" data-count="56.9" data-dec="1" data-suffix="%">56.9%</span><span class="k">General AI, zero-shot</span><span class="x">GPT-4o on apple leaves; 98.1% after fine-tuning.</span></div>
+      </div>
+      <p class="note" data-fade style="--d:.6s">Mohanty et al. (2016); Noyan (2022); Roumeliotis et al. (2025).</p>
+    </div>
+  </section>
+
+  <section class="screen" id="analyse" data-title="Analyse">
+    <div class="wrap">
+      <div class="duo even">
+        <div class="viewer" data-up style="--d:.2s">
+          <div class="hold seal-wrap"><canvas data-v="canvas" role="img" aria-label="Plant photo and analysis layer"></canvas><div class="seal" data-v="seal"></div><span class="seal-tag" data-v="tag">Synthetic sample</span></div>
+          <div class="layers pills" role="radiogroup" aria-label="Layer">
+            <label class="pill"><input type="radio" name="layer" value="photo"><span>Photo</span></label>
+            <label class="pill"><input type="radio" name="layer" value="mask"><span>Mask</span></label>
+            <label class="pill"><input type="radio" name="layer" value="vari"><span>Greenness</span></label>
+            <label class="pill"><input type="radio" name="layer" value="stress" checked><span>Stress</span></label>
+          </div>
+        </div>
+        <div class="hd flat">
+          <p class="code" data-fade style="--d:.05s">HRT — 02 · Analyse</p>
+          <h2 class="h2" data-rise><span>Drop a photo. Read the plant.</span></h2>
+          <p class="lead" data-fade style="--d:.35s">It runs in your browser. It screens; it does not diagnose.</p>
+          <label class="drop" data-v="drop" for="photo-in" data-fade style="--d:.45s"><input id="photo-in" type="file" accept="image/*" aria-label="Choose a plant photo"><span class="h3">Choose or drop a photo</span><span class="note">JPEG, PNG or WebP, or paste one. Nothing leaves this page unless you ask Claude.</span></label>
+          <div class="row" data-fade style="--d:.55s"><span class="label">Samples</span><button class="btn small" type="button" data-sample="healthy">Healthy</button><button class="btn small" type="button" data-sample="yellowing">Yellowing</button><button class="btn small" type="button" data-sample="spots">Leaf spots</button></div>
+          <div class="stats three mini" data-v="stats" data-fade style="--d:.65s"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Reading">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat">
+          <p class="code" data-fade style="--d:.05s">HRT — 03 · Reading</p>
+          <h2 class="h2" data-rise><span>What the photo shows.</span></h2>
+          <div class="meter" data-fade style="--d:.35s"><span class="label">Screening index <b data-v="index" class="num"></b> / 100</span><div class="track"><i data-v="bar" style="width:0"></i></div></div>
+          <dl class="kv" data-v="kv" data-fade style="--d:.45s"></dl>
+          <div class="fields two" data-fade style="--d:.55s">
+            <label class="ctl" for="v-crop"><span>Crop</span><select id="v-crop" class="inp"></select></label>
+            <label class="ctl" for="v-setting"><span>Setting</span><select id="v-setting" class="inp"><option value="outdoor">Outdoor field or bed</option><option value="greenhouse">Greenhouse</option><option value="indoor">Indoor, under lights</option></select></label>
+          </div>
+        </div>
+        <div class="stack opinion" data-up style="--d:.4s">
+          <div class="row"><button class="btn solid" type="button" data-claude>Ask Claude for a second opinion</button><button class="btn small" type="button" data-claude-stop hidden>Stop</button><button class="btn" type="button" data-export="plant">Export the report</button></div>
+          <p class="note" data-claude-note hidden></p>
+          <div class="answer scroll-y" data-claude-out hidden><h4>Second opinion · Claude</h4><div data-claude-body></div></div>
+          <p class="note" data-claude-hint>Claude reads the photo with the measured shares and names what to check first. It never names a product or a dose.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Needs">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat">
+          <p class="code" data-fade style="--d:.05s">HRT — 04 · Needs</p>
+          <h2 class="h2" data-rise><span>Predict what it needs.</span></h2>
+          <div class="fields two" data-fade style="--d:.35s">
+            <label class="ctl" for="n-preset"><span>Start from</span><select id="n-preset" class="inp" data-need="preset"></select></label>
+            <label class="ctl" for="n-crop"><span>Crop</span><select id="n-crop" class="inp" data-need="crop"></select></label>
+            <label class="ctl" for="n-stage"><span>Stage</span><select id="n-stage" class="inp" data-need="stage"></select></label>
+            <label class="ctl" for="n-setting"><span>Setting</span><select id="n-setting" class="inp" data-need="setting"><option value="outdoor">Outdoor</option><option value="greenhouse">Greenhouse</option><option value="indoor">Indoor</option></select></label>
+          </div>
+          <p class="strip" data-need-strip data-fade style="--d:.45s"></p>
+          <div class="row" data-fade style="--d:.5s"><button class="btn small" type="button" data-readings-open>Edit readings</button></div>
+        </div>
+        <div class="stack" data-up style="--d:.4s"><div class="stats three" data-needs-stats aria-live="polite"></div><p class="lead" data-needs-water></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Attention">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 04 · Today</p><h2 class="h2" data-rise><span>What needs attention.</span></h2></div>
+      <div class="stack" data-needs-checks aria-live="polite" data-up style="--d:.3s"></div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Tiers">
+    <div class="wrap">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 05 · Tiers</p><h2 class="h2" data-rise><span>Five tiers, one path.</span></h2><p class="lead" data-fade style="--d:.4s">Each tier adds one kind of decision. Choose one to see what it runs on.</p></div>
+      <div class="tiers" role="group" aria-label="Tiers" data-tiers data-up style="--d:.35s"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="tier" data-title="Tier detail">
+    <div class="wrap">
+      <div class="duo">
+        <div class="fit-schema" data-schema="tier" data-up style="--d:.3s"></div>
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s" data-tier-code>HRT — Tier 1</p><h2 class="h2" data-rise><span data-tier-title>Sense.</span></h2><div class="stack" data-tier-detail data-fade style="--d:.4s"></div><div class="pills seg" data-tier-nav data-fade style="--d:.5s"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Kansas">
+    <div class="wrap">
+      <div class="duo even">
+        <div class="viewer" data-up style="--d:.2s" data-field="kansas">
+          <div class="hold"><canvas data-f="map"></canvas><span class="seal-tag" data-f="tag"></span></div>
+          <div class="row"><button class="btn small" type="button" data-f="play" aria-pressed="false"><svg aria-hidden="true"><use href="#g-play"/></svg>Play the season</button><label class="ctl grow"><span class="sr">Date</span><input class="range" type="range" min="0" max="10" step="1" value="0" data-f="time"></label></div>
+        </div>
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s">HRT — 06 · Kansas, USA</p><h2 class="h2" data-rise><span>Five crop calendars in 36 km².</span></h2><figure class="fig" data-sweep style="--d:.45s"><div class="chart fit-s" data-c="kcurves"></div><ul class="legend" data-f="kleg"></ul></figure><p class="note" data-fade style="--d:.6s" data-f="knote"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Water">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 07 · Water</p><h2 class="h2" data-rise><span>What the maize needed.</span></h2></div>
+      <div class="stats" data-kstats data-up style="--d:.3s"></div>
+      <figure class="fig" data-sweep style="--d:.5s"><div class="chart fit-s" data-c="kwater"></div><ul class="legend"><li><i class="focus"></i>Crop water use</li><li><i></i>Rain</li></ul></figure>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Mkushi">
+    <div class="wrap">
+      <div class="duo even">
+        <div class="viewer" data-up style="--d:.2s" data-field="mkushi">
+          <div class="hold"><canvas data-f="map"></canvas><span class="seal-tag" data-f="tag"></span></div>
+          <div class="row"><button class="btn small" type="button" data-f="play" aria-pressed="false"><svg aria-hidden="true"><use href="#g-play"/></svg>Play the season</button><label class="ctl grow"><span class="sr">Date</span><input class="range" type="range" min="0" max="10" step="1" value="0" data-f="time"></label></div>
+        </div>
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s">HRT — 08 · Mkushi, Zambia</p><h2 class="h2" data-rise><span>Water only from the pivot.</span></h2><figure class="fig" data-sweep style="--d:.45s"><div class="chart fit-s" data-c="mk"></div><ul class="legend"><li><i class="focus"></i>Pivots</li><li><i></i>Other land</li></ul></figure><div class="stats two mini" data-mstats data-fade style="--d:.6s"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="West Java">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 09 · West Java, Indonesia</p><h2 class="h2" data-rise><span>The same rice land, a year apart.</span></h2></div>
+      <div class="pair" data-java-compare data-up style="--d:.3s">
+        <figure class="fig"><div class="seal-wrap"><img src="/research/img/java-2025-08-10.jpg" alt="West Java rice land on 10 August 2025, mostly green" loading="lazy"><span class="seal-tag">10 Aug 2025</span></div><figcaption data-fact="jv-cap25"></figcaption></figure>
+        <figure class="fig"><div class="seal-wrap"><img src="/research/img/java-2026-08-13.jpg" alt="The same rice land on 13 August 2026, with large dry, bare patches" loading="lazy"><div class="seal" data-seal></div><span class="seal-tag">13 Aug 2026</span></div><figcaption data-fact="jv-cap26"></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Risks">
+    <div class="wrap mid">
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — 10 · Risks</p><h2 class="h2" data-rise><span>What it costs to be wrong.</span></h2></div>
+      <ul class="rows act" data-up style="--d:.3s">
+        <li><span class="n">Probes</span><span class="t">Calibrate EC and pH on a schedule</span><span class="e ev">Drift is the default</span></li>
+        <li><span class="n">Placement</span><span class="t">Shade air sensors; probe at the roots</span><span class="e ev">Sun reads high</span></li>
+        <li><span class="n">Outages</span><span class="t">Every controller works on its own</span><span class="e ev">Networks fail</span></li>
+        <li><span class="n">Vision</span><span class="t">A person confirms before anything is sprayed</span><span class="e ev">Screening only</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Read">
+    <div class="wrap">
+      <div class="duo">
+        <div class="hd flat"><p class="code" data-fade style="--d:.05s">HRT — 11 · Read and present</p><h2 class="h2" data-rise><span>Read it. Present it.</span></h2><p class="lead" data-fade style="--d:.4s">A research article on AI vision and tiered automation, with the field data and verified references, and a 20-slide deck.</p><div class="row" data-fade style="--d:.55s"><button class="btn solid" type="button" data-read="r2">Read the paper</button><button class="btn" type="button" data-deck="r2">View the deck</button></div><div class="row" data-dl-row data-fade style="--d:.65s"><button class="btn small" type="button" data-pdf="r2-paper">Paper PDF</button><button class="btn small" type="button" data-pdf="r2-deck">Deck PDF</button></div></div>
+        <div class="ask" data-ask="r2" data-up style="--d:.45s"><label class="ctl" for="ask-r2"><span>Ask about this study</span><textarea id="ask-r2" class="inp" rows="2" placeholder="Which tier should a small greenhouse start with?"></textarea></label><div class="row"><button class="btn" type="button" data-ask-btn="r2">Ask Claude</button><button class="btn small" type="button" data-ask-stop="r2" hidden>Stop</button></div><div class="answer" data-ask-out="r2" hidden><h4>Answer, from the study</h4><p></p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Next">
+    <div class="wrap mid"><div class="next-wrap" data-next></div></div>
+    <footer class="foot"><span>lastfomo — Hortus · Research</span><a href="/#/hortus">Back to Hortus<svg aria-hidden="true" width="12" height="12"><use href="#g-ne"/></svg></a></footer>
+  </section>
+</main>
+
+<dialog class="sheet side" data-readings aria-labelledby="readings-title">
+  <div class="sheet-bar"><p class="code" id="readings-title">HRT — Readings</p><button class="btn small" type="button" data-close>Done</button></div>
+  <div class="sheet-body">
+    <form class="stack" data-needs-form novalidate>
+      <p class="label">Weather or room</p>
+      <div class="fields">
+        <label class="ctl" for="n-tmax"><span>Max °C</span><input id="n-tmax" class="inp" type="number" step="0.1" data-need="tmax"></label>
+        <label class="ctl" for="n-tmin"><span>Min °C</span><input id="n-tmin" class="inp" type="number" step="0.1" data-need="tmin"></label>
+        <label class="ctl" for="n-rh"><span>Humidity %</span><input id="n-rh" class="inp" type="number" step="1" data-need="rh"></label>
+        <label class="ctl" for="n-u2"><span>Wind m/s</span><input id="n-u2" class="inp" type="number" step="0.1" data-need="u2"></label>
+        <label class="ctl" for="n-rs" data-outdoor><span>Sun MJ/m²</span><input id="n-rs" class="inp" type="number" step="0.1" data-need="rs"></label>
+        <label class="ctl" for="n-ppfd" data-indoor hidden><span>PPFD µmol/m²/s</span><input id="n-ppfd" class="inp" type="number" step="10" data-need="ppfd"></label>
+        <label class="ctl" for="n-hours" data-indoor hidden><span>Light hours</span><input id="n-hours" class="inp" type="number" step="0.5" data-need="hours"></label>
+      </div>
+      <p class="label">Plant and water</p>
+      <div class="fields">
+        <label class="ctl" for="n-area"><span>m² per plant</span><input id="n-area" class="inp" type="number" step="0.01" data-need="area"></label>
+        <label class="ctl" for="n-raw"><span>Usable water, mm</span><input id="n-raw" class="inp" type="number" step="1" data-need="raw" value="20"></label>
+        <label class="ctl" for="n-flow"><span>Drip L/h per plant</span><input id="n-flow" class="inp" type="number" step="0.1" data-need="flow" value="2"></label>
+      </div>
+      <p class="label">Sensor readings</p>
+      <div class="fields">
+        <label class="ctl" for="n-moist"><span>Soil moisture %</span><input id="n-moist" class="inp" type="number" step="1" data-need="moisture"></label>
+        <label class="ctl" for="n-trig"><span>Trigger %</span><input id="n-trig" class="inp" type="number" step="1" data-need="trigger" value="30"></label>
+        <label class="ctl" for="n-ph"><span>Feed pH</span><input id="n-ph" class="inp" type="number" step="0.1" data-need="ph"></label>
+        <label class="ctl" for="n-ec"><span>EC mS/cm</span><input id="n-ec" class="inp" type="number" step="0.1" data-need="ec"></label>
+        <label class="ctl" for="n-ect"><span>Recipe EC</span><input id="n-ect" class="inp" type="number" step="0.1" data-need="ecTarget"></label>
+        <label class="ctl" for="n-co2"><span>CO₂ ppm</span><input id="n-co2" class="inp" type="number" step="10" data-need="co2"></label>
+        <label class="ctl" for="n-tminy"><span>Yesterday min °C</span><input id="n-tminy" class="inp" type="number" step="0.1" data-need="tminY"></label>
+        <label class="ctl" for="n-hum"><span>Hours RH ≥ 90% today</span><input id="n-hum" class="inp" type="number" step="1" data-need="humid"></label>
+        <label class="ctl" for="n-humy"><span>Hours RH ≥ 90% yesterday</span><input id="n-humy" class="inp" type="number" step="1" data-need="humidY"></label>
+      </div>
+      <p class="note" data-need-note></p>
+    </form>
+  </div>
+</dialog>
+<dialog class="sheet side" data-tablesheet aria-labelledby="table-title">
+  <div class="sheet-bar"><p class="code" id="table-title">HRT — Numbers</p><button class="btn small" type="button" data-close>Close</button></div>
+  <div class="sheet-body"><h3 class="h3" data-table-head></h3><div class="tsheet" data-table-body></div></div>
+</dialog>
+<dialog class="sheet" data-reader aria-labelledby="reader-title">
+  <div class="sheet-bar"><p class="code" id="reader-title">HRT — Paper</p><div class="row"><button class="btn small" type="button" data-reader-pdf>Save PDF</button><button class="btn small" type="button" data-close>Close</button></div></div>
+  <div class="sheet-body"><article class="article" data-reader-body></article></div>
+</dialog>
+<dialog class="sheet deck" data-deckview aria-labelledby="deck-title">
+  <div class="sheet-bar"><p class="code" id="deck-title">HRT — Deck</p><div class="row"><button class="btn small" type="button" data-deck-pdf>Save PDF</button><button class="btn small" type="button" data-close>Close</button></div></div>
+  <div class="deck-stage"><div class="deck-frame" data-deck-frame tabindex="0" aria-roledescription="slides"></div></div>
+  <div class="deck-nav"><button class="btn small" type="button" data-deck-prev aria-label="Previous slide">Previous</button><span data-deck-count class="num">1 / 20</span><button class="btn small" type="button" data-deck-next aria-label="Next slide">Next</button></div>
+</dialog>
+<div class="toast" role="status" data-toast></div>
+<div class="curtain" aria-hidden="true"><svg><use href="#g-lux"/></svg></div>
+<script src="/vendor/three.min.js"></script>
+<script src="/research/vendor/jspdf.umd.min.js"></script>
+<script src="/research/js/brand.js"></script>
+<script src="/research/js/charts.js"></script>
+<script src="/research/js/scenes.js"></script>
+<script src="/research/js/vision.js"></script>
+<script src="/research/js/needs.js"></script>
+<script src="/research/js/report.js"></script>
+<script src="/research/js/deck.js"></script>
+<script src="/research/js/figs.js"></script>
+<script src="/research/js/app.js"></script>
+</body>
+</html>

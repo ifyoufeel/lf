@@ -1,0 +1,116 @@
+"""Research 1 analysis: ENSO index from OISST, regional seasonal climate from NASA POWER MERRA-2/IMERG,
+yield anomalies from FAO data (OWID mirror 1961-2018; World Bank WDI cereal yield 1961-2024)."""
+import sys, json, warnings
+import numpy as np, pandas as pd
+import statsmodels.api as sm
+from statsmodels.nonparametric.smoothers_lowess import lowess
+warnings.filterwarnings("ignore")
+ROOT = sys.argv[1]
+sys.path.insert(0, ROOT + "/scripts")
+from regions import REGIONS
+D = ROOT + "/data/"; O = ROOT + "/out/"
+
+# ---------------- ENSO ----------------
+s = pd.read_csv(D + "oisst_nino34_daily_samples.csv", parse_dates=["date"])
+s["ym"] = s.date.dt.to_period("M")
+m = s.groupby("ym")[["nino34_sst", "tropical_sst"]].mean()
+m["n_days"] = s.groupby("ym").size()
+m.index = m.index.to_timestamp()
+base = m.loc["1991":"2020"]
+clim = base.groupby(base.index.month)[["nino34_sst", "tropical_sst"]].mean()
+en = pd.DataFrame(index=m.index)
+en["n34_sst"] = m.nino34_sst
+en["n34_anom"] = m.nino34_sst - clim.loc[m.index.month, "nino34_sst"].values
+en["trop_anom"] = m.tropical_sst - clim.loc[m.index.month, "tropical_sst"].values
+rel = en.n34_anom - en.trop_anom
+scale = en.n34_anom.loc["1991":"2020"].std() / rel.loc["1991":"2020"].std()
+en["rel"] = rel * scale
+en["oni"] = en.n34_anom.rolling(3, center=True).mean()
+en["roni"] = en.rel.rolling(3, center=True).mean()
+en["n_days"] = m.n_days
+en.to_csv(O + "enso_monthly.csv", float_format="%.3f")
+
+# El Nino events: >=5 consecutive overlapping 3-month seasons with roni >= 0.5
+r = en.roni.dropna()
+events = []
+run = []
+for t, v in r.items():
+    if v >= 0.5:
+        run.append((t, v))
+    else:
+        if len(run) >= 5:
+            events.append(run)
+        run = []
+if len(run) >= 5:
+    events.append(run)
+ev = []
+for e in events:
+    pk = max(e, key=lambda x: x[1])
+    ev.append(dict(start=str(e[0][0].date())[:7], end=str(e[-1][0].date())[:7], peak=round(float(pk[1]), 2),
+                   peak_month=str(pk[0].date())[:7], dev_year=int(pk[0].year if pk[0].month >= 7 else pk[0].year - 1),
+                   ongoing=(e[-1][0] == r.index[-1])))
+# the ongoing 2026 event: the run may end at the last centred value (Sep 2026); add the latest monthly value
+last_rel = float(en.rel.dropna().iloc[-1]); last_mon = str(en.rel.dropna().index[-1].date())[:7]
+def cls(p):
+    return "very strong" if p >= 2.0 else "strong" if p >= 1.5 else "moderate" if p >= 1.0 else "weak"
+for e in ev: e["class"] = cls(e["peak"])
+json.dump(dict(scale=round(float(scale), 3), events=ev, last_rel=round(last_rel, 2), last_month=last_mon), open(O + "enso_events.json", "w"), indent=1)
+
+# ---------------- Regional seasonal climate ----------------
+rm = pd.read_csv(D + "regions_monthly.csv", parse_dates=["time"])
+rm["year"] = rm.time.dt.year; rm["month"] = rm.time.dt.month
+rm["days"] = rm.time.dt.days_in_month
+enm = en[["rel", "n34_anom"]].copy(); enm["year"] = enm.index.year; enm["month"] = enm.index.month
+
+def season_table(reg):
+    g = rm[rm.region == reg["id"]].copy()
+    first = reg["season"][0]
+    rows = []
+    for Y in range(1981, 2027):
+        sel = []
+        for mo in reg["season"]:
+            yy = Y + (1 if (reg["cross"] and mo < first) else 0)
+            sel.append((yy, mo))
+        sub = g.set_index(["year", "month"]).reindex(sel)
+        esub = enm.set_index(["year", "month"]).reindex(sel)
+        complete = sub.PRECTOTCORR.notna().all()
+        rows.append(dict(region=reg["id"], year=Y, complete=bool(complete), n_months=int(sub.PRECTOTCORR.notna().sum()),
+                         rain_mm=float((sub.PRECTOTCORR * sub.days).sum()) if complete else np.nan,
+                         rain_imerg_mm=float((sub.IMERG_PRECTOT * sub.days).sum()) if sub.IMERG_PRECTOT.notna().all() else np.nan,
+                         tmax=float(sub.T2M_MAX_AVG.mean()) if complete else np.nan,
+                         gwet=float(sub.GWETROOT.mean()) if complete else np.nan,
+                         enso=float(esub.rel.mean()) if esub.rel.notna().all() else np.nan))
+    t = pd.DataFrame(rows)
+    b = t[(t.year >= 1991) & (t.year <= 2020)]
+    t["rain_pct"] = 100 * (t.rain_mm / b.rain_mm.mean() - 1)
+    t["rain_imerg_pct"] = 100 * (t.rain_imerg_mm / t[(t.year >= 2001) & (t.year <= 2020)].rain_imerg_mm.mean() - 1)
+    t["tmax_anom"] = t.tmax - b.tmax.mean()
+    t["gwet_anom"] = t.gwet - b.gwet.mean()
+    t["gwet_z"] = (t.gwet - b.gwet.mean()) / b.gwet.std()
+    return t
+
+def ols(x, y):
+    ok = np.isfinite(x) & np.isfinite(y)
+    x, y = np.asarray(x)[ok], np.asarray(y)[ok]
+    X = sm.add_constant(x)
+    f = sm.OLS(y, X).fit()
+    ci = f.conf_int(0.05)[1]
+    return dict(n=int(ok.sum()), slope=float(f.params[1]), lo=float(ci[0]), hi=float(ci[1]), p=float(f.pvalues[1]),
+                r=float(np.corrcoef(x, y)[0, 1]), intercept=float(f.params[0]), resid_sd=float(np.sqrt(f.scale)), fit=f)
+
+seas = pd.concat([season_table(r) for r in REGIONS])
+seas.to_csv(O + "regional_seasons.csv", index=False, float_format="%.3f")
+clim_stats = []
+for r in REGIONS:
+    t = seas[(seas.region == r["id"]) & (seas.year <= 2025) & seas.complete]
+    a = ols(t.enso, t.rain_pct); b = ols(t.enso, t.gwet_z); c = ols(t.enso, t.tmax_anom)
+    clim_stats.append(dict(region=r["id"], name=r["name"], crop=r["crop"], season=r["season"], expected_sign=r["sign"],
+        rain_slope=a["slope"], rain_lo=a["lo"], rain_hi=a["hi"], rain_p=a["p"], rain_r=a["r"], n=a["n"], rain_resid_sd=a["resid_sd"],
+        gwet_slope=b["slope"], gwet_p=b["p"], tmax_slope=c["slope"], tmax_p=c["p"]))
+cs = pd.DataFrame(clim_stats)
+cs.to_csv(O + "climate_enso_sensitivity.csv", index=False, float_format="%.4f")
+print(cs[["region", "n", "rain_slope", "rain_lo", "rain_hi", "rain_p", "rain_r", "gwet_slope", "tmax_slope"]].round(3).to_string())
+
+# 2026 status
+st = seas[seas.year == 2026][["region", "n_months", "complete", "rain_pct", "rain_imerg_pct", "tmax_anom", "gwet_z", "enso"]]
+print(st.round(2).to_string())

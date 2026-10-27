@@ -9,7 +9,7 @@ Rule IDs `R0` to `R17` belong to `tools/brandcheck.mjs` and appear in every repo
 | Where | When | What runs |
 |---|---|---|
 | Claude Code hook (`.claude/settings.json` → `tools/hooks/brandcheck-hook.mjs`) | after every Edit or Write under `site/` or `brand/` | the source check; errors go straight back to Claude |
-| `node tools/build.mjs` | every build | regenerates `site/tokens.css`, checks `site/`, builds, then checks `dist/artifact/lastfomo.html` as one page. Fails on any error. |
+| `node tools/build.mjs` | every build | regenerates `site/tokens.css`, checks `site/`, checks the research page (`site/research/`) as one page, builds, then checks `dist/artifact/lastfomo.html` as one page. Fails on any error. |
 | `.githooks/pre-commit` | every commit, once enabled with `git config core.hooksPath .githooks` | the build, then refuses the commit if `site/tokens.css` was stale |
 | `.github/workflows/brand.yml` | every push and pull request | `node tools/brandcheck.test.mjs`, the build, and `git diff --exit-code -- site/tokens.css` |
 | `node tools/qa/shoot.mjs` | before publishing | screenshots, contact sheets, layout and font checks, in `out/qa/` |
@@ -39,6 +39,8 @@ The QA tools need Playwright and Chromium, so they run on a workstation, not in 
 ### Brand check (`tools/brandcheck.mjs`)
 
 Source mode checks `site/index.html`, `site/styles.css`, `site/main.js`, `site/boot.js`, `site/explore.js` and `site/tokens.css` (every local script and stylesheet the page loads; three.js, which the walk loads on its own, is third-party code and is not checked). `--html <file>` checks one self-contained page, such as the built Artifact.
+
+The research pages (`site/research/`, served at `/research`) are a document of their own. The build assembles them as one page, `out/check/research.html` (the site’s tokens, `research.css` and the research scripts inline; three.js and jsPDF stay out as third-party code), and checks it with every rail but two: R6 and R7’s ban on percentages. A study’s figures and percentages are its data, computed from public archives by the scripts published beside it (`/research/code/`) and cited in its paper, so the ledger records the studies, not each figure (`hortus.research.studies`). The build prints how many figures it left to the papers. That exemption is the owner’s to confirm (README → open items); everything else, from colour literals in the scripts to typographic punctuation in their strings, fails the build as on the landing page.
 
 | Rail | The rule in plain words | Severity | How to fix a failure |
 |---|---|---|---|
@@ -95,6 +97,7 @@ A passing build means the page is not wrong in the ways a machine can measure. T
 - **The shop’s numbers.** R6 traces every price and specification to a `hortus.shop.*` fact, whose claim names the maker’s page and the import date. Prices show in US dollars by the owner’s rule (the maker’s rouble price ÷ 100, rounded to the dollar), and each fact gives both. R6 cannot tell whether the maker has since changed a price or whether the rule was applied: rerun the `shop-import` workflow and compare `shop/source/emode.json` with `site/shop.json` from time to time while the shop is live.
 - **The previews’ numbers.** The Machina and Arca previews show market prices: each is a dated, sourced fact (`machina.study.*`, `arca.study.*`) gathered on 26 October 2026. R6 proves a number is recorded, in the markup and in the lines a chart writes when chosen (`data-story`, `data-text`), not that the market still agrees: refresh the snapshot as the markets move. The gold tooltip reads `data-points`, which R6 does not; its values are the ones in the chart’s `table.sr` twin, which it does.
 - **Tone.** R7 catches known bans. It cannot hear hype, a superlative, a line that was never approved, or a paragraph that should be three words. Compare new copy with `ledger.json` → `approvedLines` and the voice in `references/copy.md`.
+- **The research figures.** The research pages are exempt from R6 and R7’s percentages (see above). Their numbers trace to the data files, the scripts in `/research/code/` and the papers’ references, not to the ledger: check a changed figure against its script, and a new study’s figures against its paper, before it ships.
 - **Numbers in words and claims without numbers.** R6 reads digits only: “eight GPUs” or “the fastest” pass unseen. Each still needs a ledger fact or must go.
 - **Meaning.** “0 bytes leave the room” is a premise, never a measurement. The Arca field-note objects are research references, not Arca’s holdings: never imply ownership or sale.
 - **Client names and Wing 04.** The checks know one banned name, not every name. Read for both.
