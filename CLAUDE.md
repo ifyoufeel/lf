@@ -52,7 +52,7 @@ Other commands: `node tools/brandcheck.mjs` checks `site/` on its own (`--html <
 
 ## Publishing targets
 
-- claude.ai Artifact: `dist/artifact/lastfomo.html`, a fragment with CSS, JS and images inlined. Publish it with the Artifact tool and republish to the same URL for updates.
+- claude.ai Artifact: `dist/artifact/lastfomo.html`, a fragment with CSS, JS and images inlined. Publish it with the Artifact tool and republish to the same URL for updates: the site’s Artifact is https://claude.ai/artifact/WLBQxwzmGz8e5Kw2gHSPY5 (“lastfomo research house”; pass it as `url`). Review copies made for the owner to try a change get their own link.
 - Vercel, live at https://lastfomo.com (`www` redirects to it; DNS at GoDaddy, `docs/publishing.md` → “Custom domain”) and at https://lastfomo.vercel.app: project `lastfomo`, connected to this repo, on Hobby by the owner’s choice (a personal site). A push to the production branch (the default branch, today `claude/great-hamilton-2sna3z`) builds `dist/web/` with `vercel.json` and goes live; a brand error fails the build. Other branches get login-protected previews. Any other static host takes `dist/web/` as it is.
 - Vercel connector: leave `teamId` out of its calls, and never crawl the live site (see `docs/publishing.md` → “The live project”).
 

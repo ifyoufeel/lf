@@ -8,6 +8,7 @@ Contents: live artifacts, delivered files, decisions in order, open items.
 |---|---|---|
 | Landing page | `https://claude.ai/artifact/Ckgt4AxvQpeKTKaPFByNMx` | home, three case pages (`#/machina`, `#/hortus`, `#/arca`), Start a project (`#/start`); films and loops in its asset store |
 | Walk the house | `https://claude.ai/artifact/GNyvJEi3xmRftrt6MF2EkB` | the 3D walking experience, dark neon stages in all wings |
+| The site, built from the repo | `https://claude.ai/artifact/WLBQxwzmGz8e5Kw2gHSPY5` | “lastfomo research house”: `dist/artifact/lastfomo.html`, republished for every update; the walk and its sound field, the shop and the previews inside |
 
 ## Delivered files
 
