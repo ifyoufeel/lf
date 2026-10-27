@@ -374,6 +374,27 @@
       <div class="row xp-row"><a class="btn solid" href="#/start">Start a project</a><button class="btn" type="button" id="xp-final-x">Keep walking</button></div>
     </div>
   </section>
+  <!-- The sound field: the jam in the house. Its stones rise round the column once all three wings are explored. -->
+  <dialog class="xp-sf" id="xp-sf" aria-labelledby="xp-sf-t">
+    <div class="xp-sf-in">
+      <div class="xp-sf-head">
+        <div class="xp-sf-ti"><p class="code">LF — The house · Sound field</p><h2 class="h2" id="xp-sf-t">The sound field.</h2></div>
+        <button class="xp-sf-jam" type="button" id="xp-sf-jam" aria-pressed="false"><i aria-hidden="true"></i><span>Jam off</span></button>
+        <label class="xp-sf-tempo"><span>Tempo</span><input type="range" id="xp-sf-bpm" min="56" max="96" step="1"><output id="xp-sf-bpm-v" for="xp-sf-bpm"></output></label>
+        <button class="btn xp-sf-x" type="button" id="xp-sf-x">Close<kbd>Esc</kbd></button>
+      </div>
+      <div class="xp-sf-field" id="xp-sf-field" role="group" aria-label="The field. Each stone is one layer of the jam.">
+        <span class="xp-sf-rest" aria-hidden="true"><span>Below the line, a layer rests</span></span>
+        <span class="xp-sf-ax up" aria-hidden="true">↑ Louder</span>
+        <span class="xp-sf-ax rt" aria-hidden="true">Brighter →</span>
+      </div>
+      <div class="xp-sf-sc"><h3 id="xp-sf-sc">Scenes</h3><div class="xp-sf-row" id="xp-sf-scenes" role="group" aria-labelledby="xp-sf-sc"></div></div>
+      <p class="xp-sf-note" id="xp-sf-note">Drag a stone: up is louder, right is brighter. Click it to change its loop.</p>
+      <p class="sr" id="xp-sf-live" role="status" aria-live="polite"></p>
+      <p class="sr" id="xp-sf-how">Arrow keys move the stone: up is louder, right is brighter, and below the line it rests. Enter changes its loop.</p>
+    </div>
+    <svg class="sr" aria-hidden="true" focusable="false"><filter id="xp-sf-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4"/></filter></svg>
+  </dialog>
 </main>
 
 <!-- =============================== START A PROJECT =============================== -->
@@ -458,6 +479,7 @@
         <li data-wing="arca"><a href="#/explore/arca" data-to="arca"><b>Arca</b><span data-n></span></a></li>
       </ul>
     </div>
+    <div class="xp-sec" id="xp-sf-sec" hidden><h3>Sound field</h3><p class="xp-sec-p">Each stone round the house column is one layer of a jam. Drag them to mix.</p><div class="row"><button class="btn" type="button" id="xp-sf-go">Open the sound field</button></div></div>
     <div class="xp-sec"><h3>How to walk</h3><dl class="xp-keys" id="xp-keys"></dl></div>
     <div class="row"><a class="btn solid" href="#/start">Start a project</a></div>
   </div>

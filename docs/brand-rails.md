@@ -77,7 +77,7 @@ The research pages (`site/research/`, served at `/research`) are a document of t
 | `fontsLoaded` | Geist, Geist Mono and Jacquard 24 actually load wherever the page uses them. | `false` is a failure | The stylesheet link must match `type.googleFonts` in `brand/tokens.json`, and family names must match `type.*.family`. `report.json` → `fontCache` lists failed downloads, usually the network. |
 | `consoleErrors`, `pageErrors`, `failedRequests` | The page runs without errors. | non-zero is a failure | Read the entries in `report.json`. Videos not uploaded yet are listed under `expectedMissing` and ignored. |
 | Contrast review | Text stays readable in both themes. Measured by no tool: the harness shoots dark and light so a person can judge. | human | Small wing-coloured text uses `var(--wing-t)`, which `brand/tokens.json` darkens for the light theme. Bright wing colours are for fills, dots, lines and plates. Secondary text uses `var(--fg2)`. |
-| `smoke.mjs` steps | Routes and the curtain, the case links, the film player, the brief form and its copy button, the theme switch (`auto → dark → light`), visible focus rings, fonts, a clean console. | any FAIL exits 1; an absent optional element is SKIP | Read the failing step in the output or in `out/qa/smoke.json`, then fix the behaviour in `site/main.js`. |
+| `smoke.mjs` steps | Routes and the curtain, the case links, the film player, the walk and its sound field, the brief form and its copy button, the theme switch (`auto → dark → light`), visible focus rings, fonts, a clean console. | any FAIL exits 1; an absent optional element is SKIP | Read the failing step in the output or in `out/qa/smoke.json`, then fix the behaviour in `site/main.js`. |
 
 ### Build and repository
 

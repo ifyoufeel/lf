@@ -41,6 +41,8 @@
     fin: $('#xp-final'), finN: $('#xp-final-n'), finX: $('#xp-final-x'),
     menu: $('#xp-menu'), set: $('#xp-set'), setX: $('#xp-set-x'), keys: $('#xp-keys'), gyroOpt: $('#xp-opt-gyro'),
     curtain: $('.curtain'),
+    sf: $('#xp-sf'), sfField: $('#xp-sf-field'), sfScenes: $('#xp-sf-scenes'), sfJam: $('#xp-sf-jam'), sfBpm: $('#xp-sf-bpm'), sfBpmV: $('#xp-sf-bpm-v'),
+    sfX: $('#xp-sf-x'), sfNote: $('#xp-sf-note'), sfLive: $('#xp-sf-live'), sfSec: $('#xp-sf-sec'), sfGo: $('#xp-sf-go'),
   };
   el.timerBar = el.timer && el.timer.firstElementChild;
 
@@ -73,10 +75,13 @@
   };
   const COUNT = Object.fromEntries(WINGS.map((w) => [w, SIGNALS[w].length]));
   const TOTAL = WINGS.reduce((n, w) => n + COUNT[w], 0);
-  SIGNALS.hub = [{ id: 'house', counts: false, title: 'lastfomo', code: 'LF — The house · Research house', body: 'A research house with three wings: nature, intelligence, and the objects worth keeping. Walk into an arch to enter a wing. Each wing hides signals; find them all to explore it.', stats: [[String(WINGS.length), 'wings to explore'], [String(TOTAL), 'signals to find']] }];
+  SIGNALS.hub = [{ id: 'house', counts: false, title: 'lastfomo', code: 'LF — The house · Research house', body: 'A research house with three wings: nature, intelligence, and the objects worth keeping. Walk into an arch to enter a wing. Each wing hides signals; find them all to explore it.', stats: [[String(WINGS.length), 'wings to explore'], [String(TOTAL), 'signals to find']] },
+    // the stone circle round the column: it opens the sound field instead of a panel, once all three wings are explored
+    { id: 'field', counts: false, title: 'The sound field', code: 'LF — The house · Sound field', body: '', stats: [] }];
   const signal = (w, id) => { const i = SIGNALS[w].findIndex((s) => s.id === id); return Object.assign({ order: i }, SIGNALS[w][i]); };
   const progress = { hub: new Set(), hortus: new Set(), machina: new Set(), arca: new Set() };
   const done = { hortus: false, machina: false, arca: false };
+  const allDone = () => WINGS.every((w) => done[w]);
 
   /* =============================== the visitor's settings =============================== */
   // Auto walk leads on phones by default; this browser remembers the choice (per-viewer convenience only).
@@ -105,7 +110,7 @@
   const state = { world: null, worlds: {}, pos: null, vel: null, yaw: 0, pitch: 0, lookYaw: 0, lookPitch: 0, lookAt: 0, focus: null, panel: null, busy: false, cool: 0, stepT: 0, walk: 0, hold: false, finalShown: false };
   const keys = new Set();
   let fwd, right, want, ray, ndc;
-  const canMove = () => active && started && !state.busy && !state.panel && !el.set.open && el.fin.hidden;
+  const canMove = () => active && started && !state.busy && !state.panel && !el.set.open && !el.sf.open && el.fin.hidden;
 
   /* =============================== textures and helpers =============================== */
   let GLOW, DOT, RING, HIT, FRAME, loader, LUX, LOCK, VOIDRGB;
@@ -349,10 +354,73 @@
     const base = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.35, 0.6), std(col('graphite'))); base.position.set(-4, 0.175, 4.2); base.rotation.y = mono.rotation.y;
     S.add(mono, base); W.colliders.push({ x: -4, z: 4.2, r: 0.7 });
     addObject(W, 'house', { x: -4, z: 4.2, y: 2.6, stand: [-2.75, 6.0], look: [-4, 1.3, 4.2] });
+    W.ring = buildRing(W);
     W.bounds = { x: 0, z: 0, r: 21 };
     portalTick(W);
     W.ticks.push((t) => { lux.material.rotation = RM ? 0 : t * 0.25; });
     return W;
+  }
+  // The sound field's stones: round the house column, asleep under the floor until all three wings are explored. Each
+  // carries its rune, lit by its layer of the jam and pulsing on its hits; Hortus, Machina and Arca face the way in, in
+  // the house order from left to right.
+  function stoneShape(d, s) {
+    const sh = new THREE.Shape(), n = d.match(/[A-Za-z]|-?[\d.]+/g);
+    let i = 0;
+    const P = () => { const x = (+n[i++] - 30) * s, y = (88 - +n[i++]) * s; return [x, y]; };
+    while (i < n.length) {
+      const c = n[i++];
+      if (c === 'M') sh.moveTo(...P()); else if (c === 'L') sh.lineTo(...P());
+      else if (c === 'Q') { const [ax, ay] = P(), [bx, by] = P(); sh.quadraticCurveTo(ax, ay, bx, by); }
+    }
+    return sh;
+  }
+  function runeTexture(d) {
+    const cv = makeCanvas(120, 184), x = cv.getContext('2d'), p = new Path2D(d);
+    x.scale(2, 2); x.strokeStyle = TOK.paper; x.lineCap = x.lineJoin = 'round';
+    x.shadowColor = TOK.paper; x.shadowBlur = 12; x.lineWidth = 3.6; x.stroke(p);
+    x.shadowBlur = 0; x.lineWidth = 3; x.stroke(p);
+    return texFrom(cv);
+  }
+  function buildRing(W) {
+    const cx = -4, cz = 4.2, R = 3.1, H = 1.6, s = 0.75 / 46, sp = W.spawn, a0 = Math.atan2(sp.x - cx, sp.z - cz);
+    const order = ['drone', 'doom', 'hortus', 'machina', 'arca', 'drums', 'bass'], body = std(col('graphite')), ash = col('ash');
+    const stones = order.map((k, i) => {
+      const a = a0 + (i - 3) * Math.PI * 2 / order.length, x = cx + Math.sin(a) * R, z = cz + Math.cos(a) * R, c = col(LAYER[k].c);
+      const g = new THREE.Group(); g.position.set(x, -H, z); g.rotation.y = a; g.visible = false;
+      const geo = new THREE.ExtrudeGeometry(stoneShape(STONE[i % 3], s), { depth: 0.3, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.03, bevelSegments: 1, curveSegments: 5 });
+      geo.translate(0, 0, -0.15);
+      const rune = new THREE.Mesh(new THREE.PlaneGeometry(60 * s, 92 * s), new THREE.MeshBasicMaterial({ map: runeTexture(LAYER[k].rune), color: c.clone(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+      rune.position.set(0, 42 * s, 0.196);
+      const halo = glow(c.clone(), 1.5, 0); halo.position.set(0, 42 * s, 0.45);
+      g.add(new THREE.Mesh(geo, body), rune, halo); W.scene.add(g);
+      return { k, g, x, z, c, rune, halo, d: i * 0.1 };
+    });
+    // Its signal: a ring on the ground through the stones, no dot. Close to the column it opens the field, not the panel.
+    const field = addObject(W, 'field', { x: cx, z: cz, y: 3.4, range: 6.4, hw: 2 * R + 0.6, hh: 2.6, prio: 0.8, verb: 'Play', always: true, linger: true, live: false, dot: false,
+      stand: [cx + Math.sin(a0) * 6, cz + Math.cos(a0) * 6], look: [cx, 0.8, cz], open: () => openMixer() }); // the auto walk stops where the whole circle shows
+    field.ring.geometry = new THREE.RingGeometry(R - 0.025, R + 0.025, 120); // a fine line through the stones' feet
+    const ring = { up: false, t0: 0, stones, field };
+    ring.rise = (instant) => {
+      if (ring.up) return;
+      ring.up = true; ring.t0 = instant || RM ? -99 : U.time.value; field.live = true;
+      stones.forEach((st) => { st.g.visible = true; W.colliders.push({ x: st.x, z: st.z, r: 0.5 }); });
+      if (AW.on) AW.reset(); // the auto walk goes to them next
+    };
+    W.ticks.push((t) => {
+      if (!ring.up) return;
+      const now = A.ctx ? A.ctx.currentTime : 0;
+      stones.forEach((st) => {
+        const u = clamp((t - ring.t0 - st.d) / 1.5, 0, 1);
+        st.g.position.y = -H * Math.pow(1 - u, 3);
+        const lv = J.on ? levelOf(st.k) : 0, rest = J.on && lv === 0, f = J.flash[st.k];
+        const ago = J.on && f != null ? now - f : 9, p = RM || ago < 0 ? 0 : Math.exp(-ago / 0.16);
+        st.rune.material.color.copy(rest ? ash : st.c);
+        st.rune.material.opacity = !J.on ? 0.5 : rest ? 0.28 : Math.min(1, 0.5 + 0.5 * lv + 0.3 * p);
+        st.halo.material.opacity = !J.on ? 0.05 : rest ? 0 : Math.min(0.85, 0.08 + 0.32 * lv + 0.4 * p);
+      });
+    });
+    if (allDone()) { ring.rise(true); SF.up = true; } // a republished page keeps its finds: the stones are already up
+    return ring;
   }
 
   /* ---------------- HORTUS: a night meadow ---------------- */
@@ -735,7 +803,7 @@
     const g = this.out.gain, t = this.ctx.currentTime;
     g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(on ? 0.9 : 0, t + 0.5);
     const name = live && this.music && state.world ? state.world.name : '';
-    if (name !== this.ambName) { if (this.amb) this.amb.stop(); this.amb = name && AMB[name] ? AMB[name]() : null; this.ambName = name; }
+    if (name !== this.ambName) { if (this.amb) this.amb.stop(); this.amb = name && AMB[name] ? AMB[name]() : null; this.ambName = name; if (J.on) J.apply(); }
     if (!on) this.sleepT = setTimeout(() => { if (this.ctx && !(liveAudio() && (this.music || this.sounds))) this.ctx.suspend().catch(() => {}); }, 1700);
   };
   function impulse(sec, decay) { const c = A.ctx, n = (c.sampleRate * sec) | 0, b = c.createBuffer(2, n, c.sampleRate); for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, decay); } return b; }
@@ -771,7 +839,7 @@
     car.connect(amp); amp.connect(b.in); car.start(t); mod.start(t); car.stop(t + 4.6); mod.stop(t + 4.6);
   }
   const AMB = {
-    hub() { const b = bus(1, 0.5), lp = filt('lowpass', 650); lp.connect(b.in);
+    hub() { const b = bus(1, 0.5), lp = filt('lowpass', 650); lp.connect(b.in); b.lp = lp; // the drone stone rides this filter and level
       [[110, 'sine', 0.05], [164.81, 'triangle', 0.03], [220, 'sine', 0.025], [277.18, 'triangle', 0.012]].forEach((v, i) => { const o = osc(b, v[1], v[0], v[2], lp); o.o.detune.value = (i - 1.5) * 5; });
       lfo(b, 0.05, 260, lp.frequency);
       every(b, () => bell(b, [880, 1174.66, 1318.51, 1760][(Math.random() * 4) | 0], 0.045), 6500, 12000); return b; },
@@ -802,11 +870,279 @@
     found() { if (!sfxOn()) return; const b = { in: A.out }; [880, 1174.66, 1760].forEach((f, i) => note(b, { f, d: 0.9, g: 0.04, at: i * 0.11 })); bell({ in: A.verb }, 1318.51, 0.05, 0.3); },
     whoosh() { if (!sfxOn()) return; const c = A.ctx, n = c.createBufferSource(), f = filt('lowpass', 200, 2), g = c.createGain(), t = c.currentTime; n.buffer = A.noiseBuf; f.frequency.setValueAtTime(200, t); f.frequency.exponentialRampToValueAtTime(3200, t + 0.5); f.frequency.exponentialRampToValueAtTime(300, t + 1.1); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2); n.connect(f); f.connect(g); g.connect(A.out); n.start(t); n.stop(t + 1.3); },
     step(name) { if (!sfxOn()) return; const k = STEPS[name] || STEPS.hub, c = A.ctx, t = c.currentTime, n = c.createBufferSource(), f = filt(k[0], k[1], k[2]), g = c.createGain(); n.buffer = A.noiseBuf; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(k[3], t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + k[4]); n.connect(f); f.connect(g); g.connect(A.out); n.start(t, Math.random() * 2); n.stop(t + k[4] + 0.05); },
+    // the stones rising: a low rumble of ground
+    rise() { if (!sfxOn()) return; const c = A.ctx, n = c.createBufferSource(), f = filt('lowpass', 90, 1.4), g = c.createGain(), t = c.currentTime; n.buffer = A.noiseBuf; n.loop = true; f.frequency.setValueAtTime(90, t); f.frequency.linearRampToValueAtTime(240, t + 1.6); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.5); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.4); n.connect(f); f.connect(g); g.connect(A.out); n.start(t, Math.random() * 2); n.stop(t + 2.5); },
   };
   // A suspended score wakes on the visitor's next touch or key, where a browser asks for a gesture to resume it.
   const nudgeAudio = () => { if (A.ctx && A.ctx.state !== 'running' && liveAudio() && (A.music || A.sounds)) A.ctx.resume().catch(() => {}); };
   view.addEventListener('pointerdown', nudgeAudio, true);
   addEventListener('keydown', () => { if (active) nudgeAudio(); }, true);
+
+  /* =============================== the sound field: the jam in the house =============================== */
+  // Once all three wings are explored, stones rise round the house column, and each one is a layer of a single endless
+  // jam in A minor: up is louder, right is brighter, and below the dashed line a layer rests. A tap changes a stone's
+  // loop; a scene loads a whole mix. One clock, one key, one progression, every pitch from the chord or the A minor
+  // scales, so any mix stays musical. Generated live like the score. The drone stone rides the house's own ambience.
+  const LAYERS = [
+    { k: 'drone', name: 'Drone', c: 'paper', x: 0.34, y: 0.3, rune: 'M30 20 L30 70 M19 33 L41 33 M21 57 L39 57' },
+    { k: 'drums', name: 'Drums', c: 'mist', x: 0.56, y: 0.42, rune: 'M17 28 L43 28 L17 64 L43 64' },
+    { k: 'bass', name: 'Bass', c: 'ash', x: 0.23, y: 0.58, rune: 'M30 20 L30 70 M30 45 L43 32 M30 45 L43 58' },
+    { k: 'doom', name: 'Doom', c: 'paper', x: 0.72, y: 0.6, rune: 'M18 24 L30 70 L42 24 M22 42 L38 42' },
+    { k: 'hortus', name: 'Hortus', c: 'hortus', x: 0.1, y: 0.78, rune: 'M30 70 L30 28 M30 46 L17 33 M30 39 L43 26' },
+    { k: 'machina', name: 'Machina', c: 'machina', x: 0.86, y: 0.9, rune: 'M17 28 L30 46 L43 28 M17 64 L30 46 L43 64' },
+    { k: 'arca', name: 'Arca', c: 'arca', x: 0.5, y: 0.9, rune: 'M30 22 L45 47 L30 72 L15 47 Z' }];
+  const LAYER = Object.fromEntries(LAYERS.map((l) => [l.k, l]));
+  // Three stone outlines, used in turn; the runes sit in the same box.
+  const STONE = ['M12 88 L7 34 Q9 10 30 5 Q51 9 53 32 L47 88 Z', 'M10 88 L12 26 Q18 6 34 6 Q50 12 50 30 L52 88 Z', 'M14 88 L9 40 Q8 14 28 6 Q48 4 51 26 L46 88 Z'];
+  const STYLES = { drums: ['Doom', 'War drums', 'Pulse'], bass: ['Riff', 'Drone', 'Octaves'], doom: ['Fuzz riff', 'Swells'], hortus: ['Kalimba', 'Mycelium', 'Rain garden'], machina: ['Arpeggio', 'Acid', 'Night drive'], arca: ['Harpsichord', 'Dungeon synth', 'Music box'] };
+  // A scene sets every loop, every stone and the tempo; a stone at y 0.9 rests.
+  const SCENES = [
+    { name: 'Stoner doom', bpm: 70, sty: { drums: 0, bass: 0, doom: 0, hortus: 0, machina: 0, arca: 0 }, mix: { drone: [0.34, 0.3], drums: [0.56, 0.42], bass: [0.23, 0.58], doom: [0.72, 0.6], hortus: [0.1, 0.78], machina: [0.86, 0.9], arca: [0.5, 0.9] } },
+    { name: 'Dungeon synth', bpm: 62, sty: { drums: 1, bass: 1, doom: 1, hortus: 1, machina: 0, arca: 1 }, mix: { drone: [0.18, 0.28], drums: [0.48, 0.64], bass: [0.32, 0.5], doom: [0.68, 0.9], hortus: [0.68, 0.46], machina: [0.88, 0.9], arca: [0.55, 0.2] } },
+    { name: 'Night machine', bpm: 88, sty: { drums: 2, bass: 2, doom: 0, hortus: 2, machina: 1, arca: 2 }, mix: { drone: [0.24, 0.68], drums: [0.78, 0.38], bass: [0.42, 0.46], doom: [0.6, 0.9], hortus: [0.15, 0.9], machina: [0.58, 0.2], arca: [0.88, 0.66] } },
+    { name: 'Night drive', bpm: 84, sty: { drums: 2, bass: 2, doom: 1, hortus: 0, machina: 2, arca: 2 }, mix: { drone: [0.22, 0.5], drums: [0.6, 0.44], bass: [0.4, 0.36], doom: [0.44, 0.72], hortus: [0.12, 0.9], machina: [0.78, 0.24], arca: [0.88, 0.66] } },
+    { name: 'Garden', bpm: 66, sty: { drums: 1, bass: 1, doom: 1, hortus: 2, machina: 0, arca: 2 }, mix: { drone: [0.5, 0.32], drums: [0.3, 0.9], bass: [0.2, 0.66], doom: [0.6, 0.9], hortus: [0.66, 0.24], machina: [0.86, 0.9], arca: [0.38, 0.56] } }];
+  const REST = 0.86; // the dashed line: at or below it a layer rests
+  const MIX = {}, STY = {};
+  LAYERS.forEach((l) => { MIX[l.k] = { x: l.x, y: l.y }; });
+  Object.keys(STYLES).forEach((k) => { STY[k] = 0; });
+  let BPM = 70;
+  const SF = { up: false, built: false, st: {}, scene: 0, glide: 0, want: false, told: false, dragEnd: 0, keyRow: false, sayT: 0, frame: 0 };
+  // The mix is a per-viewer convenience, kept in this browser; every value is checked on its way back in.
+  const SFK = 'lf-sound-field';
+  try {
+    const s = JSON.parse(localStorage.getItem(SFK) || 'null');
+    if (s && typeof s === 'object') {
+      if (s.mix && typeof s.mix === 'object') LAYERS.forEach((l) => { const m = s.mix[l.k]; if (m && Number.isFinite(+m.x) && Number.isFinite(+m.y)) MIX[l.k] = { x: clamp(+m.x, 0, 1), y: clamp(+m.y, 0.04, 0.91) }; });
+      if (Number.isFinite(+s.bpm) && +s.bpm > 0) BPM = Math.round(clamp(+s.bpm, 56, 96));
+      if (s.sty && typeof s.sty === 'object') Object.keys(STY).forEach((k) => { const v = s.sty[k] | 0; if (v >= 0 && v < STYLES[k].length) STY[k] = v; });
+      SF.scene = Number.isInteger(s.scene) && s.scene >= -1 && s.scene < SCENES.length ? s.scene : -1;
+    }
+  } catch (_) { /* storage blocked: the default mix stands */ }
+  const saveMix = () => { try { localStorage.setItem(SFK, JSON.stringify({ mix: MIX, bpm: BPM, sty: STY, scene: SF.scene })); } catch (_) { /* per-viewer convenience only */ } };
+  const levelOf = (k) => { const y = MIX[k].y; return y >= REST ? 0 : Math.pow(clamp((REST - y) / 0.78, 0, 1), 1.6); };
+  const toneOf = (k) => clamp(MIX[k].x, 0, 1);
+  const AEOL = [0, 2, 3, 5, 7, 8, 10];
+  const aeol = (deg, sharp) => { const o = Math.floor(deg / 7), d = ((deg % 7) + 7) % 7; return Math.pow(2, (AEOL[d] + 12 * o + (sharp && d === 6 ? 1 : 0)) / 12); };
+
+  // The jam: one sixteenth-note clock, booked ahead on the audio clock so it keeps time when frames come slowly.
+  const J = { on: false, wasOn: false, built: false, step: 0, next: 0, last: 0, ahead: 0.14, timer: 0, L: {}, flash: {}, acidPrev: 0 };
+  const fuzzCurve = (k) => { const n = 2048, cv = new Float32Array(n), m = Math.tanh(k); for (let i = 0; i < n; i++) cv[i] = Math.tanh(k * (i * 2 / n - 1)) / m; return cv; };
+  // A bus per layer: voices into pre, the stone's x drives the filter, its height the out level; Doom runs through a fuzz.
+  J.build = function () {
+    if (J.built) return true;
+    if (!A.ensure()) return false;
+    const c = A.ctx;
+    const chain = (type, f, q, send) => {
+      const pre = c.createGain(), flt = c.createBiquadFilter(), out = c.createGain();
+      flt.type = type; flt.frequency.value = f; flt.Q.value = q; out.gain.value = 0;
+      pre.connect(flt); flt.connect(out); out.connect(A.out);
+      if (send) { const s = c.createGain(); s.gain.value = send; out.connect(s); s.connect(A.verb); }
+      return { pre, flt, out };
+    };
+    J.L.drums = chain('lowpass', 9000, 0.6, 0.1);
+    J.L.bass = chain('lowpass', 700, 1.2, 0.04);
+    J.L.machina = chain('lowpass', 1600, 7, 0.22);
+    J.L.hortus = chain('lowpass', 5200, 0.7, 0.5);
+    J.L.arca = chain('highpass', 260, 0.7, 0.55);
+    const pre = c.createGain(), sh = c.createWaveShaper(), hp = c.createBiquadFilter(), pk = c.createBiquadFilter(), cab = c.createBiquadFilter(), out = c.createGain(), ds = c.createGain();
+    sh.curve = fuzzCurve(26); sh.oversample = '2x';
+    hp.type = 'highpass'; hp.frequency.value = 90; pk.type = 'peaking'; pk.frequency.value = 850; pk.Q.value = 0.9; pk.gain.value = 4;
+    cab.type = 'lowpass'; cab.frequency.value = 3200; cab.Q.value = 0.8; out.gain.value = 0; ds.gain.value = 0.16;
+    pre.connect(sh); sh.connect(hp); hp.connect(pk); pk.connect(cab); cab.connect(out); out.connect(A.out); out.connect(ds); ds.connect(A.verb);
+    J.L.doom = { pre, flt: cab, out };
+    J.built = true;
+    return true;
+  };
+  const MAXG = { drums: 0.9, bass: 0.55, doom: 0.42, machina: 0.3, hortus: 0.4, arca: 0.34 };
+  const TONE = { drums: [1200, 3.6], bass: [180, 3.2], doom: [1400, 2.2], machina: [300, 4.6], hortus: [900, 3.2], arca: [120, 3] };
+  // The whole mix onto the audio graph; quick while a stone is dragged. With the jam off the house's ambience is itself again.
+  J.apply = function (fast) {
+    if (!J.built) return;
+    const t = A.ctx.currentTime, tc = fast ? 0.03 : 0.12;
+    Object.keys(J.L).forEach((k) => {
+      J.L[k].out.gain.setTargetAtTime(J.on ? levelOf(k) * MAXG[k] : 0, t, tc);
+      J.L[k].flt.frequency.setTargetAtTime(TONE[k][0] * Math.pow(2, toneOf(k) * TONE[k][1]), t, tc);
+    });
+    const amb = A.amb;
+    if (amb && amb.lp && !amb.dead && A.ambName === 'hub') {
+      const g = amb.in.gain, f = amb.lp.frequency;
+      g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); f.cancelScheduledValues(t); f.setValueAtTime(f.value, t);
+      if (J.on) { g.setTargetAtTime(levelOf('drone') * 1.15, t, tc); f.setTargetAtTime(260 * Math.pow(2, toneOf('drone') * 3), t, tc); }
+      else { g.setTargetAtTime(1, t, 0.3); f.setTargetAtTime(650, t, 0.3); }
+    }
+  };
+  // Four bars: Am | Am C | G | F E. E major brings the G sharp that pulls back to A.
+  const ROOT = (s) => { const bar = s >> 4, beat = (s & 15) >> 2; if (bar === 0) return 55; if (bar === 1) return beat < 2 ? 55 : 65.41; if (bar === 2) return 49; return beat < 2 ? 43.65 : 41.2; };
+  const TRI = (r) => (r === 55 ? [1, 1.2, 1.5] : [1, 1.26, 1.5]);
+  // The voices: every note is a few short-lived nodes, booked at an exact time and stopped after its release.
+  function vTone(t, type, f, peak, a, dec, dest, f2) {
+    const c = A.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dec);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + dec);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + a + dec + 0.05);
+  }
+  function vHold(t, type, f, peak, len, rel, dest, detune) {
+    const c = A.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = f; if (detune) o.detune.value = detune;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + 0.008); g.gain.setValueAtTime(peak, t + Math.max(0.01, len - 0.02)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + rel);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + len + rel + 0.05);
+  }
+  function vNoise(t, type, f, q, peak, dec, dest) {
+    const c = A.ctx, n = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain();
+    n.buffer = A.noiseBuf; fl.type = type; fl.frequency.value = f; fl.Q.value = q;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dec);
+    n.connect(fl); fl.connect(g); g.connect(dest); n.start(t, Math.random() * 2); n.stop(t + dec + 0.05);
+  }
+  // Every kick ducks the bass and lets it back in, a built-in pump.
+  function kick(t) {
+    vTone(t, 'sine', 150, 1, 0.004, 0.5, J.L.drums.pre, 42);
+    vNoise(t, 'highpass', 2500, 0.7, 0.12, 0.02, J.L.drums.pre);
+    const g = J.L.bass.pre.gain; g.cancelScheduledValues(t); g.setValueAtTime(0.55, t); g.linearRampToValueAtTime(1, t + 0.24);
+  }
+  function snare(t) { vNoise(t, 'bandpass', 1900, 0.8, 0.55, 0.26, J.L.drums.pre); vTone(t, 'triangle', 200, 0.3, 0.003, 0.13, J.L.drums.pre, 150); }
+  function vSwell(t, type, f, peak, att, len, rel, dest, detune) {
+    const c = A.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = f; if (detune) o.detune.value = detune;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(peak, t + att); g.gain.setValueAtTime(peak, t + Math.max(att, len - 0.02)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + rel);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + len + rel + 0.05);
+  }
+  function vBell(t, f, peak, dec, dest, ratio, index) {
+    const c = A.ctx, car = c.createOscillator(), mod = c.createOscillator(), mg = c.createGain(), g = c.createGain();
+    car.frequency.value = f; mod.frequency.value = f * ratio;
+    mg.gain.setValueAtTime(f * index, t); mg.gain.exponentialRampToValueAtTime(1, t + dec); mod.connect(mg); mg.connect(car.frequency);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + dec);
+    car.connect(g); g.connect(dest); car.start(t); mod.start(t); car.stop(t + dec + 0.05); mod.stop(t + dec + 0.05);
+  }
+  function vAcid(t, f, from, len, accent, base, dest) {
+    const c = A.ctx, o = c.createOscillator(), fl = c.createBiquadFilter(), g = c.createGain(), pk = accent ? 0.34 : 0.22;
+    o.type = 'sawtooth';
+    if (from) { o.frequency.setValueAtTime(from, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.06); } else o.frequency.setValueAtTime(f, t);
+    fl.type = 'lowpass'; fl.Q.value = 13; fl.frequency.setValueAtTime(base * (accent ? 7 : 4), t); fl.frequency.exponentialRampToValueAtTime(base, t + (accent ? 0.22 : 0.14));
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pk, t + 0.004); g.gain.setValueAtTime(pk, t + len * 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    o.connect(fl); fl.connect(g); g.connect(dest); o.start(t); o.stop(t + len + 0.05);
+  }
+  function vOrgan(t, f, len, dest) {
+    const lp = A.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2000; lp.connect(dest);
+    vSwell(t, 'square', f, 0.05, 0.06, len, 0.45, lp, -6); vSwell(t, 'square', f, 0.05, 0.06, len, 0.45, lp, 6); vSwell(t, 'sine', f / 2, 0.08, 0.06, len, 0.45, lp);
+  }
+  // The sequencer: one step of every audible layer. A resting layer is skipped and costs nothing.
+  J.play = function (s, t) {
+    const sx = 60 / BPM / 4, bar = s >> 4, i = s & 15, root = ROOT(s), tri = TRI(root), on = (k) => levelOf(k) > 0.001;
+    const segLen = bar % 2 === 1 ? 8 : 16, segStart = i % segLen === 0, pent = [1, 1.2, 1.335, 1.5, 1.782];
+    if (on('drums')) {
+      const d = J.L.drums.pre;
+      if (STY.drums === 0) {
+        if (i === 0 || i === 10 || (i === 7 && bar % 2 === 1)) kick(t);
+        if (i === 8 || (bar === 3 && i >= 12)) snare(t);
+        if (i % 2 === 0) vNoise(t, 'highpass', 7600, 0.7, i % 4 === 0 ? 0.15 : 0.08, i === 14 && bar % 2 ? 0.3 : 0.05, d);
+        if (s === 0) vNoise(t, 'highpass', 3800, 0.5, 0.13, 1.8, d);
+      } else if (STY.drums === 1) {
+        if (i === 0 || i === 8) vTone(t, 'sine', 95, 0.9, 0.004, 0.7, d, 48);
+        if (i === 4 || i === 12) vNoise(t, 'lowpass', 420, 0.8, 0.5, 0.22, d);
+        if (i === 10 && bar % 2 === 0) vTone(t, 'sine', 80, 0.6, 0.004, 0.5, d, 44);
+        if (bar === 3 && i >= 12) vTone(t, 'sine', 120 - (i - 12) * 10, 0.7, 0.004, 0.4, d, 60);
+      } else {
+        if (i % 4 === 0) kick(t);
+        if (i === 4 || i === 12) { vNoise(t, 'bandpass', 1500, 0.9, 0.45, 0.16, d); vNoise(t + 0.018, 'bandpass', 1500, 0.9, 0.35, 0.14, d); }
+        vNoise(t, 'highpass', 8000, 0.7, i % 4 === 2 ? 0.12 : 0.05, i % 4 === 2 ? 0.16 : 0.03, d);
+      }
+      J.flash.drums = t;
+    }
+    if (on('bass')) {
+      const b = J.L.bass.pre;
+      if (STY.bass === 0 && (i === 0 || i === 6 || i === 8 || i === 14)) {
+        const len = (i === 6 || i === 14 ? 2 : 6) * sx;
+        vHold(t, 'sawtooth', root, 0.45, len, 0.08, b); vHold(t, 'sine', root, 0.55, len, 0.1, b); J.flash.bass = t;
+      } else if (STY.bass === 1 && segStart) {
+        vSwell(t, 'sawtooth', root, 0.3, 0.25, segLen * sx, 0.3, b); vSwell(t, 'sine', root, 0.5, 0.2, segLen * sx, 0.3, b); J.flash.bass = t;
+      } else if (STY.bass === 2 && i % 2 === 0) {
+        vHold(t, 'sawtooth', i % 4 === 0 ? root : root * 2, 0.4, sx * 1.6, 0.04, b); J.flash.bass = t;
+      }
+    }
+    if (on('doom')) {
+      const g = J.L.doom.pre;
+      if (STY.doom === 0) {
+        const hit = (len) => { [1, 1.5, 2].forEach((r) => [-8, 8].forEach((dt) => vHold(t, 'sawtooth', root * 2 * r, 0.07, len, 0.35, g, dt))); J.flash.doom = t; };
+        if (bar % 2 === 0) {
+          if (i === 0) hit(6 * sx);
+          else if (i === 6 || i === 7) [1, 1.5].forEach((r) => vHold(t, 'sawtooth', root * 2 * r, 0.06, sx * 0.5, 0.04, g, 6));
+          else if (i === 8) hit(8 * sx);
+        } else if (i === 0 || i === 8) hit(8 * sx);
+      } else if (segStart) {
+        [1, 1.5].forEach((r) => [-6, 6].forEach((dt) => vSwell(t, 'sawtooth', root * 2 * r, 0.06, Math.min(1.2, segLen * sx * 0.5), segLen * sx, 0.8, g, dt))); J.flash.doom = t;
+      }
+    }
+    if (on('machina')) {
+      const m = J.L.machina.pre;
+      if (STY.machina === 0) {
+        const pat = [0, 2, 1, 2, 0, 3, 2, 1], tones = [tri[0], tri[1], tri[2], 2];
+        vTone(t, 'square', root * 4 * tones[pat[s % 8]] * (i >= 8 ? 2 : 1), 0.16, 0.003, sx * 0.9, m); J.flash.machina = t;
+      } else if (STY.machina === 1) {
+        const SEQ = [0, 0, 12, 0, 3, 0, 15, 7, 0, 10, 0, 12, 5, 0, 3, 7], ACC = [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0], SLD = [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1];
+        const f = root * 2 * Math.pow(2, SEQ[i] / 12);
+        vAcid(t, f, SLD[i] && J.acidPrev ? J.acidPrev : 0, sx * (SLD[(i + 1) % 16] ? 1.05 : 0.7), !!ACC[i], 220 * Math.pow(2, toneOf('machina') * 3), m);
+        J.acidPrev = f; J.flash.machina = t;
+      } else {
+        if (i % 4 === 2) { tri.forEach((r) => vTone(t, 'sawtooth', root * 4 * r, 0.07, 0.004, sx * 1.4, m)); J.flash.machina = t; }
+        vTone(t, 'square', root * 8 * tri[[0, 1, 2, 1][i % 4]], 0.035, 0.002, sx * 0.6, m);
+      }
+    }
+    if (on('hortus')) {
+      // nature shouldn't loop: the garden draws its notes by chance
+      const h = J.L.hortus.pre;
+      if (STY.hortus === 0) {
+        if (i % 2 === 0 && Math.random() < 0.38) {
+          const f = 440 * pent[(Math.random() * 5) | 0] * (Math.random() < 0.3 ? 2 : 1);
+          vTone(t, 'triangle', f, 0.22, 0.004, 1.1, h); vTone(t, 'sine', f * 2, 0.06, 0.004, 0.5, h); J.flash.hortus = t;
+        }
+        if (i === 4 && Math.random() < 0.25) { const f0 = 2600 + Math.random() * 1600; for (let k = 0; k < 3; k++) vTone(t + k * 0.1, 'sine', f0, 0.05, 0.004, 0.09, h, f0 * 1.35); }
+      } else if (STY.hortus === 1) {
+        if (i % 4 === 0 && Math.random() < 0.65) { vBell(t, 220 * pent[(Math.random() * 5) | 0] * (Math.random() < 0.4 ? 2 : 1), 0.18, 2.6, h, 1.41, 1.6); J.flash.hortus = t; }
+        if (i === 8 && Math.random() < 0.5) vTone(t, 'triangle', 110 * pent[(Math.random() * 5) | 0], 0.18, 0.01, 1.2, h);
+      } else {
+        vNoise(t, 'bandpass', 3800, 0.6, 0.05, 0.22, h);
+        if (Math.random() < 0.5) vTone(t + Math.random() * sx, 'sine', 1500 + Math.random() * 2200, 0.05, 0.002, 0.05, h);
+        if (i % 2 === 0 && Math.random() < 0.3) { vSwell(t, 'sine', 880 * pent[(Math.random() * 5) | 0], 0.09, 0.08, sx * 2.5, 0.4, h); J.flash.hortus = t; }
+      }
+    }
+    if (on('arca')) {
+      const a = J.L.arca.pre;
+      if (STY.arca === 0 && i % 2 === 0) {
+        const arp = [0, 1, 2, 1, 2, 0, 2, 1];
+        vTone(t, 'sawtooth', root * 4 * tri[arp[(i >> 1) % 8]] * (bar % 2 ? 2 : 1), 0.09, 0.002, 0.34, a); J.flash.arca = t;
+      } else if (STY.arca === 1) {
+        const MEL = [[0, 2, 4, 3], [2, 0, -3, -1], [-1, 1, 3, 1], [0, -2, -3, -1]];
+        if (i % 4 === 0) { vOrgan(t, 440 * aeol(MEL[bar][i >> 2], bar === 3 && i === 12), sx * 3.8, a); J.flash.arca = t; }
+        if (segStart) tri.forEach((r) => vSwell(t, 'triangle', root * 4 * r, 0.05, 0.5, segLen * sx, 0.6, a));
+      } else if (STY.arca === 2 && i % 2 === 0 && i % 8 !== 6) {
+        vBell(t, root * 8 * tri[[2, 1, 0, 1][(i >> 1) % 4]], 0.12, 1.3, a, 4.0, 0.6); J.flash.arca = t;
+      }
+    }
+  };
+  // A light swing: even sixteenths a little long, odd ones a little short. Notes are booked 140 ms ahead; when a busy
+  // frame holds the clock back, the walk books further ahead so the beat holds, then eases back.
+  J.tick = function () {
+    if (!A.ctx) return;
+    const now = A.ctx.currentTime, gap = J.last ? now - J.last : 0;
+    J.last = now; J.ahead = Math.min(0.5, Math.max(0.14, gap * 1.5, (J.ahead || 0.14) * 0.98));
+    if (J.next < now - 0.2) J.next = now + 0.05; // after a stall, pick the beat up rather than rush to catch it
+    while (J.next < now + J.ahead) { J.play(J.step, J.next); J.next += (60 / BPM / 4) * (J.step % 2 === 0 ? 1.08 : 0.92); J.step = (J.step + 1) % 64; }
+  };
+  // The jam is music: starting it turns music on if the visitor had it off.
+  J.start = function () {
+    J.wasOn = false;
+    if (!A.music) { A.music = true; A.update(); syncOpts(); }
+    if (!A.music || !J.build()) { syncJam(); return false; }
+    if (!J.on) { J.on = true; J.step = 0; J.next = A.ctx.currentTime + 0.1; J.last = 0; J.acidPrev = 0; clearInterval(J.timer); J.timer = setInterval(J.tick, 25); }
+    J.apply(); syncJam();
+    return true;
+  };
+  // J.stop(true) pauses and remembers (a wing has its own score, or the visitor left the walk); J.stop() stops.
+  J.stop = function (keep) {
+    if (!J.on) { if (!keep) J.wasOn = false; return; }
+    J.on = false; J.wasOn = !!keep; clearInterval(J.timer); J.timer = 0; J.apply(); syncJam();
+  };
 
   /* =============================== HUD, panel, toasts =============================== */
   // One message at a time: a new one waits its turn, an answer to the visitor's own action (now) goes first, and a new
@@ -843,6 +1179,7 @@
   const PT = { on: false, t: 0, dur: 0, held: false }; // the auto walk's reading time for an open panel
   function openPanel(o, auto) {
     if (!o || state.panel) return;
+    if (o.open) { o.open(); return; } // the stone circle opens the sound field
     state.panel = o; keys.clear(); release();
     el.pCode.textContent = o.code; el.pTitle.textContent = o.title; el.pBody.textContent = o.body;
     const pic = o.img && PICS[o.img];
@@ -898,7 +1235,7 @@
   /* =============================== settings: the hamburger in the header =============================== */
   const OPTS = {
     auto: { get: () => AW.on, set: (v) => setAuto(v) },
-    music: { get: () => A.music, set: (v) => { A.music = v; A.update(); } },
+    music: { get: () => A.music, set: (v) => { A.music = v; A.update(); if (!v) J.stop(); } }, // music off stops the jam too
     sounds: { get: () => A.sounds, set: (v) => { A.sounds = v; A.update(); } },
     gyro: { get: () => G.on, set: (v) => setGyro(v) },
   };
@@ -921,7 +1258,7 @@
   let setOpener = null;
   function openSettings() {
     if (!active || el.set.open) return;
-    syncOpts(); syncWings();
+    syncOpts(); syncWings(); syncField();
     setOpener = document.activeElement; keys.clear(); release();
     if (typeof el.set.showModal === 'function') el.set.showModal(); else el.set.setAttribute('open', '');
     el.menu.setAttribute('aria-expanded', 'true');
@@ -936,6 +1273,188 @@
     if (b) { OPTS[b.dataset.opt].set(b.getAttribute('aria-checked') !== 'true'); syncOpts(); return; }
     if (e.target.closest('a[href^="#"]')) closeSettings(); // a place in the house, or Start a project: leave the dialog first
   });
+
+  /* =============================== the sound field: the mixer =============================== */
+  // A glass card over the walk. Each stone sits where the mix puts it, through custom properties: --x is brightness,
+  // --y loudness (below the dashed line it rests), --lv lights its rune and --p pulses it on the layer's hits.
+  const HINT = COARSE ? 'Drag to mix, tap to change a loop.' : 'Drag a stone: up is louder, right is brighter. Click it to change its loop.';
+  function syncJam() {
+    if (!el.sfJam) return;
+    el.sfJam.setAttribute('aria-pressed', J.on ? 'true' : 'false');
+    el.sfJam.lastElementChild.textContent = J.on ? 'Jam on' : 'Jam off';
+    el.sfField.classList.toggle('off', !J.on);
+  }
+  function syncTempo() { el.sfBpm.value = String(BPM); el.sfBpmV.textContent = BPM + ' BPM'; }
+  // Once the stones can wake, the settings offer the field, and on a keyboard F opens it.
+  function syncField() {
+    el.sfSec.hidden = !allDone();
+    if (allDone() && !COARSE && !SF.keyRow) { SF.keyRow = true; const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = 'F'; dd.textContent = 'Open the sound field'; el.keys.append(dt, dd); }
+  }
+  // The jam belongs to the house: a wing pauses it for its own score, and the house picks it up again.
+  function jamWorld(name) {
+    if (name !== 'hub') { J.stop(true); closeMixer(); return; }
+    const waking = allDone() && !SF.up;
+    if (waking) riseStones(SF.want ? 300 : 700);
+    if (J.wasOn && A.music) J.start();
+    if (SF.want) {
+      SF.want = false;
+      const tryOpen = () => { if (!active || !state.world || state.world.name !== 'hub') return; if (state.busy) { setTimeout(tryOpen, 150); return; } openMixer(); };
+      setTimeout(tryOpen, waking && !RM ? 2600 : 650);
+    }
+  }
+  function riseStones(delay) {
+    const W = state.worlds.hub;
+    if (!W || !W.ring || SF.up) return;
+    SF.up = true; syncField();
+    setTimeout(() => {
+      if (state.world !== W || !active) { SF.up = false; return; } // gone before they woke: they wake on the way back
+      W.ring.rise(false); SFX.rise();
+      toast(AW.on ? 'The stones woke around the column.' : COARSE ? 'The stones woke around the column. Walk up to them to play.' : 'The stones woke around the column. Walk up to them, or press F, to play.', 6000);
+    }, delay);
+  }
+  function buildField() {
+    if (SF.built) return;
+    SF.built = true;
+    const NS = 'http://www.w3.org/2000/svg';
+    LAYERS.forEach((l, i) => {
+      const b = document.createElement('button'), svg = document.createElementNS(NS, 'svg'), name = document.createElement('b'), loop = document.createElement('span');
+      b.type = 'button'; b.className = 'sf-st'; b.dataset.k = l.k; b.setAttribute('aria-describedby', 'xp-sf-how');
+      b.style.setProperty('--c', 'var(--' + l.c + ')'); b.style.setProperty('--ct', 'var(--' + (WINGS.indexOf(l.k) >= 0 ? l.k + '-t' : l.c) + ')');
+      svg.setAttribute('viewBox', '0 0 60 92'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
+      [['sh', STONE[i % 3]], ['gl', l.rune], ['ru', l.rune]].forEach(([c, d]) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('class', c); p.setAttribute('d', d); svg.append(p); });
+      name.textContent = l.name;
+      b.append(svg, name, loop); el.sfField.append(b); SF.st[l.k] = b;
+    });
+    SCENES.forEach((sc, n) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = sc.name; b.dataset.n = String(n); b.setAttribute('aria-pressed', 'false'); el.sfScenes.append(b); });
+  }
+  const LEVEL = (lv) => (lv < 0.15 ? 'quiet' : lv < 0.45 ? 'soft' : lv < 0.8 ? 'loud' : 'full');
+  const BRIGHT = (x) => (x < 0.34 ? 'dark' : x < 0.67 ? 'warm' : 'bright');
+  function placeStone(k) {
+    const b = SF.st[k];
+    if (!b) return;
+    const m = MIX[k], lv = levelOf(k), loop = STYLES[k] ? STYLES[k][STY[k]] : '';
+    b.style.setProperty('--x', m.x.toFixed(4)); b.style.setProperty('--y', m.y.toFixed(4)); b.style.setProperty('--lv', lv.toFixed(3));
+    b.classList.toggle('rest', lv === 0);
+    b.lastElementChild.textContent = loop;
+    b.setAttribute('aria-label', LAYER[k].name + ': ' + (loop ? loop + ' loop, ' : '') + (lv === 0 ? 'resting below the line' : LEVEL(lv) + ', ' + BRIGHT(m.x)));
+  }
+  const placeAll = () => LAYERS.forEach((l) => placeStone(l.k));
+  function markScene(n) {
+    SF.scene = n;
+    el.sfScenes.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', +b.dataset.n === n ? 'true' : 'false'));
+  }
+  const custom = () => { if (SF.scene !== -1) markScene(-1); }; // a change by hand makes the mix the visitor's own
+  const stopGlide = () => { if (SF.glide) { cancelAnimationFrame(SF.glide); SF.glide = 0; } };
+  function say(msg) {
+    clearTimeout(SF.sayT);
+    el.sfNote.textContent = msg; el.sfLive.textContent = msg;
+    SF.sayT = setTimeout(() => { el.sfNote.textContent = HINT; }, 4200);
+  }
+  function cycleStyle(k) {
+    const l = LAYER[k];
+    if (!STYLES[k]) { say('The drone holds the hum of the house. Drag it to shape it.'); return; }
+    STY[k] = (STY[k] + 1) % STYLES[k].length;
+    if (k === 'machina') J.acidPrev = 0;
+    custom(); placeStone(k); saveMix();
+    const loop = STYLES[k][STY[k]];
+    say(levelOf(k) > 0 ? l.name + ': ' + loop + '.' : l.name + ' rests below the line. Drag it up to hear ' + loop + '.');
+  }
+  // A scene glides every stone to its place while the mix follows; a scene is a wish to hear it, so it starts the jam.
+  function loadScene(n) {
+    const S = SCENES[n];
+    if (!S) return;
+    stopGlide(); J.acidPrev = 0;
+    Object.keys(STY).forEach((k) => { STY[k] = S.sty[k]; });
+    BPM = S.bpm; syncTempo(); markScene(n);
+    const from = {}, to = {};
+    LAYERS.forEach((l) => { from[l.k] = MIX[l.k]; to[l.k] = { x: S.mix[l.k][0], y: S.mix[l.k][1] }; });
+    if (!J.on) J.start();
+    say(S.name + ', ' + S.bpm + ' BPM.');
+    if (RM) { Object.assign(MIX, to); placeAll(); J.apply(); saveMix(); return; }
+    const t0 = performance.now();
+    const step = () => {
+      const u = Math.min(1, (performance.now() - t0) / 700), e = 1 - Math.pow(1 - u, 3);
+      LAYERS.forEach((l) => { const a = from[l.k], b = to[l.k]; MIX[l.k] = { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e }; });
+      placeAll(); J.apply(true);
+      if (u < 1) SF.glide = requestAnimationFrame(step); else { SF.glide = 0; J.apply(); saveMix(); }
+    };
+    step();
+  }
+  // Drag a stone to mix it. A press that moves less than 5 px is a tap, and a tap changes the loop.
+  let drag = null;
+  el.sfField.addEventListener('pointerdown', (e) => {
+    const b = e.target.closest('.sf-st');
+    if (!b || drag || e.button > 0) return;
+    const f = el.sfField, fr = f.getBoundingClientRect(), br = b.getBoundingClientRect();
+    drag = { k: b.dataset.k, b, id: e.pointerId, x0: e.clientX, y0: e.clientY, moved: false, ox: e.clientX - br.left, oy: e.clientY - br.top,
+      L: fr.left + f.clientLeft, T: fr.top + f.clientTop, W: f.clientWidth, H: f.clientHeight, w: b.offsetWidth, h: b.offsetHeight, px: parseFloat(getComputedStyle(f).getPropertyValue('--px')) || 24 };
+    try { b.setPointerCapture(e.pointerId); } catch (_) { /* not captured: still fine */ }
+    stopGlide();
+  });
+  el.sfField.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (!drag.moved) { if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 5) return; drag.moved = true; drag.b.classList.add('drag'); }
+    const d = drag, left = e.clientX - d.L - d.ox, top = e.clientY - d.T - d.oy;
+    MIX[d.k] = { x: clamp((left - d.px) / Math.max(1, d.W - d.w - 2 * d.px), 0, 1), y: clamp(0.04 + (top - 8) / Math.max(1, d.H - d.h - 16) * 0.87, 0.04, 0.91) };
+    custom(); placeStone(d.k); J.apply(true);
+  });
+  function endDrag(e) {
+    if (!drag || (e && e.pointerId !== drag.id)) return;
+    const d = drag;
+    drag = null; d.b.classList.remove('drag');
+    if (d.moved) { SF.dragEnd = performance.now(); J.apply(); saveMix(); }
+  }
+  el.sfField.addEventListener('pointerup', endDrag); el.sfField.addEventListener('pointercancel', endDrag); el.sfField.addEventListener('lostpointercapture', endDrag);
+  el.sfField.addEventListener('click', (e) => { const b = e.target.closest('.sf-st'); if (b && performance.now() - SF.dragEnd > 400) cycleStyle(b.dataset.k); });
+  // On a keyboard: the arrow keys move a stone, Shift moves it further, Enter or Space changes its loop.
+  el.sfField.addEventListener('keydown', (e) => {
+    const b = e.target.closest && e.target.closest('.sf-st'), v = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] }[e.key];
+    if (!b || !v) return;
+    e.preventDefault(); stopGlide();
+    const k = b.dataset.k, s = e.shiftKey ? 0.1 : 0.03, m = MIX[k];
+    MIX[k] = { x: clamp(m.x + v[0] * s, 0, 1), y: clamp(m.y + v[1] * s, 0.04, 0.91) };
+    custom(); placeStone(k); J.apply(); saveMix();
+  });
+  el.sfScenes.addEventListener('click', (e) => { const b = e.target.closest('button[data-n]'); if (b) loadScene(+b.dataset.n); });
+  el.sfBpm.addEventListener('input', () => { BPM = Math.round(clamp(+el.sfBpm.value || 70, 56, 96)); syncTempo(); custom(); saveMix(); });
+  el.sfJam.addEventListener('click', () => { if (J.on) J.stop(); else if (!J.start()) say('Sound is not available in this browser.'); });
+  function openMixer() {
+    if (!active || !started || !ready || !allDone() || el.sf.open) return;
+    if (!state.world || state.world.name !== 'hub') {
+      // The field is in the house: walk there first, and turn music on now, while the visitor's tap still counts.
+      if (!A.music) { A.music = true; A.update(); syncOpts(); }
+      SF.want = true; navigate('hub'); return;
+    }
+    closePanel(); closeSettings(); keys.clear(); release(); hush();
+    const W = state.world;
+    if (W.ring) W.ring.field.found = true;
+    buildField(); placeAll(); syncTempo(); markScene(SF.scene);
+    const ok = J.start(); // inside the tap or key, so the browser lets the audio start
+    if (typeof el.sf.showModal === 'function') el.sf.showModal(); else el.sf.setAttribute('open', '');
+    clearTimeout(SF.sayT); el.sfNote.textContent = HINT;
+    if (!ok) say('Sound is not available in this browser.');
+    SF.st.drone.focus({ preventScroll: true });
+  }
+  function closeMixer() { if (!el.sf.open) return; if (typeof el.sf.close === 'function') el.sf.close(); else { el.sf.removeAttribute('open'); el.sf.dispatchEvent(new Event('close')); } }
+  el.sfX.addEventListener('click', closeMixer);
+  el.sf.addEventListener('click', (e) => { if (e.target === el.sf && performance.now() - SF.dragEnd > 400) closeMixer(); });
+  el.sf.addEventListener('close', () => {
+    stopGlide(); endDrag();
+    if (!active) return;
+    el.c.focus({ preventScroll: true });
+    if (J.on && !SF.told) { SF.told = true; toast('The jam plays on while you walk the house.', 4200); }
+  });
+  el.sfGo.addEventListener('click', () => { closeSettings(); openMixer(); });
+  // Each frame while the field is open: pulse the runes on their layers' hits.
+  function sfTick() {
+    const now = A.ctx ? A.ctx.currentTime : 0;
+    LAYERS.forEach((l) => {
+      const b = SF.st[l.k], f = J.flash[l.k];
+      if (!b) return;
+      const ago = J.on && f != null ? now - f : 9, p = RM || ago < 0 ? 0 : Math.exp(-ago / 0.16), v = p > 0.02 ? p.toFixed(2) : '0';
+      if (b.lfP !== v) { b.lfP = v; b.style.setProperty('--p', v); }
+    });
+  }
 
   /* =============================== auto walk: the house walks you through it =============================== */
   // It visits every signal of a wing in turn, reads each one out on its panel, walks back through the arch and on to
@@ -958,13 +1477,14 @@
   const stand = (o) => ({ kind: 'signal', o, x: o.stand[0], z: o.stand[1] });
   function nextGoal(W) {
     if (W.name === 'hub') {
-      const house = W.objects[0];
-      if (house && !house.found) return stand(house);
+      const house = W.objects[0], field = W.ring && W.ring.field;
+      if (house && !house.found && !(field && field.live)) return stand(house);
       const next = WINGS.find((w) => !done[w]);
       if (next) { const p = W.portals.find((x) => x.to === next); return { kind: 'portal', p, x: p.x + p.nx * 3.2, z: p.z + p.nz * 3.2 }; }
-      AW.roam = (AW.roam + 1) % 8; // all three explored: an easy loop of the house
+      if (field && field.live && !field.found) return stand(field); // the stones woke: show them once
+      AW.roam = (AW.roam + 1) % 8; // all three explored: an easy loop of the house, clear of the stones
       const a = AW.roam / 8 * Math.PI * 2;
-      return { kind: 'roam', x: 0.5 + Math.cos(a) * 3.8, z: Math.sin(a) * 3.8 };
+      return { kind: 'roam', x: 2.5 + Math.cos(a) * 3.8, z: -0.5 + Math.sin(a) * 3.8 };
     }
     const o = W.objects.find((x) => x.counts !== false && !x.found);
     if (o) return stand(o);
@@ -1003,6 +1523,12 @@
   function autoStep(W, dt) {
     if (AW.wait > 0) { AW.wait -= dt; want.set(0, 0, 0); stride(W, dt); return; }
     if (AW.phase === 'read') { if (!state.panel) { AW.reset(); AW.wait = 0.35; } return; }
+    // At the stones the walk waits a while with Play in reach, then walks on; it never opens the field by itself.
+    if (AW.phase === 'linger') {
+      want.set(0, 0, 0); stride(W, dt);
+      if ((AW.t += dt) > 9 || AW.goal.o.found) { AW.goal.o.found = true; AW.reset(); AW.wait = 0.4; }
+      return;
+    }
     if (!AW.goal) AW.goal = nextGoal(W);
     const g = AW.goal, d = Math.hypot(g.x - state.pos.x, g.z - state.pos.z);
     if (g.kind === 'signal' && g.o.found && AW.phase !== 'face') { AW.reset(); return; } // found by hand on the way
@@ -1026,7 +1552,10 @@
       const k = Math.min(1, dt * 4.2), diff = wrapA(yawT - state.yaw);
       state.yaw += diff * k; state.pitch += (pitchT - state.pitch) * k;
       want.set(0, 0, 0); stride(W, dt);
-      if (AW.t > 1.1 || (AW.t > 0.45 && Math.abs(diff) < 0.04)) { AW.phase = 'read'; if (!state.panel) openPanel(g.o, true); }
+      if (AW.t > 1.1 || (AW.t > 0.45 && Math.abs(diff) < 0.04)) {
+        if (g.o.linger) { AW.phase = 'linger'; AW.t = 0; toast(COARSE ? 'The sound field. Tap Play to mix the stones.' : 'The sound field. Press E to play.', 6000, true); }
+        else { AW.phase = 'read'; if (!state.panel) openPanel(g.o, true); }
+      }
     } else if (AW.phase === 'enter') {
       const p = g.p;
       walkTo(W, dt, p.x - p.nx * 1.4, p.z - p.nz * 1.4, 2, 2.2); // straight through the arch; the arch changes the route
@@ -1086,7 +1615,7 @@
   /* =============================== input =============================== */
   const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'shift'];
   addEventListener('keydown', (e) => {
-    if (!active || !started || el.set.open || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!active || !started || el.set.open || el.sf.open || e.ctrlKey || e.metaKey || e.altKey) return;
     const k = (e.key || '').toLowerCase();
     if (state.panel) { if (k === 'escape' || k === 'e') { closePanel(); e.preventDefault(); } return; }
     if (!el.fin.hidden || (e.target && e.target.closest && e.target.closest('input,textarea,select,dialog'))) return;
@@ -1095,6 +1624,7 @@
       keys.add(k); if (k.indexOf('arrow') === 0) e.preventDefault();
     } else if (k === 'e' || (k === 'enter' && (e.target === el.c || e.target === view || e.target === document.body))) { if (state.focus) { openPanel(state.focus); e.preventDefault(); } }
     else if (k === 'm') { OPTS.music.set(!A.music); syncOpts(); toast(A.music ? 'Music on.' : 'Music off.', 1600, true); }
+    else if (k === 'f' || e.code === 'KeyF') { e.preventDefault(); if (allDone()) openMixer(); else toast('The stones wake once all three wings are explored.', 0, true); }
     else if (k === 'h' || k === '?') openSettings();
   });
   addEventListener('keyup', (e) => keys.delete((e.key || '').toLowerCase()));
@@ -1120,7 +1650,7 @@
     if (look.moved < 8 && e.type === 'pointerup' && state.world) {
       const r = el.c.getBoundingClientRect();
       ndc.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera);
-      const hits = ray.intersectObjects(state.world.objects.map((o) => o.hit), false);
+      const hits = ray.intersectObjects(state.world.objects.filter((o) => o.live !== false).map((o) => o.hit), false);
       if (hits.length && hits[0].distance < 9) openPanel(hits[0].object.userData.obj);
     }
     look = null; state.lookAt = performance.now();
@@ -1191,13 +1721,16 @@
   function pickFocus(W) {
     const h = camYaw(); fwd.set(-Math.sin(h), 0, -Math.cos(h));
     let best = null, bs = 1e9;
-    W.objects.forEach((o) => { const dx = o.x - state.pos.x, dz = o.z - state.pos.z, d = Math.hypot(dx, dz); if (d > o.range) return; const dot = d > 0.01 ? (fwd.x * dx + fwd.z * dz) / d : 1; if (dot < 0.35 && d > 1.6) return; const s = d - dot * 1.2; if (s < bs) { bs = s; best = o; } });
-    if (best !== state.focus) { state.focus = best; if (best) el.promptT.textContent = (COARSE ? '' : 'Inspect · ') + best.title; }
-    el.prompt.classList.toggle('on', !!state.focus && !AW.on);
+    W.objects.forEach((o) => { if (o.live === false) return; const dx = o.x - state.pos.x, dz = o.z - state.pos.z, d = Math.hypot(dx, dz); if (d > o.range) return; const dot = d > 0.01 ? (fwd.x * dx + fwd.z * dz) / d : 1; if (dot < 0.35 && d > 1.6) return; const s = d - dot * 1.2 - (o.prio || 0); if (s < bs) { bs = s; best = o; } });
+    // The stone circle names its action on phones too, and stays in reach while the auto walk leads.
+    if (best !== state.focus) { state.focus = best; if (best) el.promptT.textContent = (best.verb ? best.verb + ' · ' : COARSE ? '' : 'Inspect · ') + best.title; }
+    el.prompt.classList.toggle('on', !!state.focus && (!AW.on || !!state.focus.always));
   }
   let C_PAPER = null;
   function markers(W, t) {
     W.objects.forEach((o) => {
+      if (o.live === false) { o.ring.visible = o.marker.visible = false; return; } // the stone circle, still asleep
+      o.ring.visible = true; o.marker.visible = o.dot !== false;
       o.focus += ((o === state.focus ? 1 : 0) - o.focus) * 0.15;
       o.marker.position.y = o.gy + o.y + (RM ? 0 : Math.sin(t * 2 + o.phase) * 0.09);
       o.marker.scale.setScalar(o.found ? 0.6 : 1 + o.focus * 0.5);
@@ -1236,7 +1769,7 @@
     G.recenter(); AW.reset(); if (AW.on) AW.wait = 0.8;
     document.body.dataset.wing = name === 'hub' ? '' : name;
     hud(); el.prompt.classList.remove('on');
-    A.update();
+    A.update(); jamWorld(name);
     if (!started) { el.word.textContent = name === 'hub' ? 'lastfomo' : name; el.line.textContent = LINES[name]; }
     else if (name !== 'hub' && !done[name]) setTimeout(() => { if (state.world === W) toast(NAMES[name] + '. ' + COUNT[name] + ' signals to find. Follow the lights.'); }, 700);
   }
@@ -1265,10 +1798,13 @@
     lookTick(dt);
     W.ticks.forEach((f) => f(t, dt));
     markers(W, t);
-    if (started && !state.busy && !state.panel) { pickFocus(W); checkPortals(W, now); }
+    if (started && !state.busy && !state.panel && !el.sf.open) { pickFocus(W); checkPortals(W, now); }
+    if (el.sf.open) sfTick();
     readTick(real);
     placeCamera(W);
-    renderer.render(W.scene, camera);
+    // Behind the open sound field the house is a backdrop: a quarter of the frames on a desktop, none on a phone,
+    // where the card covers it. The jam keeps the main thread to itself.
+    if (!el.sf.open || (!COARSE && (SF.frame = (SF.frame + 1) % 4) === 0)) renderer.render(W.scene, camera);
   }
   const startLoop = () => { if (!raf && ready && active && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } };
   const stopLoop = () => { cancelAnimationFrame(raf); raf = 0; };
@@ -1366,7 +1902,7 @@
     started = true;
     A.music = A.sounds = withSound; A.update();
     el.start.classList.add('fade'); setTimeout(() => { el.start.hidden = true; }, 700);
-    hud(); syncOpts(); wake();
+    hud(); syncOpts(); syncField(); wake();
     el.c.focus({ preventScroll: true });
     const W = state.world, how = AW.on
       ? (COARSE ? 'Auto walk is on. Press the round button to walk yourself.' : 'Auto walk is on. Press W or an arrow key to walk yourself.')
@@ -1398,7 +1934,7 @@
     if (!active) return;
     active = false;
     stopLoop(); keys.clear(); release(); look = null;
-    closePanel(); closeSettings();
+    closePanel(); closeSettings(); closeMixer(); J.stop(true); SF.want = false; // the jam waits for the visitor's return
     curT.forEach(clearTimeout); curT = []; state.busy = false;
     listenMotion(false); unlock(); A.update(); hush();
   }
@@ -1422,6 +1958,7 @@
         auto: AW.on, phase: AW.phase, gyro: G.live(), motion: { on: G.on, heard: G.heard, yaw: +G.yaw.toFixed(3) }, look: +state.lookYaw.toFixed(3), hold: state.hold, panel: state.panel ? state.panel.id : '',
         found: Object.fromEntries(Object.entries(progress).map(([k, v]) => [k, Array.from(v)])), done: Object.assign({}, done),
         music: A.music, sounds: A.sounds, audio: A.ctx ? A.ctx.state : 'none', settings: el.set.open,
+        field: { awake: allDone(), up: SF.up, open: !!el.sf.open, jam: J.on, paused: J.wasOn, scene: SF.scene, bpm: BPM, loops: Object.assign({}, STY), mix: JSON.parse(JSON.stringify(MIX)) },
       };
     },
   };

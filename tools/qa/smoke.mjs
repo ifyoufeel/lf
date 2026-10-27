@@ -430,6 +430,43 @@ await step('explore: leaving gives the header and the theme back', async () => {
   return 'Start a project back, the walk at rest, the theme as it was';
 });
 
+// The sound field: once every wing is explored, stones rise round the house column and F opens the jam. A fresh page
+// takes the finds as a republished Artifact would (lfExplore.load), so the step need not walk all the signals.
+await step('explore: the sound field opens once every wing is explored', async () => {
+  const p2 = await context.newPage();
+  const s2 = {};
+  attachCollectors(p2, s2);
+  try {
+    await p2.goto(base + '#/', { waitUntil: 'load', timeout: 60000 });
+    const all = { hub: ['house'], hortus: ['med', 'lab', 'node', 'field', 'feed'], machina: ['gpus', 'cpu', 'mem', 'power', 'net', 'core'], arca: ['necklace', 'helmet', 'gauntlet', 'painting', 'chest', 'vault'] };
+    await p2.evaluate((f) => window.lfExplore.load({ found: f }), all);
+    await p2.evaluate(() => { location.hash = '#/explore'; });
+    await p2.waitForFunction(() => !document.querySelector('#xp-go-sound').disabled || !document.querySelector('#xp-home').hidden, null, { timeout: 30000 })
+      .catch(() => { throw new Error('the walk did not finish loading in 30 s'); });
+    await p2.locator('#xp-go-sound').click();
+    await p2.waitForTimeout(800);
+    let st = await p2.evaluate(() => window.lfExplore.peek().field);
+    check(st.awake && st.up, `the stones did not wake: ${JSON.stringify(st)}`);
+    await p2.keyboard.press('f');
+    await p2.waitForFunction(() => document.querySelector('#xp-sf').open, null, { timeout: 3000 }).catch(() => { throw new Error('F did not open the sound field'); });
+    const stones = await p2.locator('#xp-sf-field .sf-st').count(), scenes = await p2.locator('#xp-sf-scenes button').count();
+    check(stones === 7 && scenes > 1, `${stones} stones, ${scenes} scenes`);
+    await p2.locator('#xp-sf-scenes button').nth(1).click();
+    await p2.waitForTimeout(400);
+    st = await p2.evaluate(() => window.lfExplore.peek().field);
+    check(st.jam && st.scene === 1, `the jam ${st.jam ? 'plays' : 'is off'}, scene ${st.scene}`);
+    await p2.keyboard.press('Escape');
+    await p2.waitForFunction(() => !document.querySelector('#xp-sf').open, null, { timeout: 2000 }).catch(() => { throw new Error('Escape did not close the sound field'); });
+    st = await p2.evaluate(() => window.lfExplore.peek().field);
+    check(st.jam, 'the jam stopped when the field closed');
+    return `${stones} stones, ${scenes} scenes, the jam plays on after Escape`;
+  } finally {
+    sink.consoleErrors.push(...s2.consoleErrors); sink.pageErrors.push(...s2.pageErrors);
+    s2.closing = true;
+    await p2.close().catch(() => {});
+  }
+});
+
 await step('nav: Skip to content moves focus into the view', async () => {
   await go('#/machina', 'machina');
   await page.waitForTimeout(400);

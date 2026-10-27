@@ -611,6 +611,76 @@ dialog.xp-set::backdrop{background:transparent}
 .xp-keys{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 18px;margin:0;font-size:15px;line-height:1.45;color:var(--fg2)}
 .xp-keys dt{font:500 11px/1.9 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg)}
 .xp-keys dd{margin:0}
+.xp-sec-p{margin:0 0 14px;font-size:15px;line-height:1.45;color:var(--fg2)}
+
+/* ---------- the sound field (site/explore.js): the jam in the house ---------- */
+/* A glass card over the walk, the header dimmed behind it. Each stone sits where the mix puts it: --x is brightness and
+   --y loudness, mapped to the stone's top, so a stone below the dashed line rests there whole. */
+dialog.xp-sf{padding:0;border:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;overflow:hidden;color:var(--fg);background:linear-gradient(var(--scrim),var(--scrim) calc(env(safe-area-inset-top,0px) + var(--bar)),transparent calc(env(safe-area-inset-top,0px) + var(--bar) + 56px))}
+dialog.xp-sf::backdrop{background:transparent}
+.xp-sf-in{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + var(--bar) + 12px);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:min(1120px,calc(100% - 28px));transform:translateX(-50%);display:flex;flex-direction:column;gap:14px;padding:clamp(16px,2vw,24px);overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:18px;background:var(--glass);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);-webkit-user-select:none;user-select:none}
+.xp-sf-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px}
+.xp-sf-ti{flex:1 1 auto;display:grid;gap:8px;min-width:0}
+.xp-sf-ti .code{color:var(--fg2)}
+.xp-sf .h2{font-size:clamp(26px,3vw,34px)}
+.xp-sf-jam{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 18px;border:1px solid var(--line);border-radius:999px;background:none;color:var(--fg);font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color var(--snap) var(--ease)}
+.xp-sf-jam:hover{border-color:var(--fg)}
+.xp-sf-jam i{width:8px;height:8px;border-radius:50%;border:1px solid var(--fg2)}
+.xp-sf-jam[aria-pressed="true"] i{background:var(--fg);border-color:var(--fg);animation:xp-breathe 2.4s var(--ease) infinite}
+.xp-sf-tempo{display:inline-flex;align-items:center;gap:12px;min-height:44px;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.xp-sf-tempo output{min-width:7ch;color:var(--fg);white-space:nowrap}
+.xp-sf-tempo input{-webkit-appearance:none;appearance:none;width:clamp(110px,12vw,170px);height:28px;margin:0;background:none;cursor:pointer}
+.xp-sf-tempo input::-webkit-slider-runnable-track{height:2px;background:var(--line)}
+.xp-sf-tempo input::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;margin-top:-7px;border:0;border-radius:50%;background:var(--fg)}
+.xp-sf-tempo input::-moz-range-track{height:2px;background:var(--line)}
+.xp-sf-tempo input::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:var(--fg)}
+.xp-sf-x kbd{font:inherit;opacity:.6}
+.xp-sf-jam:focus-visible,.xp-sf-tempo input:focus-visible,.xp-sf-row button:focus-visible{outline:2px solid var(--wing-t);outline-offset:3px}
+.xp-sf-field{--sw:clamp(54px,4.4vw,66px);--sh:calc(var(--sw) * 1.534 + 34px);--px:24px;--line-y:calc(8px + .82 / .87 * (100% - var(--sh) - 16px));position:relative;flex:1 1 380px;min-height:330px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--void) radial-gradient(circle,var(--iron) 1px,transparent 1.6px) 0 0/22px 22px;touch-action:none}
+.xp-sf-rest{position:absolute;left:0;right:0;bottom:0;top:var(--line-y);border-top:1px dashed var(--fg2);background:var(--ink);pointer-events:none}
+.xp-sf-rest span,.xp-sf-ax{position:absolute;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2);white-space:nowrap;pointer-events:none}
+.xp-sf-rest span{left:14px;top:8px}
+.xp-sf-ax.up{left:14px;top:14px}
+.xp-sf-ax.rt{right:14px;top:14px}
+.sf-st{all:unset;box-sizing:border-box;position:absolute;z-index:1;left:calc(var(--px) + var(--x) * (100% - var(--sw) - 2 * var(--px)));top:calc(8px + (var(--y) - .04) / .87 * (100% - var(--sh) - 16px));width:var(--sw);height:var(--sh);display:grid;grid-template-columns:minmax(0,1fr);align-content:start;justify-items:center;row-gap:3px;cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent}
+.sf-st svg{display:block;width:100%;height:auto;overflow:visible;margin-bottom:3px}
+.sf-st .sh{fill:var(--graphite);stroke:var(--iron);stroke-width:1.5}
+.sf-st .gl,.sf-st .ru{fill:none;stroke:var(--c);stroke-linecap:round;stroke-linejoin:round;transition:stroke var(--glide) var(--ease)}
+.sf-st .gl{stroke-width:6;filter:url(#xp-sf-glow);opacity:calc(var(--lv,0) * .6 + var(--p,0) * .5)}
+.sf-st .ru{stroke-width:3.2;opacity:calc(.34 + .66 * var(--lv,0))}
+.sf-st b,.sf-st span{display:block;width:max-content;font:500 11px/1.25 var(--mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.sf-st b{color:var(--fg)}
+.sf-st span{min-height:1.25em;color:var(--ct)}
+.sf-st.rest .gl,.sf-st.rest .ru{stroke:var(--ash)}
+.sf-st.rest .gl,.xp-sf-field.off .sf-st .gl{opacity:0}
+.sf-st.rest span{color:var(--fg2)}
+.xp-sf-field.off .sf-st .ru{opacity:.34}
+.sf-st.drag{z-index:3;cursor:grabbing}
+.sf-st:focus-visible{outline:2px solid var(--wing-t);outline-offset:4px;border-radius:10px}
+.xp-sf-sc{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.xp-sf-sc h3{margin:0;font:500 12px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.xp-sf-row{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.xp-sf-row button{min-height:40px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:none;color:var(--fg);font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background var(--snap) var(--ease),color var(--snap) var(--ease),border-color var(--snap) var(--ease)}
+.xp-sf-row button:hover{border-color:var(--fg)}
+.xp-sf-row button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.xp-sf-note{margin:0;min-height:1.45em;font-size:15px;line-height:1.45;color:var(--fg2)}
+/* On phones the card fills the screen under the header and the field grows tall, so stones close in x part in y. */
+@media (max-width:760px){
+  .xp-sf-in{left:max(8px,env(safe-area-inset-left,0px));right:max(8px,env(safe-area-inset-right,0px));width:auto;transform:none;top:calc(env(safe-area-inset-top,0px) + var(--bar) + 8px);bottom:calc(env(safe-area-inset-bottom,0px) + 8px);padding:16px;gap:12px}
+  .xp-sf-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px}
+  .xp-sf-ti{display:contents}
+  .xp-sf-ti .code{grid-column:1/-1}
+  .xp-sf-ti .h2{grid-column:1/3;align-self:center}
+  .xp-sf-x{grid-column:3;grid-row:2}
+  .xp-sf-jam{grid-row:3}
+  .xp-sf-tempo{grid-column:2/4;grid-row:3}
+  .xp-sf-tempo input{flex:1 1 auto;width:auto;min-width:0}
+  .xp-sf-x kbd{display:none}
+  .xp-sf-field{--sw:44px;--px:30px;flex-basis:420px;min-height:360px}
+  .xp-sf-sc{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:8px}
+  .xp-sf-row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+  .xp-sf-row::-webkit-scrollbar{display:none}
+}
 
 /* ---------- reduced motion: instant, no shimmer, no bob ---------- */
 @media (prefers-reduced-motion:reduce){
@@ -620,5 +690,5 @@ dialog.xp-set::backdrop{background:transparent}
   .js .screen [data-pix]{clip-path:none;animation:none}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .cur{display:none}
-  .xp-grain,.xp-walk.auto{animation:none}
+  .xp-grain,.xp-walk.auto,.xp-sf-jam[aria-pressed="true"] i{animation:none}
 }
