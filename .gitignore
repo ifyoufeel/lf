@@ -5,3 +5,8 @@ out/
 
 # Personal Claude Code overrides
 .claude/settings.local.json
+
+# Secrets never enter git: environment files, and the Vercel CLI's folder (`vercel env pull` writes keys there)
+.env
+.env.*
+.vercel/

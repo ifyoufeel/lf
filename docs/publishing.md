@@ -104,8 +104,18 @@ Every push builds. A push to the production branch updates the live address; a p
 
 **Checked on 19 October 2026**, after the loops, the horse-only header and the brief function went live (commit `dbe91b0`): the page and all 21 fingerprinted media URLs are byte-identical to a fresh build, and `/api/brief` is deployed beside `dist/web` with the “Other” preset. It answers GET with 405, a post from another origin with 403, and a valid same-origin brief with 503 `{"ok":false,"reason":"not-configured"}` until `RESEND_API_KEY` is set. No email was sent. The Vercel Firewall API answered “config not found” to a rate-limit rule (with and without the team id), so the rule in “Spam” below is still a dashboard step.
 
+**Checked on 30 October 2026**, a security review of the repository and the project:
+
+- Production serves commit `3035dbf`, the head of the production branch, built by Vercel from `ifyoufeel/lf`. A fresh clone builds with 0 errors and leaves the tree clean, so everything the site needs is in git. The other branches on GitHub (`claude/hortus-research-live`, `claude/landing-page-exploration-iqz9l5`, `claude/nice-albattani-vwopq7`) are already part of the production branch. `ifyoufeel/fomo` is a separate project, the vault-and-redeem platform, and holds no part of the site.
+- No secret in the files or anywhere in the history: no API key, token or private key, and no `.env` or key file ever committed. The project has no environment variables yet. `.gitignore` now keeps `.env` files and the Vercel CLI’s `.vercel/` folder out of git.
+- `api/brief.mjs` takes only same-origin POSTs, caps the body, validates every field, keeps line breaks out of the subject, sends plain text to the fixed inbox only and never logs the brief. Add the rate-limit rule in “Spam” together with `RESEND_API_KEY`.
+- Deployment Protection covers previews and deployment URLs, Git fork protection is on, and the owner is the repository’s only collaborator. `brand.yml` now runs with a read-only token.
+- The research pages vendor jsPDF 2.5.1 (2022). Later releases fixed denial-of-service bugs in its image handling; the pages only write their own reports, so update it the next time the research changes.
+- The repository is public, so anyone can read its notes on the shop’s maker and prices. Making it private is the owner’s step (GitHub → Settings → General → Danger Zone), after the authorship point below.
+
 **For later sessions.**
 
+- On Hobby, a private repository deploys only commits whose author is the account owner, matched against the owner’s GitHub login connection on Vercel ([troubleshoot project collaboration](https://vercel.com/docs/deployments/troubleshoot-project-collaboration)). GitHub credits commits made as `Claude <noreply@anthropic.com>` to the GitHub user `claude`, so once the repository is private Vercel blocks them. Commits must then carry the owner’s identity, `ifyoufeel <92150640+ifyoufeel@users.noreply.github.com>`.
 - The Vercel connector in Claude works in its own default scope: leave `teamId` out of project and deployment calls. With the team id set, creating a project answered 403 and reading one answered 404.
 - Check the live site with a handful of requests, never a crawl. A burst of requests for paths that do not exist made Vercel’s automatic bot protection answer one sandbox address with its Security Checkpoint (403, `x-vercel-mitigated: challenge`). Browsers pass that checkpoint on their own; scripts do not.
 - The connector reads and writes the project, its deployments and its sandboxes. The Hobby plan includes some sandbox time; stop a sandbox when the check is done.
