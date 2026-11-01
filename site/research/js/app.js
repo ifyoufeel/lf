@@ -7,7 +7,7 @@
   const BASE = ((document.currentScript && document.currentScript.src) || location.href).replace(/js\/app\.js(?:[?#].*)?$/, "");
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
-  const HC = window.HC, HD = window.HortusDeck, HV = window.HortusVision, HN = window.HortusNeeds, HR = window.HortusReport, HS = window.HortusScenes;
+  const HC = window.HC, HD = window.HortusDeck, HV = window.HortusVision, HN = window.HortusNeeds, HR = window.HortusReport, HS = window.HortusScenes, HA = window.HortusAgc;
   document.documentElement.classList.add("js");
   const reduce = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   const toastEl = $("[data-toast]");
@@ -22,7 +22,8 @@
   /* ---------- the registry: one entry per study, oldest first ---------- */
   const STUDIES = [
     { id: "el-nino-2026", n: "01", key: "r1", title: "The 2026–27 El Niño", sub: "Climate and crops", date: "October 2026", paper: "hortus-study-01-el-nino-2026-27-paper.pdf", deck: "hortus-study-01-el-nino-2026-27-deck.pdf" },
-    { id: "plant-vision", n: "02", key: "r2", title: "Seeing what plants need", sub: "Plant vision and automation", date: "October 2026", paper: "hortus-study-02-plant-vision-paper.pdf", deck: "hortus-study-02-plant-vision-deck.pdf" }
+    { id: "plant-vision", n: "02", key: "r2", title: "Seeing what plants need", sub: "Plant vision and automation", date: "October 2026", paper: "hortus-study-02-plant-vision-paper.pdf", deck: "hortus-study-02-plant-vision-deck.pdf" },
+    { id: "agc162", n: "03", key: "r3", title: "AI vision for fruit farms", sub: "agc162 · Farm analysis", date: "October 2026", pitch: "hortus-study-03-agc162-pitch.pdf" }
   ];
   const byKey = (k) => STUDIES.find((s) => s.key === k);
   const ALIAS = { hub: "research", elnino: "el-nino-2026", vision: "plant-vision" }; // links from the first version
@@ -653,6 +654,16 @@ Reply with only a JSON object: {"summary": string (two sentences), "what_i_see":
 
     const jseal = $("[data-java-compare] [data-seal]");
     onIn(jseal, () => setTimeout(() => jseal.classList.add("open"), reduce() ? 0 : 500));
+  };
+
+  /* ======================= STUDY 03 · AGC162, AI VISION FOR FRUIT FARMS ======================= */
+  // The owner's pitch: machine views, a 3D field guide, three demo app screens and a pack line (js/agc162.js).
+  // Its pitch PDF saves through [data-pdf="r3-pitch"], like the papers.
+  INIT.agc162 = () => {
+    renderNext("agc162");
+    if (!HA) return;
+    try { const p = HA.init(views.agc162, { base: BASE, toast, jump, reduce }); if (p) players.push(p); }
+    catch (e) { console.error(e); }
   };
 
   /* ---------- questions to Claude about a study ---------- */

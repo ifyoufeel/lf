@@ -254,8 +254,8 @@
     },
     {
       "id": "hortus.research.studies",
-      "claim": "Hortus research, published at /research on 27 October 2026: “The 2026–27 El Niño” (climate and crops: NOAA OISST, NASA POWER, FAO yields) and “Seeing what plants need” (plant vision and automation: Sentinel-2 fields in Kansas, Mkushi and West Java), each with its page, tools, paper, deck, data and scripts. The studies’ own figures are data computed by those scripts and cited in the papers; the build checks the research pages for every rail but R6 and R7’s percentages.",
-      "numbers": ["2026", "27"]
+      "claim": "Hortus research, published at /research on 27 October 2026: “The 2026–27 El Niño” (climate and crops: NOAA OISST, NASA POWER, FAO yields) and “Seeing what plants need” (plant vision and automation: Sentinel-2 fields in Kansas, Mkushi and West Java), each with its page, tools, paper, deck, data and scripts. The studies’ own figures are data computed by those scripts and cited in the papers; the build checks the research pages for every rail but R6 and R7’s percentages. Study 03, “AI vision for fruit farms” (agc162, farm analysis), joined on 1 November 2026: the owner’s agc162 pitch, ported to the research pages. Its figures are cited from the published sources it lists (FAO and FAOSTAT via JIRCAS, journal trials, one market report), its pilot targets are labelled as targets, its demo screens show demo data, and its pitch PDF (13 pages) is the owner’s file, served as supplied.",
+      "numbers": ["2026", "27", "162"]
     }
   ],
   "approvedLines": {
@@ -387,14 +387,17 @@
     "defense": "defence",
     "jewelry": "jewellery"
   },
-  "placeholders": [],
+  "placeholders": [
+    { "token": "[YOUR PRICING]", "where": "Hortus research, study 03 (agc162), the Business screen (site/research/index.html); the pitch PDF carries it too", "owner": "The owner sets agc162’s plan prices (Scout, Orchard, Packhouse), on the page and in the pitch." }
+  ],
   "unconfirmed": [
     "Shop product names that follow the owner's example (SensiRoom H became HortusRoom S, 26 October 2026) are suggested: HortusPilot N (nutrients), HortusPilot F (the full feed line), HortusPilot pH, HortusRoom A (air) and HortusRoom C (CO₂).",
     "Roadmap 'Next' items (more private builds; pilot beds to full farms; a private catalogue by invitation) were written as plausible directions.",
     "'What happens next' steps on Start a project (we read the brief; a short call; a written plan) are suggested wording.",
     "Field-note captions now follow the ledger wording ('over about 250 years', 'Renaissance, embossed and gilt steel, made for display', dosing channels 'Visible on the feeding rig'); the shipped page had looser wording.",
     "Brief sending states on Start a project ('Sending…'; 'Brief sent.'; 'It is on its way to lastfomo@gmail.com.') are suggested wording, added when the form began emailing the brief.",
-    "The Research screen on the Hortus case (‘Each study reads open data and ends in a tool a grower can use.’) and the research pages’ headlines and labels are suggested wording, written with the studies (27 October 2026). ‘Research first’ and ‘We learn the field before we touch it’ are the house principle in the brand’s copy."
+    "The Research screen on the Hortus case (‘Each study reads open data and ends in a tool a grower can use.’) and the research pages’ headlines and labels are suggested wording, written with the studies (27 October 2026). ‘Research first’ and ‘We learn the field before we touch it’ are the house principle in the brand’s copy.",
+    "Hortus research, study 03 (agc162, 1 November 2026): the words are the owner’s, from their agc162 pitch page. Added with it, as suggested wording: the research index’s questions Q6 (‘Fruit found and sized on the tree’, moderate evidence) and Q7 (‘Sprays timed to infection risk’, limited evidence); the Sources screen’s ‘Open data. Named sources.’ and its lead, which now name study 03’s published sources; the study’s screen labels (‘HRT — 01 · The problem’ and on); the pitch screen’s ‘PDF, 13 pages. Pilot orchards and partners: lastfomo@gmail.com’, the house address where the pitch had [YOUR EMAIL]; the Live capture caption (‘a fixed camera watching fruit on the tree’), since the live demo now shows the Calypso tree; and ‘Demo.’ at the end of the demo app’s confirmations."
   ],
   "conflicts": [
     {

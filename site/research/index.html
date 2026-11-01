@@ -82,14 +82,16 @@
         <li><span class="n">Q3</span><span class="t">Irrigation in hotter summers</span><span class="s"><a href="#plant-vision" data-go="plant-vision">Study 02</a></span><span class="e ev"><b>Moderate</b> evidence</span></li>
         <li><span class="n">Q4</span><span class="t">Drought on smallholder rice</span><span class="s"><a href="#plant-vision" data-go="plant-vision">Study 02</a></span><span class="e ev"><b>Moderate</b> evidence</span></li>
         <li><span class="n">Q5</span><span class="t">Stress seen before it spreads</span><span class="s"><a href="#plant-vision" data-go="plant-vision">Study 02</a></span><span class="e ev"><b>Limited</b> evidence</span></li>
+        <li><span class="n">Q6</span><span class="t">Fruit found and sized on the tree</span><span class="s"><a href="#agc162" data-go="agc162">Study 03</a></span><span class="e ev"><b>Moderate</b> evidence</span></li>
+        <li><span class="n">Q7</span><span class="t">Sprays timed to infection risk</span><span class="s"><a href="#agc162" data-go="agc162">Study 03</a></span><span class="e ev"><b>Limited</b> evidence</span></li>
       </ul>
     </div>
   </section>
 
   <section class="screen" data-title="Sources">
     <div class="wrap mid">
-      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — Sources</p><h2 class="h2" data-rise><span>Open data only.</span></h2><p class="lead" data-fade style="--d:.4s">Every number comes from public archives, read on 26 October 2026, and every script is published with the pages.</p></div>
-      <div class="pills srcs" data-up style="--d:.45s"><span class="chip">NOAA OISST v2.1</span><span class="chip">NASA POWER · MERRA-2 · IMERG · FLASHFlux</span><span class="chip">Copernicus Sentinel-2 L2A</span><span class="chip">FAO yields via Our World in Data</span><span class="chip">World Bank WDI</span><span class="chip mute">Natural Earth</span></div>
+      <div class="hd"><p class="code" data-fade style="--d:.05s">HRT — Sources</p><h2 class="h2" data-rise><span>Open data. Named sources.</span></h2><p class="lead" data-fade style="--d:.4s">Studies 01 and 02 read every number from public archives on 26 October 2026, and every script is published with the pages. Study 03 cites published research, checked in October 2026, and names each source.</p></div>
+      <div class="pills srcs" data-up style="--d:.45s"><span class="chip">NOAA OISST v2.1</span><span class="chip">NASA POWER · MERRA-2 · IMERG · FLASHFlux</span><span class="chip">Copernicus Sentinel-2 L2A</span><span class="chip">FAO yields via Our World in Data</span><span class="chip">World Bank WDI</span><span class="chip">FAO · FAOSTAT · published trials</span><span class="chip mute">Natural Earth</span></div>
       <p class="note" data-fade style="--d:.6s">NOAA and NASA data on the AWS Open Data registry; Sentinel-2 through Earth Search. Contains modified Copernicus Sentinel data 2025–2026.</p>
     </div>
     <footer class="foot"><span>lastfomo — Hortus · Research</span><a href="/#/hortus">Back to Hortus<svg aria-hidden="true" width="12" height="12"><use href="#g-ne"/></svg></a></footer>
@@ -460,6 +462,379 @@
   </section>
 </main>
 
+<!-- ============================== STUDY 03 · AGC162, AI VISION FOR FRUIT FARMS ============================== -->
+<!-- The owner's agc162 pitch, ported: square cards (no arches on subpages), agc162 set in Geist (Jacquard sets only the
+     four house names), every colour a token. Behaviour in js/agc162.js; demo screens say so on their face. -->
+<main class="view agc" data-view="agc162" data-wing="hortus" data-crumb="AI vision for fruit farms" data-key="r3" tabindex="-1" hidden>
+  <section class="screen cover plate" data-title="Study">
+    <div class="wrap">
+      <div class="ag">
+        <div class="media" data-up style="--d:.35s">
+          <figure class="ag-hold" data-ascii="hero"><canvas aria-hidden="true"></canvas><figcaption class="sr">A misty mango orchard, half photograph and half agc162’s machine view drawn in characters, with trees marked as they are checked.</figcaption></figure>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.1s">HRT — Study 03 · Farm analysis</p>
+          <h1 class="ag-name" data-rise style="--d:.2s"><span>agc162</span></h1>
+          <p class="h2" data-rise style="--d:.35s"><span>AI vision for fruit farms.</span></p>
+        </div>
+        <div class="rest">
+          <p class="lead" data-fade style="--d:.5s">agc162 reads leaves, flowers and fruit from photos, video and live cameras. It flags disease before it spreads and tells you what to do next.</p>
+          <div class="row" data-fade style="--d:.65s"><button class="btn solid" type="button" data-pdf="r3-pitch">Download the pitch</button><a class="btn" href="/research/pdf/hortus-study-03-agc162-pitch.pdf" target="_blank" rel="noopener">View the pitch<svg aria-hidden="true"><use href="#g-ne"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+    <div class="cue" aria-hidden="true"><span>Scroll</span><i></i></div>
+  </section>
+
+  <section class="screen" data-title="The problem">
+    <div class="wrap">
+      <div class="ag rev">
+        <div class="media hide-m" data-up style="--d:.3s">
+          <figure class="ag-hold" data-ascii="leaf"><canvas aria-hidden="true"></canvas><figcaption class="sr">Guava leaves with reddening, spots and holes, scanned by agc162.</figcaption></figure>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 01 · The problem</p>
+          <p class="ag-big" aria-hidden="true" data-fade style="--d:.2s"><small>Up to</small><span data-count="40" data-suffix="%">40%</span></p>
+          <h2 class="h3" data-rise style="--d:.3s"><span><span class="sr">Up to 40% </span>of the world’s crop production is lost to pests and disease every year.</span></h2>
+          <p class="src" data-fade style="--d:.4s">FAO / IPPC scientific review, 2021</p>
+        </div>
+        <div class="rest">
+          <div class="ag-stats" data-up style="--d:.5s">
+            <div class="ag-stat"><p class="v" data-count="220" data-prefix="$" data-suffix="B">$220B</p><p class="d">a year: what plant disease costs the world economy</p><p class="src">FAO, 2021</p></div>
+            <div class="ag-stat"><p class="v" data-count="14" data-suffix="%">14%</p><p class="d">of food is lost between harvest and retail, more for fruit</p><p class="src">FAO SOFA, 2019</p></div>
+            <div class="ag-stat"><p class="v" data-count="59" data-suffix=" Mt">59 Mt</p><p class="d">mangoes, mangosteens and guavas grown in 2022</p><p class="src">FAOSTAT via JIRCAS</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Hidden loss">
+    <div class="wrap">
+      <div class="ag">
+        <div class="media" data-up style="--d:.3s">
+          <figure class="ag-loss" aria-labelledby="agc-loss-cap">
+            <ol class="ag-season" aria-label="When the damage happens">
+              <li class="on"><i></i><b>Flowering</b><span>infection</span></li>
+              <li><i></i><b>Harvest</b><span>looks clean</span></li>
+              <li class="hot"><i></i><b>Shelf</b><span>rot shows</span></li>
+            </ol>
+            <figcaption id="agc-loss-cap" class="label">Mango lost to fungal rot, by stage</figcaption>
+            <div class="ag-bars">
+              <div class="ag-bar" style="--v:1.13"><span class="k">Field</span><span class="t"><i></i></span><span class="n">1.1%</span></div>
+              <div class="ag-bar" style="--v:3.01"><span class="k">Wholesale</span><span class="t"><i></i></span><span class="n">3.0%</span></div>
+              <div class="ag-bar hot" style="--v:40.79"><span class="k">Retail</span><span class="t"><i></i></span><span class="n">40.8%</span></div>
+              <div class="ag-bar" style="--v:24.62"><span class="k">Consumer</span><span class="t"><i></i></span><span class="n">24.6%</span></div>
+            </div>
+            <p class="src">One survey, Coimbatore, India · Madras Agricultural Journal 92</p>
+          </figure>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 02 · The hidden loss</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Rot starts at flowering. It shows on the shelf.</span></h2>
+        </div>
+        <div class="rest">
+          <p class="lead" data-fade style="--d:.4s">Anthracnose infects flowers and young fruit, then waits. Fruit that looks clean at harvest can rot as it ripens, far from the farm.</p>
+          <p class="src" data-fade style="--d:.5s">Nelson 2008, University of Hawaiʻi CTAHR PD-48</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Why it persists">
+    <div class="wrap">
+      <div class="ag one">
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 03 · Why it persists</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Today’s tools are blind or brittle.</span></h2>
+        </div>
+        <div class="rest ag-duo" data-up style="--d:.35s">
+          <article>
+            <h3 class="h3">Sprays follow the calendar.</h3>
+            <svg class="ag-risk" viewBox="0 0 440 184" role="img" aria-label="Illustration: weekly sprays against an infection-risk curve. Three of four sprays fall when risk is low.">
+              <path class="a" d="M16.5,134.75 C46.75,134.75 60.5,133.38 71.5,121 S82.5,41.25 101.75,33 S126.5,96.25 143,129.25 S192.5,134.75 228.25,134.75 S253,123.75 261.25,85.25 S272.25,46.75 280.5,46.75 S294.25,74.25 305.25,115.5 S330,134.75 360.25,134.75 L423.5,134.75 L423.5,143 L16.5,143 Z"/>
+              <path class="l" d="M16.5,134.75 C46.75,134.75 60.5,133.38 71.5,121 S82.5,41.25 101.75,33 S126.5,96.25 143,129.25 S192.5,134.75 228.25,134.75 S253,123.75 261.25,85.25 S272.25,46.75 280.5,46.75 S294.25,74.25 305.25,115.5 S330,134.75 360.25,134.75 L423.5,134.75"/>
+              <line class="b" x1="16.5" y1="143" x2="423.5" y2="143"/>
+              <g class="s"><rect x="30.25" y="143" width="1.9" height="11"/><circle cx="31.2" cy="159.5" r="4.4"/><rect x="133.38" y="143" width="1.9" height="11"/><circle cx="134.3" cy="159.5" r="4.4"/><rect x="235.12" y="143" width="1.9" height="11"/><circle cx="236.1" cy="159.5" r="4.4"/><rect x="336.88" y="143" width="1.9" height="11"/><circle cx="337.8" cy="159.5" r="4.4"/><circle cx="371" cy="176" r="3.4"/></g>
+              <text x="101.75" y="20" text-anchor="middle">INFECTION RISK</text><text x="16.5" y="181">WEEK 1</text><text x="206.25" y="181">WEEK 3</text><text x="380" y="181">SPRAY</text>
+            </svg>
+            <p>In one mango orchard, most scheduled anthracnose sprays fell in low-risk periods.</p>
+            <p class="src">Estrada &amp; Ilag 1990, Philippines · illustration</p>
+          </article>
+          <article>
+            <h3 class="h3">Lab AI breaks outdoors.</h3>
+            <p class="ag-flip" aria-hidden="true"><span data-count="99.35" data-dec="2" data-suffix="%">99.35%</span><span class="ar">→</span><span class="down" data-count="31.4" data-dec="1" data-suffix="%">31.4%</span></p>
+            <p>A plant-disease model scored 99.35% on its own test set and 31.4% on photos taken elsewhere.</p>
+            <p class="src">Mohanty, Hughes &amp; Salathé 2016</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="How it works">
+    <div class="wrap">
+      <div class="ag">
+        <div class="media" data-up style="--d:.3s">
+          <figure class="ag-hold ag-slider" data-ascii="compare"><canvas aria-hidden="true"></canvas><span class="ag-knob" aria-hidden="true"></span><span class="ag-tag l" aria-hidden="true">What you see</span><span class="ag-tag r" aria-hidden="true">What agc162 sees</span><input class="sr" type="range" min="0" max="100" value="50" aria-label="Compare the photo with agc162’s view"><figcaption class="sr">A trellised Calypso mango row. Drag to compare the photo with agc162’s view, which marks and sizes each fruit.</figcaption></figure>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 04 · How it works</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Every tree, seen. Every week.</span></h2>
+        </div>
+        <div class="rest">
+          <ol class="ag-steps" data-up style="--d:.4s">
+            <li><span class="n">01</span><b>Capture</b><span>Phone photos, row video, drone passes or fixed cameras.</span></li>
+            <li><span class="n">02</span><b>Detect</b><span>Fruit, flowers, lesions and pests, tree by tree.</span></li>
+            <li><span class="n">03</span><b>Forecast</b><span>Flowering stage, leaf wetness and temperature become infection risk.</span></li>
+            <li><span class="n">04</span><b>Treat</b><span>A window, a block and a product class, checked against your label.</span></li>
+            <li><span class="n">05</span><b>Grade</b><span>Size and blemish at harvest and on the pack line.</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Capture">
+    <div class="wrap">
+      <div class="ag rev">
+        <div class="media" data-up style="--d:.3s">
+          <figure class="ag-hold" data-ascii="mode"><canvas aria-hidden="true"></canvas><figcaption class="sr" data-mode-cap>Photo mode: a guava leaf scanned by phone.</figcaption></figure>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 05 · Capture</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Photo. Video. Live.</span></h2>
+        </div>
+        <div class="rest" data-fade style="--d:.4s">
+          <div class="ag-seg" role="tablist" aria-label="Capture mode">
+            <button role="tab" type="button" id="agc-mode-photo" aria-selected="true" tabindex="0" data-mode="photo" aria-controls="agc-mode-panel">Photo</button><button role="tab" type="button" id="agc-mode-video" aria-selected="false" tabindex="-1" data-mode="video" aria-controls="agc-mode-panel">Video</button><button role="tab" type="button" id="agc-mode-live" aria-selected="false" tabindex="-1" data-mode="live" aria-controls="agc-mode-panel">Live</button>
+          </div>
+          <div id="agc-mode-panel" role="tabpanel" aria-labelledby="agc-mode-photo" aria-live="polite">
+            <p class="lead" data-mode-text>A phone photo of a leaf, a flower panicle or a fruit. agc162 answers in the field, tree by tree.</p>
+            <p class="strip" data-mode-strip>Phone / leaf · panicle · fruit / offline first</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Field guide">
+    <div class="wrap">
+      <div class="ag">
+        <div class="media" data-up style="--d:.3s">
+          <div class="ag-hold ag-stage" data-mango>
+            <canvas class="gl" role="img" aria-label="A three-dimensional mango. Use the arrow keys or drag to turn it."></canvas>
+            <div class="ag-hots"></div>
+            <p class="ag-hint" aria-hidden="true">Drag to turn · tap a signal</p>
+            <p class="ag-fallback" hidden>3D needs WebGL here. Choose a problem from the list.</p>
+          </div>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 06 · Field guide · Mango</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Turn the fruit. Find the signal.</span></h2>
+        </div>
+        <div class="rest" data-fade style="--d:.4s">
+          <div class="ag-chips" role="group" aria-label="Mango problems" data-chips></div>
+          <div class="ag-panel" aria-live="polite" data-panel></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Orchard">
+    <div class="wrap">
+      <div class="ag rev">
+        <div class="media" data-up style="--d:.3s">
+          <div class="ag-phone-fit"><div class="ag-phone" data-app="map"><div class="ap">
+            <div class="ap-top"><span class="ap-title">Demo orchard</span><span class="ap-tag">Demo</span></div>
+            <p class="ap-sub ap-mono">6 blocks · 17.1 ha · scanned Monday</p>
+            <div class="ap-map-wrap"><svg class="ap-map" viewBox="0 0 340 300" role="group" aria-label="Orchard blocks. Choose a block.">
+              <defs><pattern id="agc-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="ap-hatch" x1="0" y1="0" x2="0" y2="6"/></pattern><pattern id="agc-dots" width="5" height="5" patternUnits="userSpaceOnUse"><circle class="ap-dotfill" cx="2.5" cy="2.5" r="1.25"/></pattern></defs>
+              <path class="ap-road" d="M170 0 V300 M0 104 H340 M0 202 H340"/>
+            </svg></div>
+            <div class="ap-legend ap-mono"><span><i class="ap-lg"></i>Healthy</span><span><i class="ap-lg watch"></i>Watch</span><span><i class="ap-lg act"></i>Act</span><span><svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" class="ap-trap hot"/></svg>Trap</span></div>
+            <div class="ap-sheet"><div class="ap-tabs" role="tablist" aria-label="Block details"><button role="tab" type="button" id="agc-tab-overview" aria-selected="true" tabindex="0" aria-controls="agc-block" data-tab="overview">Overview</button><button role="tab" type="button" id="agc-tab-scans" aria-selected="false" tabindex="-1" aria-controls="agc-block" data-tab="scans">Scans</button><button role="tab" type="button" id="agc-tab-treat" aria-selected="false" tabindex="-1" aria-controls="agc-block" data-tab="treat">Treat</button><button role="tab" type="button" id="agc-tab-schedule" aria-selected="false" tabindex="-1" aria-controls="agc-block" data-tab="schedule">Schedule</button></div><div class="ap-body" id="agc-block" role="tabpanel" aria-labelledby="agc-tab-overview" aria-live="polite"></div></div>
+          </div></div></div>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 07 · App · Orchard</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Your orchard, block by block.</span></h2>
+        </div>
+        <div class="rest">
+          <p class="lead ag-app" data-fade style="--d:.4s">Scans roll up into one map. Tap a block to see what was found, how sure agc162 is, and what to do next.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Scan">
+    <div class="wrap">
+      <div class="ag">
+        <div class="media" data-up style="--d:.3s">
+          <div class="ag-phone-fit"><div class="ag-phone" data-app="scan"><div class="ap dark">
+            <div class="ap-top"><span class="ap-title">Scan</span><span class="ap-tag">Demo</span></div>
+            <div class="ap-seg" role="group" aria-label="Scan target"><button type="button" aria-pressed="true" data-target="leaf">Leaf</button><button type="button" aria-pressed="false" data-target="fruit">Fruit</button></div>
+            <div class="ap-vf"><canvas aria-hidden="true"></canvas><span class="ap-vc tl"></span><span class="ap-vc tr"></span><span class="ap-vc bl"></span><span class="ap-vc br"></span></div>
+            <div class="ap-scanbar"><button class="ap-shutter" type="button" aria-label="Scan"><i></i></button><span class="ap-hint ap-mono" aria-live="polite">Tap to scan</span></div>
+            <div class="ap-result" aria-live="polite"></div>
+          </div></div></div>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 08 · App · Scan</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Point. Scan. Know what to check.</span></h2>
+        </div>
+        <div class="rest">
+          <p class="lead ag-app" data-fade style="--d:.4s">agc162 lists what it could be, how likely each is, and what to check before anyone sprays. When it isn’t sure, it says so.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="agc-plan" data-title="Plan">
+    <div class="wrap">
+      <div class="ag rev">
+        <div class="media" data-up style="--d:.3s">
+          <div class="ag-phone-fit"><div class="ag-phone" data-app="plan"><div class="ap">
+            <div class="ap-top"><span class="ap-title">Plan · Block C</span><span class="ap-tag">Demo</span></div>
+            <p class="ap-sub ap-mono">Calypso · flowering 70% · next 7 days</p>
+            <div class="ap-seg" role="group" aria-label="Spray plan"><button type="button" aria-pressed="true" data-plan="agc">agc162</button><button type="button" aria-pressed="false" data-plan="cal">Calendar</button></div>
+            <div class="ap-days" role="group" aria-label="Next seven days. Tap a day to change its weather."></div>
+            <div class="ap-key ap-mono"><span><i class="wet"></i>Wet hours</span><span><i class="rk"></i>Risk</span><span><i class="sp"></i>Spray</span></div>
+            <div class="ap-plan" aria-live="polite"></div>
+          </div></div></div>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 09 · App · Plan</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Spray when the risk is real.</span></h2>
+        </div>
+        <div class="rest">
+          <p class="lead ag-app" data-fade style="--d:.4s">Flowering stage, hours of leaf wetness and temperature make a risk score for each block. agc162 suggests a window. You decide.</p>
+          <p class="src ag-app" data-fade style="--d:.5s">Mango trials: sprays triggered by 18 h or more of canopy wetness gave the best anthracnose control · Dodd et al. 1991</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Packhouse">
+    <div class="wrap">
+      <div class="ag">
+        <div class="media" data-up style="--d:.3s">
+          <figure class="ag-hold" data-pack><canvas aria-hidden="true"></canvas>
+            <div class="ag-pack-hud" aria-label="Fruit graded in this demo"><div class="c1"><span>Class I</span><b data-t="1">0</b></div><div><span>Class II</span><b data-t="2">0</b></div><div><span>Reject</span><b data-t="3">0</b></div></div>
+            <figcaption class="sr">A demo pack line drawn in characters. Each mango is sized and graded as it crosses the scan line.</figcaption></figure>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 10 · Packhouse</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Every fruit, graded the same way.</span></h2>
+        </div>
+        <div class="rest">
+          <p class="lead" data-fade style="--d:.4s">Line cameras size each mango and flag blemish, sap burn and rot, so the grade doesn’t depend on who is on shift.</p>
+          <p class="note ag-short" data-fade style="--d:.5s">Manual mango grading is slow and subjective. One deep-learning system reported 98% on a public mango image set; agc162 will be measured on your own line.</p>
+          <p class="src" data-fade style="--d:.55s">Foods 11(21):3483, 2022</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Evidence">
+    <div class="wrap">
+      <div class="ag one">
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 11 · Evidence</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>The science is ready. The proof is in the field.</span></h2>
+        </div>
+        <div class="rest ag-ev" data-up style="--d:.35s">
+          <div>
+            <h3 class="label">What research already shows</h3>
+            <div class="ag-grid">
+              <div class="ag-stat"><p class="v" data-count="0.968" data-dec="3">0.968</p><p class="d">F1 score for finding mangoes on tree canopies, on an independent test set</p><p class="src">Koirala et al. 2019 · moderate</p></div>
+              <div class="ag-stat"><p class="v">≥18 h</p><p class="d">of canopy wetness triggered the best-performing anthracnose sprays in mango trials</p><p class="src">Dodd et al. 1991 · limited</p></div>
+              <div class="ag-stat"><p class="v">½</p><p class="d">or fewer fungicide sprays when a weather model sets the timing, without more disease</p><p class="src">MacKenzie &amp; Peres 2012, strawberry · moderate</p></div>
+              <div class="ag-stat"><p class="v">47–73%</p><p class="d">less spray used by a sensor-guided orchard sprayer in field trials</p><p class="src">USDA-ARS · Ohio State · moderate</p></div>
+            </div>
+          </div>
+          <div>
+            <h3 class="label">What agc162 will prove in pilots</h3>
+            <div class="ag-grid">
+              <div class="ag-stat"><p class="v">Every tree</p><p class="d">scanned each week, not a sample</p><p class="ag-target">Target</p></div>
+              <div class="ag-stat"><p class="v">48 h</p><p class="d">of warning before each high-risk infection window</p><p class="ag-target">Target</p></div>
+              <div class="ag-stat"><p class="v">−25%</p><p class="d">fungicide sprays against the calendar, at equal control</p><p class="ag-target">Target</p></div>
+              <div class="ag-stat"><p class="v">Per class</p><p class="d">accuracy reported on your own blocks, never on a lab set</p><p class="ag-target">Commitment</p></div>
+            </div>
+            <p class="note">Targets for pilot validation, not results.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Business">
+    <div class="wrap">
+      <div class="ag rev">
+        <div class="media hide-m" data-up style="--d:.3s">
+          <figure class="ag-hold" data-ascii="guava"><canvas aria-hidden="true"></canvas><figcaption class="sr">A guava tree at harvest with full crates.</figcaption></figure>
+        </div>
+        <div class="top">
+          <p class="code" data-fade style="--d:.05s">HRT — 12 · Business</p>
+          <h2 class="h2" data-rise style="--d:.15s"><span>Priced per hectare, per season.</span></h2>
+        </div>
+        <div class="rest ag-biz" data-up style="--d:.35s">
+          <div><h3 class="label">Market</h3>
+            <p class="ag-kv"><b>59 Mt</b><span>mangoes, mangosteens and guavas a year; India grows about 44%</span></p>
+            <p class="ag-kv"><b>$2.8B → $8.5B</b><span>AI in agriculture, 2025 to 2030 (one analyst; others estimate less)</span></p></div>
+          <div><h3 class="label">Plans</h3>
+            <ul class="ag-list"><li><b>Scout</b><span>Phone scans, per user</span></li><li><b>Orchard</b><span>Video, drone and spray timing, per hectare per season</span></li><li><b>Packhouse</b><span>Line cameras, per line</span></li></ul>
+            <p class="note">Prices: <span class="ag-ph">[YOUR PRICING]</span></p></div>
+          <div><h3 class="label">Path · proposed</h3>
+            <ul class="ag-list"><li><b>Season 1</b><span>Mango pilot: phone scans and spray timing, three orchards</span></li><li><b>Season 2</b><span>Video and drone passes; guava</span></li><li><b>Season 3</b><span>Pack-line grading</span></li></ul></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="The pitch">
+    <div class="wrap mid">
+      <div class="hd ag-close">
+        <p class="code" data-fade style="--d:.05s">HRT — 13 · The pitch</p>
+        <h2 class="h1" data-rise style="--d:.15s"><span>Nothing left to miss.</span></h2>
+        <p class="lead" data-fade style="--d:.4s">The full case in 13 pages: the loss, the evidence, the product and the pilot plan.</p>
+        <div class="row" data-fade style="--d:.5s"><button class="btn solid" type="button" data-pdf="r3-pitch">Download the pitch</button><a class="btn" href="/research/pdf/hortus-study-03-agc162-pitch.pdf" target="_blank" rel="noopener">View the pitch<svg aria-hidden="true"><use href="#g-ne"/></svg></a><button class="btn" type="button" data-agc-sources>Sources</button></div>
+        <p class="note" data-fade style="--d:.6s">PDF, 13 pages. Pilot orchards and partners: <a href="mailto:lastfomo@gmail.com">lastfomo@gmail.com</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" data-title="Next">
+    <div class="wrap mid"><div class="next-wrap" data-next></div></div>
+    <footer class="foot"><span>lastfomo — Hortus · Research</span><a href="/#/hortus">Back to Hortus<svg aria-hidden="true" width="12" height="12"><use href="#g-ne"/></svg></a></footer>
+  </section>
+</main>
+
+<dialog class="sheet side" data-agc-sheet aria-labelledby="agc-src-title">
+  <div class="sheet-bar"><p class="code" id="agc-src-title">HRT — Study 03 · Sources</p><button class="btn small" type="button" data-close>Close</button></div>
+  <div class="sheet-body">
+    <p class="note">Checked October 2026. Evidence labels: strong, moderate, limited, commercial.</p>
+    <ol class="ag-refs">
+      <li>FAO / IPPC (2021). Scientific review of the impact of climate change on plant pests. Up to 40% of crop production lost; plant disease over $220B a year. <em>Agency estimate</em></li>
+      <li>FAO (2019). The State of Food and Agriculture 2019: about 14% of food lost between harvest and retail. <em>Agency estimate</em></li>
+      <li>JIRCAS (2024), citing FAOSTAT: about 59 Mt of mangoes, mangosteens and guavas in 2022; India about 44%.</li>
+      <li>Nelson, S.C. (2008). Mango anthracnose, PD-48; Mango powdery mildew, PD-46. University of Hawaiʻi CTAHR.</li>
+      <li>Post-harvest fungal spoilage in mango at different levels of marketing. Madras Agricultural Journal 92: 42–48 (Coimbatore survey). <em>Limited</em></li>
+      <li>Estrada, A.B. &amp; Ilag, L.L. (1990). Temperature, humidity and infection of <i>C. gloeosporioides</i> on Carabao mango. UPLB. <em>Limited</em></li>
+      <li>Dodd, J.C. et al. (1991). Plant Pathology 40: 568–575 and 576–583. doi:10.1111/j.1365-3059.1991.tb02421.x; tb02422.x <em>Limited</em></li>
+      <li>Mohanty, S.P., Hughes, D.P. &amp; Salathé, M. (2016). Using deep learning for image-based plant disease detection. arXiv:1604.03169. <em>Moderate</em></li>
+      <li>Koirala, A. et al. (2019). Benchmarking of ‘MangoYOLO’. Precision Agriculture 20: 1107–1135. doi:10.1007/s11119-019-09642-0 <em>Moderate</em></li>
+      <li>MacKenzie, S.J. &amp; Peres, N.A. (2012). Plant Disease 96: 529–536. doi:10.1094/PDIS-03-11-0182 <em>Moderate</em></li>
+      <li>USDA-ARS and Ohio State CFAES. Intelligent sprayer field trials: 47–73% less spray. <em>Moderate</em></li>
+      <li>Pitkethley, R. (2006). Bacterial black spot of mangoes. NT Agnote I24; Pacific Pests, Pathogens &amp; Weeds fact sheet 213.</li>
+      <li>Stem end rot of mango in Australia: causes and control. Acta Horticulturae 291: 288–295; FAO TCP/RAS/3502 mango handling.</li>
+      <li>ICAR–CISH. Management of powdery mildew of mango; National Horticulture Board (India), mango diseases.</li>
+      <li>Ocitti, P. et al. (2021). Hot-water disinfestation of <i>Bactrocera dorsalis</i> in mango. African Entomology 29: 238–247. doi:10.4001/003.029.0238</li>
+      <li>Computer vision system for mango fruit defect detection. Foods 11(21): 3483 (2022). doi:10.3390/foods11213483</li>
+      <li>BCC Research (2025). AI in Agriculture: Global Markets. <em>Commercial</em></li>
+    </ol>
+  </div>
+</dialog>
 <dialog class="sheet side" data-readings aria-labelledby="readings-title">
   <div class="sheet-bar"><p class="code" id="readings-title">HRT — Readings</p><button class="btn small" type="button" data-close>Done</button></div>
   <div class="sheet-body">
@@ -521,6 +896,7 @@
 <script src="/research/js/report.js"></script>
 <script src="/research/js/deck.js"></script>
 <script src="/research/js/figs.js"></script>
+<script src="/research/js/agc162.js"></script>
 <script src="/research/js/app.js"></script>
 </body>
 </html>
