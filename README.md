@@ -8,7 +8,7 @@ Live at **https://lastfomo.vercel.app**. Vercel builds it from this repo on ever
 
 ## What this is
 
-- `site/` is the page: one HTML document with hash routes for home, the three case pages, Start a project, and the walk (`#/explore`): the house and its wings in 3D, with signals to find, a score for each wing, auto walk and phone controls.
+- `site/` is the page: one HTML document with hash routes for home, the three case pages, Start a project, and the walk (`#/explore`): the house and its wings in 3D, with signals to find, a score for each wing, auto walk (on by default, on phones and desktops) and drag to look.
 - `site/research/` is Hortus research at `/research`: an index and a page per study, each a run of full screens with its charts, tools (a plant-photo analyser, a needs predictor, an El Niño outlook), paper, 20-slide deck and PDF reports, and study 03, agc162: AI vision for fruit farms, with its machine views, a 3D mango field guide, three demo app screens and the pitch PDF. The Hortus case links to it from its Research screen, below the hardware.
 - `brand/` is the brand as data: tokens, a ledger of facts and approved copy, and the exact Figma marks.
 - `tools/` builds the page, checks it against the brand rules, and photographs every screen for review.
@@ -37,7 +37,7 @@ site/
   styles.css             component styles; colours only through var(--token)
   boot.js                runs in <head> before first paint: the js class, the saved theme
   main.js                plates, reveals, routing, curtain, player, cursor, brief composer, theme switch, basket
-  explore.js             the walk: worlds, signals, score, auto walk, walk button, motion look, settings
+  explore.js             the walk: worlds, signals, score, auto walk, walk button, drag to look, settings
   vendor/three.min.js    three.js r128 for the walk, loaded only when it opens; never edited
   media.json             video manifest: wing loops, case cover footage, films; null means not uploaded yet
   media/*.jpg            posters and stills, each listed in brand/ledger.json under media

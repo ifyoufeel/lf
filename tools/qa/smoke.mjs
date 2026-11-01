@@ -380,7 +380,8 @@ await step('explore: Explore opens the walk at the house', async () => {
   await page.waitForTimeout(800);
   const p = await page.evaluate(() => window.lfExplore.peek());
   check(p.started && p.world === 'hub', `after Enter in silence: started ${p.started}, world ${p.world || 'none'}`);
-  return `the house, trail ${trail}, settings in the header, dark`;
+  check(p.auto === true, 'auto walk does not lead by default'); // on desktops too (the owner, 1 November 2026)
+  return `the house, trail ${trail}, settings in the header, dark, auto walk leading`;
 });
 
 await step('explore: a case cover opens its wing in the walk', async () => {
@@ -399,6 +400,8 @@ await step('explore: a case cover opens its wing in the walk', async () => {
 await step('explore: the settings open from the header and close on Escape', async () => {
   await page.locator('#xp-menu').click();
   await page.waitForFunction(() => document.querySelector('#xp-set').open, null, { timeout: 2000 }).catch(() => { throw new Error('the settings did not open'); });
+  const opts = await page.locator('#xp-set [data-opt]').evaluateAll((bs) => bs.map((b) => b.dataset.opt).join(' '));
+  check(opts === 'auto music sounds', `the settings switch ${opts}`); // drag looks: no motion switch
   const sw = page.locator('#xp-set [data-opt="auto"]');
   const before = await sw.getAttribute('aria-checked');
   await sw.click();

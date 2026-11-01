@@ -13,7 +13,6 @@
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const COARSE = matchMedia('(pointer: coarse)').matches;
   const Q = COARSE ? 0.55 : 1; // phones get fewer blades, trees and fireflies
-  const MOTION = COARSE && typeof window.DeviceOrientationEvent !== 'undefined';
   const WINGS = ['hortus', 'machina', 'arca'];
   const NAMES = { hub: 'The house', hortus: 'Hortus', machina: 'Machina', arca: 'Arca' };
   const LINES = { hub: 'Walk the house.', hortus: 'What grows.', machina: 'What thinks.', arca: 'What lasts.' };
@@ -39,7 +38,7 @@
     pBody: $('#xp-p-body'), pStats: $('#xp-p-stats'), pClose: $('#xp-p-close'),
     start: $('#xp-start'), word: $('#xp-start-t'), line: $('#xp-start-line'), goS: $('#xp-go-sound'), goQ: $('#xp-go-quiet'), home: $('#xp-home'), note: $('#xp-note'),
     fin: $('#xp-final'), finN: $('#xp-final-n'), finX: $('#xp-final-x'),
-    menu: $('#xp-menu'), set: $('#xp-set'), setX: $('#xp-set-x'), keys: $('#xp-keys'), gyroOpt: $('#xp-opt-gyro'),
+    menu: $('#xp-menu'), set: $('#xp-set'), setX: $('#xp-set-x'), keys: $('#xp-keys'),
     curtain: $('.curtain'),
     sf: $('#xp-sf'), sfField: $('#xp-sf-field'), sfScenes: $('#xp-sf-scenes'), sfJam: $('#xp-sf-jam'), sfBpm: $('#xp-sf-bpm'), sfBpmV: $('#xp-sf-bpm-v'),
     sfX: $('#xp-sf-x'), sfNote: $('#xp-sf-note'), sfLive: $('#xp-sf-live'), sfSec: $('#xp-sf-sec'), sfGo: $('#xp-sf-go'),
@@ -84,11 +83,13 @@
   const allDone = () => WINGS.every((w) => done[w]);
 
   /* =============================== the visitor's settings =============================== */
-  // Auto walk leads on phones by default; this browser remembers the choice (per-viewer convenience only).
+  // Auto walk leads by default, on phones and desktops alike (the owner, 1 November 2026). Turning it off in the settings
+  // is remembered in this browser (per-viewer convenience only); a step of the visitor's own takes over for this visit.
+  // Choices saved before that day carry no v: 2 and give way to the new default.
   const PREF = 'lf-walk';
-  const prefs = { auto: COARSE, gyro: COARSE };
-  try { const p = JSON.parse(localStorage.getItem(PREF) || '{}'); if (typeof p.auto === 'boolean') prefs.auto = p.auto; if (typeof p.gyro === 'boolean') prefs.gyro = p.gyro; } catch (_) { /* storage blocked: the defaults stand */ }
-  const savePrefs = () => { try { localStorage.setItem(PREF, JSON.stringify(prefs)); } catch (_) { /* per-viewer convenience only */ } };
+  const prefs = { auto: true };
+  try { const p = JSON.parse(localStorage.getItem(PREF) || '{}'); if (p && p.v === 2 && typeof p.auto === 'boolean') prefs.auto = p.auto; } catch (_) { /* storage blocked: the default stands */ }
+  const savePrefs = () => { try { localStorage.setItem(PREF, JSON.stringify({ v: 2, auto: prefs.auto })); } catch (_) { /* per-viewer convenience only */ } };
 
   /* =============================== colours come from the tokens =============================== */
   const TOK = {};
@@ -1237,7 +1238,6 @@
     auto: { get: () => AW.on, set: (v) => setAuto(v) },
     music: { get: () => A.music, set: (v) => { A.music = v; A.update(); if (!v) J.stop(); } }, // music off stops the jam too
     sounds: { get: () => A.sounds, set: (v) => { A.sounds = v; A.update(); } },
-    gyro: { get: () => G.on, set: (v) => setGyro(v) },
   };
   function syncOpts() {
     el.set.querySelectorAll('[data-opt]').forEach((b) => b.setAttribute('aria-checked', OPTS[b.dataset.opt].get() ? 'true' : 'false'));
@@ -1251,10 +1251,9 @@
     });
   }
   const KEYS = COARSE
-    ? [['Round button', 'Hold to walk where you look'], ['Drag', 'Look around']].concat(MOTION ? [['Your phone', 'Turn it to look around']] : [], [['Tap a signal', 'Inspect it'], ['Arches', 'Walk in to change worlds']])
+    ? [['Round button', 'Hold to walk where you look'], ['Drag', 'Look around'], ['Tap a signal', 'Inspect it'], ['Arches', 'Walk in to change worlds']]
     : [['W A S D', 'Walk (Shift to hurry)'], ['Drag', 'Look around'], ['Arrow keys', 'Walk and turn'], ['E', 'Inspect a signal, close it again'], ['M', 'Music on or off'], ['Esc', 'Close a signal or the settings']];
   KEYS.forEach((k) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k[0]; dd.textContent = k[1]; el.keys.append(dt, dd); });
-  if (el.gyroOpt) el.gyroOpt.hidden = !MOTION;
   let setOpener = null;
   function openSettings() {
     if (!active || el.set.open) return;
@@ -1463,13 +1462,14 @@
   AW.reset = () => { AW.goal = null; AW.phase = 'walk'; AW.t = 0; AW.lastD = 1e9; AW.stuck = 0; AW.detour = null; };
   function setAuto(v, tookOver) {
     if (AW.on === v) return;
-    AW.on = v; prefs.auto = v; savePrefs();
+    AW.on = v;
+    if (!tookOver) { prefs.auto = v; savePrefs(); } // the settings' switch is remembered; taking over lasts this visit
     AW.reset();
     if (v) { AW.wait = 0.6; keys.clear(); release(); if (started) toast(COARSE ? 'Auto walk is on. Press the round button to walk yourself.' : 'Auto walk is on. Press W or an arrow key to walk yourself.', 0, true); }
     else {
       // fold the looks into the heading, so the view stays put
       state.yaw = wrapA(state.yaw + state.lookYaw); state.lookYaw = 0;
-      if (!G.live()) { state.pitch = clamp(state.pitch + state.lookPitch, -1.15, 1.15); state.lookPitch = 0; }
+      state.pitch = clamp(state.pitch + state.lookPitch, -1.15, 1.15); state.lookPitch = 0;
       if (tookOver && !AW.told) { AW.told = true; toast('Auto walk is off. Turn it on again in the settings.', 0, true); }
     }
     syncOpts(); wake();
@@ -1562,54 +1562,15 @@
     }
   }
 
-  /* =============================== looking around: drag, and the phone itself =============================== */
-  // With motion on, the phone's turn adds to the heading (calibrated to the way it faced when the world opened) and its
-  // tilt sets the pitch. Inside an Artifact the sensors never answer, so the walk says so and keeps drag-to-look.
-  const G = { on: false, heard: false, raw: null, cal: null, tYaw: 0, tPitch: 0, yaw: 0, pitch: 0, check: 0 };
-  let GQ = null;
-  G.live = () => G.on && G.heard;
-  G.recenter = () => { G.cal = G.raw; G.tYaw = G.yaw = 0; };
-  function onOrient(e) {
-    if (e.alpha == null || e.beta == null || !GQ) return;
-    const D = Math.PI / 180, so = ((screen.orientation && screen.orientation.angle) || window.orientation || 0) * D;
-    GQ.e.set(e.beta * D, e.alpha * D, -e.gamma * D, 'YXZ');
-    GQ.q.setFromEuler(GQ.e); GQ.q.multiply(GQ.q1); GQ.q.multiply(GQ.q0.setFromAxisAngle(GQ.z, -so));
-    GQ.o.setFromQuaternion(GQ.q, 'YXZ');
-    G.raw = GQ.o.y; if (G.cal === null) G.cal = G.raw;
-    G.tYaw = wrapA(G.raw - G.cal); G.tPitch = clamp(GQ.o.x, -1.2, 1.2);
-    if (!G.heard) { G.heard = true; G.yaw = G.tYaw; G.pitch = G.tPitch; state.lookPitch = 0; }
-  }
-  function listenMotion(on) { if (on) addEventListener('deviceorientation', onOrient); else removeEventListener('deviceorientation', onOrient); }
-  // After motion is turned on, the phone must answer; inside an Artifact it never does.
-  function askMotion() {
-    clearTimeout(G.check);
-    G.check = setTimeout(() => { if (G.on && !G.heard && active) { setGyro(false); toast('Your phone did not share its motion here. Drag to look around.', 4600); } }, 1800);
-  }
-  function setGyro(v) {
-    if (!MOTION) return;
-    clearTimeout(G.check);
-    if (!v) {
-      if (G.live()) { state.yaw = wrapA(state.yaw + G.yaw); state.pitch = G.pitch; }
-      G.on = false; G.heard = false; G.yaw = 0; listenMotion(false);
-      prefs.gyro = false; savePrefs(); syncOpts(); return;
-    }
-    prefs.gyro = true; savePrefs();
-    const begin = () => { G.on = true; G.heard = false; G.cal = null; listenMotion(active); syncOpts(); askMotion(); };
-    const DOE = window.DeviceOrientationEvent;
-    if (DOE && typeof DOE.requestPermission === 'function') {
-      // iOS asks once, and only from a tap: this call must stay inside the click that turned motion on.
-      DOE.requestPermission().then((r) => { if (r === 'granted') begin(); else { prefs.gyro = false; savePrefs(); syncOpts(); toast('Motion is off for this page. Drag to look around.'); } })
-        .catch(() => { prefs.gyro = false; savePrefs(); syncOpts(); toast('Motion is off for this page. Drag to look around.'); });
-    } else begin();
-  }
-  const camYaw = () => state.yaw + state.lookYaw + (G.live() ? G.yaw : 0);
+  /* =============================== looking around: drag =============================== */
+  // Drag looks, on every device. The phone's own motion is not used (the owner, 1 November 2026): a visitor exploring
+  // from where they sit should not have to turn round with the phone.
+  const camYaw = () => state.yaw + state.lookYaw;
   function lookTick(dt) {
-    if (G.live()) { const k = Math.min(1, dt * 14); G.yaw += wrapA(G.tYaw - G.yaw) * k; G.pitch += (G.tPitch - G.pitch) * k; }
     // After a drag the auto walk's view drifts back to the way it walks.
-    if (look || performance.now() - state.lookAt < 900) return;
+    if (!AW.on || look || performance.now() - state.lookAt < 900) return;
     const k = Math.min(1, dt * 1.6);
-    if (AW.on) state.lookYaw += (0 - state.lookYaw) * k;
-    if (AW.on || G.live()) state.lookPitch += (0 - state.lookPitch) * k;
+    state.lookYaw += (0 - state.lookYaw) * k; state.lookPitch += (0 - state.lookPitch) * k;
   }
 
   /* =============================== input =============================== */
@@ -1641,8 +1602,8 @@
     const dx = e.clientX - look.x, dy = e.clientY - look.y, s = e.pointerType === 'touch' ? 0.0052 : 0.0036;
     look.x = e.clientX; look.y = e.clientY; look.moved += Math.abs(dx) + Math.abs(dy);
     // The auto walk keeps its heading: a drag only looks away from it. A walker of their own turns with the drag.
-    if (AW.on) state.lookYaw -= dx * s; else state.yaw -= dx * s;
-    if (AW.on || G.live()) state.lookPitch = clamp(state.lookPitch - dy * s, -1.15, 1.15); else state.pitch = clamp(state.pitch - dy * s, -1.15, 1.15);
+    if (AW.on) { state.lookYaw -= dx * s; state.lookPitch = clamp(state.lookPitch - dy * s, -1.15, 1.15); }
+    else { state.yaw -= dx * s; state.pitch = clamp(state.pitch - dy * s, -1.15, 1.15); }
     state.lookAt = performance.now();
   });
   function endPointer(e) {
@@ -1695,7 +1656,7 @@
     const gy = W.heightAt ? W.heightAt(state.pos.x, state.pos.z) : 0;
     const bob = RM ? 0 : Math.sin(state.walk) * 0.035 * Math.min(1, state.vel.length() / 3);
     camera.position.set(state.pos.x, gy + 1.62 + bob, state.pos.z);
-    camera.rotation.set(clamp((G.live() ? G.pitch : state.pitch) + state.lookPitch, -1.25, 1.25), camYaw(), 0);
+    camera.rotation.set(clamp(state.pitch + state.lookPitch, -1.25, 1.25), camYaw(), 0);
   }
   function stride(W, dt) {
     state.vel.lerp(want, Math.min(1, dt * 9));
@@ -1766,7 +1727,7 @@
     let sp = W.spawn;
     if (name === 'hub' && from && from !== 'hub') { const p = W.portals.find((x) => x.to === from); if (p) sp = { x: p.x + p.nx * 3.4, z: p.z + p.nz * 3.4, yaw: Math.atan2(-p.nx, -p.nz) }; }
     state.pos.set(sp.x, 0, sp.z); state.yaw = sp.yaw; state.pitch = 0; state.lookYaw = 0; state.lookPitch = 0;
-    G.recenter(); AW.reset(); if (AW.on) AW.wait = 0.8;
+    AW.reset(); if (AW.on) AW.wait = 0.8;
     document.body.dataset.wing = name === 'hub' ? '' : name;
     hud(); el.prompt.classList.remove('on');
     A.update(); jamWorld(name);
@@ -1872,13 +1833,12 @@
     GLOW = glowTexture(); DOT = new THREE.SphereGeometry(0.075, 16, 12); RING = new THREE.RingGeometry(0.95, 1.02, 56); HIT = new THREE.MeshBasicMaterial({ visible: false });
     FRAME = new THREE.MeshStandardMaterial({ color: col('graphite'), roughness: 0.5, metalness: 0.45 });
     loader = new THREE.TextureLoader(); LUX = glyph('g-lux'); LOCK = glyph('g-lock');
-    GQ = { e: new THREE.Euler(), o: new THREE.Euler(), q: new THREE.Quaternion(), q0: new THREE.Quaternion(), q1: new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), z: new THREE.Vector3(0, 0, 1) };
   }
   const fontsReady = () => (document.fonts && document.fonts.load
     ? Promise.race([Promise.all(['150px "Jacquard 24"', '300 46px "Geist"', '500 44px "Geist Mono"'].map((f) => document.fonts.load(f).catch(() => null))), new Promise((r) => setTimeout(r, 2500))])
     : Promise.resolve());
   const NOTE = COARSE
-    ? 'Best with headphones. Hold the round button to walk' + (MOTION ? ', turn your phone to look.' : ', drag to look.')
+    ? 'Best with headphones. Hold the round button to walk, drag to look.'
     : 'Best with headphones. W A S D to walk, drag to look, E to inspect.';
   function boot() {
     if (loading) return loading;
@@ -1898,7 +1858,6 @@
   }
   function begin(withSound) {
     if (started || !ready) return;
-    if (prefs.gyro && MOTION) setGyro(true); // first, inside the click: iOS asks for motion only from a tap
     started = true;
     A.music = A.sounds = withSound; A.update();
     el.start.classList.add('fade'); setTimeout(() => { el.start.hidden = true; }, 700);
@@ -1921,7 +1880,6 @@
       active = true;
       document.body.dataset.wing = name === 'hub' ? '' : name;
       if (!started) { el.word.textContent = name === 'hub' ? 'lastfomo' : name; el.line.textContent = LINES[name]; }
-      if (G.on) { listenMotion(true); if (!G.heard) askMotion(); }
       if (!ready) { boot(); return; }
       setWorld(name);
       size(); grain(); startLoop(); A.update(); wake(); syncWalk();
@@ -1936,7 +1894,7 @@
     stopLoop(); keys.clear(); release(); look = null;
     closePanel(); closeSettings(); closeMixer(); J.stop(true); SF.want = false; // the jam waits for the visitor's return
     curT.forEach(clearTimeout); curT = []; state.busy = false;
-    listenMotion(false); unlock(); A.update(); hush();
+    unlock(); A.update(); hush();
   }
   window.lfExplore = {
     init(o) { if (o && o.horse) HORSE = o.horse; },
@@ -1955,7 +1913,7 @@
       return {
         active, ready, started, world: state.world ? state.world.name : '', busy: state.busy,
         pos: state.pos ? [+state.pos.x.toFixed(2), +state.pos.z.toFixed(2)] : null, yaw: +camYaw().toFixed(3),
-        auto: AW.on, phase: AW.phase, gyro: G.live(), motion: { on: G.on, heard: G.heard, yaw: +G.yaw.toFixed(3) }, look: +state.lookYaw.toFixed(3), hold: state.hold, panel: state.panel ? state.panel.id : '',
+        auto: AW.on, phase: AW.phase, look: +state.lookYaw.toFixed(3), hold: state.hold, panel: state.panel ? state.panel.id : '',
         found: Object.fromEntries(Object.entries(progress).map(([k, v]) => [k, Array.from(v)])), done: Object.assign({}, done),
         music: A.music, sounds: A.sounds, audio: A.ctx ? A.ctx.state : 'none', settings: el.set.open,
         field: { awake: allDone(), up: SF.up, open: !!el.sf.open, jam: J.on, paused: J.wasOn, scene: SF.scene, bpm: BPM, loops: Object.assign({}, STY), mix: JSON.parse(JSON.stringify(MIX)) },
